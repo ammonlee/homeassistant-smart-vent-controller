@@ -1,0 +1,1711 @@
+########## packages/vent_zone_controller.yaml ##########
+homeassistant: {}
+
+# ───────────────────────────
+# HELPERS (sliders + toggles)
+# ───────────────────────────
+input_number:
+  min_other_room_open_pct:
+    name: Min Other-Room Vent Open (%)
+    min: 0
+    max: 50
+    step: 5
+    icon: mdi:weather-windy
+    initial: 25
+    unit_of_measurement: "%"
+
+  occupancy_linger_min:
+    name: Occupancy Linger (min)
+    min: 0
+    max: 120
+    step: 5
+    icon: mdi:timer-sand
+    initial: 30
+    unit_of_measurement: "min"
+  occupancy_linger_night_min:
+    name: Occupancy Linger at Night (min)
+    min: 0
+    max: 240
+    step: 5
+    icon: mdi:weather-night
+    initial: 90
+    unit_of_measurement: "min"
+
+  room_hysteresis_f:
+    name: Room Hysteresis (°F)
+    min: 0.5
+    max: 3.0
+    step: 0.1
+    icon: mdi:tune
+    initial: 1.0
+    unit_of_measurement: "°F"
+
+  closed_threshold_pct:
+    name: Closed Threshold (%)
+    min: 0
+    max: 40
+    step: 5
+    icon: mdi:percent
+    initial: 10
+    unit_of_measurement: "%"
+
+  relief_open_pct:
+    name: Relief Open (%)
+    min: 40
+    max: 100
+    step: 5
+    icon: mdi:fan
+    initial: 60
+    unit_of_measurement: "%"
+
+  heat_boost_f:
+    name: Heat Boost (°F)
+    min: 0
+    max: 3
+    step: 0.5
+    icon: mdi:thermometer-plus
+    initial: 1.0
+    unit_of_measurement: "°F"
+
+  last_thermostat_setpoint:
+    name: Last Thermostat Setpoint (Internal)
+    min: 40
+    max: 100
+    step: 0.5
+    icon: mdi:thermostat
+    initial: 72
+    unit_of_measurement: "°F"
+
+  automation_cooldown_sec:
+    name: Automation Cooldown (seconds)
+    min: 0
+    max: 300
+    step: 5
+    icon: mdi:timer-outline
+    initial: 30
+    unit_of_measurement: "s"
+
+  hvac_min_runtime_min:
+    name: HVAC Minimum Runtime (minutes)
+    min: 0
+    max: 30
+    step: 1
+    icon: mdi:timer-play-outline
+    initial: 10
+    unit_of_measurement: "min"
+
+  hvac_min_off_time_min:
+    name: HVAC Minimum Off Time (minutes)
+    min: 0
+    max: 30
+    step: 1
+    icon: mdi:timer-off-outline
+    initial: 5
+    unit_of_measurement: "min"
+
+  max_relief_rooms:
+    name: Max Relief Rooms
+    min: 1
+    max: 10
+    step: 1
+    icon: mdi:fan-alert
+    initial: 3
+    unit_of_measurement: "rooms"
+
+  master_priority:
+    name: Master Bedroom Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  blue_priority:
+    name: Blue Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  gold_priority:
+    name: Gold Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  green_priority:
+    name: Green Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  grey_priority:
+    name: Grey Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  guest_priority:
+    name: Guest Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  family_priority:
+    name: Family Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  kitchen_priority:
+    name: Kitchen Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  basement_priority:
+    name: Basement Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+  piano_priority:
+    name: Piano Room Priority
+    min: 0
+    max: 10
+    step: 1
+    icon: mdi:star
+    initial: 5
+
+  default_thermostat_temp:
+    name: Default Thermostat Temp (when no rooms need conditioning)
+    min: 65
+    max: 80
+    step: 1
+    icon: mdi:thermometer
+    initial: 72
+    unit_of_measurement: "°F"
+
+  hvac_cycle_start_timestamp:
+    name: HVAC Cycle Start Timestamp (Internal)
+    min: 0
+    max: 9999999999
+    step: 1
+    icon: mdi:clock-start
+    initial: 0
+    mode: box
+
+  hvac_cycle_end_timestamp:
+    name: HVAC Cycle End Timestamp (Internal)
+    min: 0
+    max: 9999999999
+    step: 1
+    icon: mdi:clock-end
+    initial: 0
+    mode: box
+
+input_text:
+  hvac_last_action:
+    name: HVAC Last Action (Internal)
+    initial: idle
+    max: 20
+
+input_boolean:
+  require_occupancy:
+    name: Condition Only When Occupied
+    icon: mdi:account-eye
+    initial: true
+  heat_boost_enabled:
+    name: Heat Boost Enabled
+    icon: mdi:fire
+    initial: true
+  auto_thermostat_control:
+    name: Auto Thermostat Control
+    icon: mdi:thermostat-auto
+    initial: true
+  auto_vent_control:
+    name: Auto Vent Control
+    icon: mdi:air-conditioner
+    initial: true
+  debug_mode:
+    name: Debug Mode (Enhanced Logging)
+    icon: mdi:bug
+    initial: false
+
+# ───────────────────────────
+# GROUPS – confirm entity IDs match yours
+# ───────────────────────────
+group:
+  vents_master_bedroom:
+    name: Master Bedroom Vents
+    entities:
+      - cover.master_bedroom_v1
+      - cover.master_bedroom_v2
+  vents_blue_room:
+    name: Blue Room Vents
+    entities:
+      - cover.blue_v1
+      - cover.blue_v2
+  vents_gold_room:
+    name: Gold Room Vents
+    entities:
+      - cover.gold_v1
+      - cover.gold_v2
+  vents_green_room:
+    name: Green Room Vents
+    entities:
+      - cover.green_v1
+      - cover.green_v2
+  vents_grey_room:
+    name: Grey Room Vents
+    entities:
+      - cover.grey_v1
+      - cover.grey_v2
+  vents_guest_room:
+    name: Guest Room Vents
+    entities:
+      - cover.guest_room_v1
+      - cover.guest_room_v2
+  vents_family_room:
+    name: Family Room Vents
+    entities:
+      - cover.family_room_v1
+      - cover.family_room_v2
+  vents_kitchen:
+    name: Kitchen Vents
+    entities:
+      - cover.kitchen_v1
+      - cover.kitchen_v2
+  vents_piano_room:
+    name: Piano Room Vents
+    entities:
+      - cover.piano_room_v1  # add v2 if present
+  vents_basement:
+    name: Basement Vents
+    entities:
+      - cover.basement_v1
+      - cover.basement_v2
+      - cover.basement_v3
+
+  vent_groups_all:
+    name: All Flair Vents
+    entities:
+      - group.vents_master_bedroom
+      - group.vents_blue_room
+      - group.vents_gold_room
+      - group.vents_green_room
+      - group.vents_grey_room
+      - group.vents_guest_room
+      - group.vents_family_room
+      - group.vents_kitchen
+      - group.vents_piano_room
+      - group.vents_basement
+
+# ───────────────────────────
+# TEMPLATE SENSORS
+#  - occupancy w/ night linger (22:00–06:00)
+#  - per-room targets from climate.*
+#  - per-room temps (sensor.* preferred; fallback climate current_temperature)
+#  - per-room DELTAs = target − temp
+#  - Rooms To Condition (multi-room) using delta + hysteresis
+# ───────────────────────────
+template:
+  - binary_sensor:
+      - name: "Master Occupied Recent"
+        unique_id: master_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.master_bedroom_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Blue Occupied Recent"
+        unique_id: blue_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.blue_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Gold Occupied Recent"
+        unique_id: gold_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.gold_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Green Occupied Recent"
+        unique_id: green_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.green_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Grey Occupied Recent"
+        unique_id: grey_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.grey_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Basement Occupied Recent"
+        unique_id: basement_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.basement_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Kitchen Occupied Recent"
+        unique_id: kitchen_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.kitchen_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Family Room Occupied Recent"
+        unique_id: family_room_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.family_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+      - name: "Guest Room Occupied Recent"
+        unique_id: guest_room_occupied_recent
+        state: >-
+          {% set base = states('input_number.occupancy_linger_min')|int(30) %}
+          {% set night = states('input_number.occupancy_linger_night_min')|int(90) %}
+          {% set linger = (night if (now().hour >= 22 or now().hour < 6) else base) * 60 %}
+          {% set ent = 'binary_sensor.guest_room_occupancy' %}
+          {{ is_state(ent,'on') or (as_timestamp(now()) - as_timestamp(states[ent].last_changed)) < linger }}
+
+  - sensor:
+      # ---- Per-room TARGETS pulled from climate.* ----
+      - name: "Master Target (°F)"
+        unique_id: master_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.master_bedroom_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Blue Target (°F)"
+        unique_id: blue_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.blue_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Gold Target (°F)"
+        unique_id: gold_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.gold_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Green Target (°F)"
+        unique_id: green_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.green_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Grey Target (°F)"
+        unique_id: grey_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.grey_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Guest Target (°F)"
+        unique_id: guest_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.guest_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Family Target (°F)"
+        unique_id: family_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.family_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Kitchen Target (°F)"
+        unique_id: kitchen_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.kitchen_room_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+      - name: "Basement Target (°F)"
+        unique_id: basement_target_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set c = 'climate.basement_room' %}
+          {% set t = state_attr(c,'temperature') %}
+          {% if t is not none %}
+            {{ t|float }}
+          {% else %}
+            {% set lo = state_attr(c,'target_temp_low') %}
+            {% set hi = state_attr(c,'target_temp_high') %}
+            {{ (((lo|float) + (hi|float)) / 2) if (lo is not none and hi is not none) else 72 }}
+          {% endif %}
+
+      # ---- Per-room TEMPS (sensor.* preferred; fallback to climate current_temperature) ----
+      - name: "Master Temp (°F)"
+        unique_id: master_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.master_bedroom_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.master_bedroom_room','current_temperature')|float(0)) }}
+      - name: "Blue Temp (°F)"
+        unique_id: blue_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.blue_room_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.blue_room_room','current_temperature')|float(0)) }}
+      - name: "Gold Temp (°F)"
+        unique_id: gold_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.gold_room_sensor_temperature') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.gold_room_room','current_temperature')|float(0)) }}
+      - name: "Green Temp (°F)"
+        unique_id: green_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.green_room_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.green_room_room','current_temperature')|float(0)) }}
+      - name: "Grey Temp (°F)"
+        unique_id: grey_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.grey_room_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.grey_room_room','current_temperature')|float(0)) }}
+      - name: "Guest Temp (°F)"
+        unique_id: guest_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.guest_room_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.guest_room_room','current_temperature')|float(0)) }}
+      - name: "Family Temp (°F)"
+        unique_id: family_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.family_room_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.family_room_room','current_temperature')|float(0)) }}
+      - name: "Kitchen Temp (°F)"
+        unique_id: kitchen_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.kitchen_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.kitchen_room_room','current_temperature')|float(0)) }}
+      - name: "Basement Temp (°F)"
+        unique_id: basement_temp_degf
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set s = states('sensor.basement_temp_degf') %}
+          {{ (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.basement_room','current_temperature')|float(0)) }}
+
+      # ---- DELTAS: Using existing delta sensors directly ----
+      # Note: These sensors already exist in your system (e.g., sensor.blue_delta_degf)
+      # No need to recreate them - we'll reference them directly in the automation
+
+      # ---- Multi-room selection using delta + hysteresis + occupancy ----
+      - name: "Rooms To Condition"
+        unique_id: rooms_to_condition
+        icon: mdi:home-thermometer-outline
+        state: >-
+          {% set hys = states('input_number.room_hysteresis_f')|float(1) %}
+          {% set mode = states('climate.main_floor_thermostat') %}
+          {% set need_occ = is_state('input_boolean.require_occupancy','on') %}
+
+          {%- set master_t = state_attr('climate.master_bedroom_room','current_temperature')|float(0) -%}
+          {%- set master_t_valid = (master_t >= 40 and master_t <= 100 and state_attr('climate.master_bedroom_room','current_temperature') is not none) -%}
+          {%- set blue_t = state_attr('climate.blue_room_room','current_temperature')|float(0) -%}
+          {%- set blue_t_valid = (blue_t >= 40 and blue_t <= 100 and state_attr('climate.blue_room_room','current_temperature') is not none) -%}
+          {%- set gold_t = state_attr('climate.gold_room_room','current_temperature')|float(0) -%}
+          {%- set gold_t_valid = (gold_t >= 40 and gold_t <= 100 and state_attr('climate.gold_room_room','current_temperature') is not none) -%}
+          {%- set green_t = state_attr('climate.green_room_room','current_temperature')|float(0) -%}
+          {%- set green_t_valid = (green_t >= 40 and green_t <= 100 and state_attr('climate.green_room_room','current_temperature') is not none) -%}
+          {%- set grey_t = state_attr('climate.grey_room_room','current_temperature')|float(0) -%}
+          {%- set grey_t_valid = (grey_t >= 40 and grey_t <= 100 and state_attr('climate.grey_room_room','current_temperature') is not none) -%}
+          {%- set guest_t = state_attr('climate.guest_room_room','current_temperature')|float(0) -%}
+          {%- set guest_t_valid = (guest_t >= 40 and guest_t <= 100 and state_attr('climate.guest_room_room','current_temperature') is not none) -%}
+          {%- set family_t = state_attr('climate.family_room_room','current_temperature')|float(0) -%}
+          {%- set family_t_valid = (family_t >= 40 and family_t <= 100 and state_attr('climate.family_room_room','current_temperature') is not none) -%}
+          {%- set kitchen_t = state_attr('climate.kitchen_room_room','current_temperature')|float(0) -%}
+          {%- set kitchen_t_valid = (kitchen_t >= 40 and kitchen_t <= 100 and state_attr('climate.kitchen_room_room','current_temperature') is not none) -%}
+          {%- set basement_t = state_attr('climate.basement_room','current_temperature')|float(0) -%}
+          {%- set basement_t_valid = (basement_t >= 40 and basement_t <= 100 and state_attr('climate.basement_room','current_temperature') is not none) -%}
+          {%- set piano_t = (state_attr('climate.piano_room_room','current_temperature')|float(0) if states('climate.piano_room_room') != 'unavailable' else 0) -%}
+          {%- set piano_t_valid = (piano_t >= 40 and piano_t <= 100 and states('climate.piano_room_room') != 'unavailable' and state_attr('climate.piano_room_room','current_temperature') is not none) -%}
+          {% set rooms = [
+            {'k':'master','d': (state_attr('climate.master_bedroom_room','temperature')|float(72) - master_t),'ok': is_state('binary_sensor.master_occupied_recent','on'),'valid':master_t_valid,'group':'group.vents_master_bedroom'},
+            {'k':'blue',  'd': (state_attr('climate.blue_room_room','temperature')|float(72) - blue_t),'ok': is_state('binary_sensor.blue_occupied_recent','on'),  'valid':blue_t_valid,'group':'group.vents_blue_room'},
+            {'k':'gold',  'd': (state_attr('climate.gold_room_room','temperature')|float(72) - gold_t),'ok': is_state('binary_sensor.gold_occupied_recent','on'),  'valid':gold_t_valid,'group':'group.vents_gold_room'},
+            {'k':'green', 'd': (state_attr('climate.green_room_room','temperature')|float(72) - green_t),'ok': is_state('binary_sensor.green_occupied_recent','on'), 'valid':green_t_valid,'group':'group.vents_green_room'},
+            {'k':'grey',  'd': (state_attr('climate.grey_room_room','temperature')|float(72) - grey_t),'ok': is_state('binary_sensor.grey_occupied_recent','on'),  'valid':grey_t_valid,'group':'group.vents_grey_room'},
+            {'k':'guest', 'd': (state_attr('climate.guest_room_room','temperature')|float(72) - guest_t),'ok': is_state('binary_sensor.guest_room_occupied_recent','on'),'valid':guest_t_valid,'group':'group.vents_guest_room'},
+            {'k':'family','d': (state_attr('climate.family_room_room','temperature')|float(72) - family_t),'ok': is_state('binary_sensor.family_room_occupied_recent','on'),'valid':family_t_valid,'group':'group.vents_family_room'},
+            {'k':'kitchen','d':(state_attr('climate.kitchen_room_room','temperature')|float(72) - kitchen_t),'ok': is_state('binary_sensor.kitchen_occupied_recent','on'),'valid':kitchen_t_valid,'group':'group.vents_kitchen'},
+            {'k':'basement','d':(state_attr('climate.basement_room','temperature')|float(72) - basement_t),'ok': is_state('binary_sensor.basement_occupied_recent','on'),'valid':basement_t_valid,'group':'group.vents_basement'},
+            {'k':'piano','d':(state_attr('climate.piano_room_room','temperature')|float(72) - piano_t) if states('climate.piano_room_room') != 'unavailable' else 0,'ok': is_state('binary_sensor.piano_room_occupied_recent','on') if states('binary_sensor.piano_room_occupied_recent') != 'unavailable' else false,'valid':piano_t_valid,'group':'group.vents_piano_room'}
+          ] %}
+          
+          {% set valid_rooms = rooms | selectattr('valid') | list %}
+
+          {% set ok_rooms = valid_rooms if not need_occ else valid_rooms | selectattr('ok') | list %}
+
+          {% set heat_rooms = (ok_rooms | selectattr('d','>',hys) | map(attribute='k') | list) if mode in ['heat','auto','heat_cool'] else [] %}
+          {% set cool_rooms = (ok_rooms | selectattr('d','<',-hys) | map(attribute='k') | list) if mode in ['cool','auto','heat_cool'] else [] %}
+
+          {% if mode == 'heat' %}{{ heat_rooms|join(',') or 'none' }}
+          {% elif mode == 'cool' %}{{ cool_rooms|join(',') or 'none' }}
+          {% else %}{{ (heat_rooms + cool_rooms)|unique|join(',') or 'none' }}
+          {% endif %}
+
+      - name: "Thermostat Manual Override Detected"
+        unique_id: thermostat_manual_override
+        icon: mdi:hand-back-left
+        state: >-
+          {% set auto_enabled = is_state('input_boolean.auto_thermostat_control','on') %}
+          {% set current_temp = state_attr('climate.main_floor_thermostat','temperature')|float(72) %}
+          {% set last_set = states('input_number.last_thermostat_setpoint')|float(72) %}
+          {% set tolerance = 0.5 %}
+          {% set diff = (current_temp - last_set)|abs %}
+          {{ 'on' if (auto_enabled and diff > tolerance) else 'off' }}
+        attributes:
+          current_setpoint: "{{ state_attr('climate.main_floor_thermostat','temperature')|float(72) }}"
+          last_automation_setpoint: "{{ states('input_number.last_thermostat_setpoint')|float(72) }}"
+          difference: "{{ (state_attr('climate.main_floor_thermostat','temperature')|float(72) - states('input_number.last_thermostat_setpoint')|float(72))|abs }}"
+
+      - name: "Parse Rooms CSV"
+        unique_id: parse_rooms_csv
+        state: >-
+          {% set s = (this.attributes.input | default('') | trim | replace(' ','')) %}
+          {% if s not in ['','none',none] %}
+            {% set parts = [] %}
+            {% set current = '' %}
+            {% for char in s %}
+              {% if char == ',' %}
+                {% if current != '' %}
+                  {% set parts = parts + [current] %}
+                  {% set current = '' %}
+                {% endif %}
+              {% else %}
+                {% set current = current + char %}
+              {% endif %}
+            {% endfor %}
+            {% if current != '' %}
+              {% set parts = parts + [current] %}
+            {% endif %}
+            {% set valid_keys = ['master','blue','gold','green','grey','guest','family','kitchen','basement','piano'] %}
+            {% set filtered = [] %}
+            {% for p in parts %}
+              {% if p in valid_keys %}
+                {% set filtered = filtered + [p] %}
+              {% endif %}
+            {% endfor %}
+            {{ filtered|join(',') }}
+          {% else %}
+            none
+          {% endif %}
+        attributes:
+          input: "{{ states('sensor.rooms_to_condition') }}"
+          parsed_list: >-
+            {% set s = (this.attributes.input | default('') | trim | replace(' ','')) %}
+            {% if s not in ['','none',none] %}
+              {% set parts = [] %}
+              {% set current = '' %}
+              {% for char in s %}
+                {% if char == ',' %}
+                  {% if current != '' %}
+                    {% set parts = parts + [current] %}
+                    {% set current = '' %}
+                  {% endif %}
+                {% else %}
+                  {% set current = current + char %}
+                {% endif %}
+              {% endfor %}
+              {% if current != '' %}
+                {% set parts = parts + [current] %}
+              {% endif %}
+              {% set valid_keys = ['master','blue','gold','green','grey','guest','family','kitchen','basement','piano'] %}
+              {% set filtered = [] %}
+              {% for p in parts %}
+                {% if p in valid_keys %}
+                  {% set filtered = filtered + [p] %}
+                {% endif %}
+              {% endfor %}
+              {{ filtered }}
+
+      - name: "Zone Controller Statistics"
+        unique_id: zone_controller_stats
+        icon: mdi:chart-line
+        state: "{{ states('sensor.rooms_to_condition') }}"
+        attributes:
+          rooms_selected_count: >-
+            {% set rooms = states('sensor.rooms_to_condition')|default('none') %}
+            {% if rooms != 'none' and rooms != '' %}
+              {% set parts = [] %}
+              {% set current = '' %}
+              {% for char in rooms %}
+                {% if char == ',' %}
+                  {% if current != '' and current != 'none' %}
+                    {% set parts = parts + [current] %}
+                    {% set current = '' %}
+                  {% endif %}
+                {% else %}
+                  {% set current = current + char %}
+                {% endif %}
+              {% endfor %}
+              {% if current != '' and current != 'none' %}
+                {% set parts = parts + [current] %}
+              {% endif %}
+              {{ parts|count }}
+            {% else %}
+              0
+            {% endif %}
+          total_rooms: "10"
+          automation_enabled: "{{ is_state('input_boolean.auto_vent_control','on') and is_state('input_boolean.auto_thermostat_control','on') }}"
+          last_update: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+      - name: "HVAC Cycle Start Time"
+        unique_id: hvac_cycle_start_time
+        icon: mdi:clock-start
+        state: "{{ states('input_number.hvac_cycle_start_timestamp')|float(0) }}"
+        attributes:
+          formatted_time: >-
+            {% set ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+            {% if ts > 0 %}
+              {{ as_timestamp(ts)|timestamp_custom('%Y-%m-%d %H:%M:%S') }}
+            {% else %}
+              Never
+            {% endif %}
+          runtime_elapsed_min: >-
+            {% set ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+            {% if ts > 0 %}
+              {{ ((now().timestamp() - ts) / 60)|round(1) }}
+            {% else %}
+              0
+            {% endif %}
+
+      - name: "HVAC Cycle End Time"
+        unique_id: hvac_cycle_end_time
+        icon: mdi:clock-end
+        state: "{{ states('input_number.hvac_cycle_end_timestamp')|float(0) }}"
+        attributes:
+          formatted_time: >-
+            {% set ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+            {% if ts > 0 %}
+              {{ as_timestamp(ts)|timestamp_custom('%Y-%m-%d %H:%M:%S') }}
+            {% else %}
+              Never
+            {% endif %}
+          off_time_elapsed_min: >-
+            {% set ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+            {% if ts > 0 %}
+              {{ ((now().timestamp() - ts) / 60)|round(1) }}
+            {% else %}
+              0
+            {% endif %}
+
+      - name: "HVAC Cycle Protection Status"
+        unique_id: hvac_cycle_protection_status
+        icon: mdi:shield-check
+        state: >-
+          {% set action = state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') %}
+          {% set min_runtime = states('input_number.hvac_min_runtime_min')|int(10) * 60 %}
+          {% set min_off_time = states('input_number.hvac_min_off_time_min')|int(5) * 60 %}
+          {% if action in ['heating','cooling'] %}
+            {% set start_ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+            {% if start_ts > 0 %}
+              {% set runtime = (now().timestamp() - start_ts)|int %}
+              {{ 'protected' if runtime < min_runtime else 'allowed' }}
+            {% else %}
+              allowed
+            {% endif %}
+          {% elif action == 'idle' %}
+            {% set end_ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+            {% if end_ts > 0 %}
+              {% set off_time = (now().timestamp() - end_ts)|int %}
+              {{ 'protected' if off_time < min_off_time else 'allowed' }}
+            {% else %}
+              allowed
+            {% endif %}
+          {% else %}
+            allowed
+          {% endif %}
+        attributes:
+          current_action: "{{ state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') }}"
+          can_change_setpoint: >-
+            {% set action = state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') %}
+            {% set min_runtime = states('input_number.hvac_min_runtime_min')|int(10) * 60 %}
+            {% set min_off_time = states('input_number.hvac_min_off_time_min')|int(5) * 60 %}
+            {% if action in ['heating','cooling'] %}
+              {% set start_ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+              {% if start_ts > 0 %}
+                {% set runtime = (now().timestamp() - start_ts)|int %}
+                {{ runtime >= min_runtime }}
+              {% else %}
+                true
+              {% endif %}
+            {% elif action == 'idle' %}
+              {% set end_ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+              {% if end_ts > 0 %}
+                {% set off_time = (now().timestamp() - end_ts)|int %}
+                {{ off_time >= min_off_time }}
+              {% else %}
+                true
+              {% endif %}
+            {% else %}
+              true
+            {% endif %}
+          runtime_remaining: >-
+            {% set action = state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') %}
+            {% set min_runtime = states('input_number.hvac_min_runtime_min')|int(10) * 60 %}
+            {% if action in ['heating','cooling'] %}
+              {% set start_ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+              {% if start_ts > 0 %}
+                {% set runtime = (now().timestamp() - start_ts)|int %}
+                {% set remaining = min_runtime - runtime %}
+                {{ (remaining / 60)|round(1) if remaining > 0 else 0 }}
+              {% else %}
+                0
+              {% endif %}
+            {% else %}
+              0
+            {% endif %}
+          off_time_remaining: >-
+            {% set action = state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') %}
+            {% set min_off_time = states('input_number.hvac_min_off_time_min')|int(5) * 60 %}
+            {% if action == 'idle' %}
+              {% set end_ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+              {% if end_ts > 0 %}
+                {% set off_time = (now().timestamp() - end_ts)|int %}
+                {% set remaining = min_off_time - off_time %}
+                {{ (remaining / 60)|round(1) if remaining > 0 else 0 %}
+              {% else %}
+                0
+              {% endif %}
+            {% else %}
+              0
+            {% endif %}
+
+# ───────────────────────────
+# SCRIPTS
+#   - set_multi_room_vents: opens selected rooms, applies ≤1/3-closed w/ temp+occ-aware relief
+#   - apply_ecobee_hold_for_rooms: optional heat-boost; never changes hvac_mode
+# ───────────────────────────
+script:
+  set_multi_room_vents:
+    alias: "Set vents for multiple rooms (≤1/3 closed, delta/occ-aware relief)"
+    mode: queued
+    fields:
+      rooms_csv:
+        description: "Comma-separated room keys to fully open (e.g., 'master,blue')"
+    sequence:
+      - if:
+          condition: template
+          value_template: "{{ not is_state('input_boolean.auto_vent_control','on') }}"
+        then:
+            - action: system_log.write
+              data:
+                message: "Vent control disabled. Skipping vent adjustments."
+            - stop: "Auto vent control is disabled"
+      - variables:
+          min_other: "{{ states('input_number.min_other_room_open_pct') | int }}"
+          close_thr: "{{ states('input_number.closed_threshold_pct') | int(10) }}"
+          relief_pct: "{{ states('input_number.relief_open_pct') | int(60) }}"
+          max_relief: "{{ states('input_number.max_relief_rooms') | int(3) }}"
+          mode: "{{ states('climate.main_floor_thermostat') }}"
+          action: "{{ state_attr('climate.main_floor_thermostat','hvac_action') | default('idle') }}"
+          debug: "{{ is_state('input_boolean.debug_mode','on') }}"
+          selected_list: >-
+            {% set s = (rooms_csv | default('') | trim | replace(' ','')) %}
+            {% if s not in ['','none'] %}
+              {% set parts = [] %}
+              {% set current = '' %}
+              {% for char in s %}
+                {% if char == ',' %}
+                  {% if current != '' %}
+                    {% set parts = parts + [current] %}
+                    {% set current = '' %}
+                  {% endif %}
+                {% else %}
+                  {% set current = current + char %}
+                {% endif %}
+              {% endfor %}
+              {% if current != '' %}
+                {% set parts = parts + [current] %}
+              {% endif %}
+              {% set valid_keys = ['master','blue','gold','green','grey','guest','family','kitchen','basement','piano'] %}
+              {% set filtered = [] %}
+              {% for p in parts %}
+                {% if p in valid_keys %}
+                  {% set filtered = filtered + [p] %}
+                {% endif %}
+              {% endfor %}
+              {{ filtered }}
+            {% else %}
+              {{ [] }}
+            {% endif %}
+
+          rooms: >-
+            {%- set master_t = state_attr('climate.master_bedroom_room','current_temperature')|float(0) -%}
+            {%- set master_t_valid = (master_t >= 40 and master_t <= 100) -%}
+            {%- set master_tgt = state_attr('climate.master_bedroom_room','temperature')|float(72) -%}
+            {%- set master_d = (master_tgt - master_t) if master_t_valid else 0 -%}
+            {%- set blue_t = state_attr('climate.blue_room_room','current_temperature')|float(0) -%}
+            {%- set blue_t_valid = (blue_t >= 40 and blue_t <= 100) -%}
+            {%- set blue_tgt = state_attr('climate.blue_room_room','temperature')|float(72) -%}
+            {%- set blue_d = (blue_tgt - blue_t) if blue_t_valid else 0 -%}
+            {%- set gold_t = state_attr('climate.gold_room_room','current_temperature')|float(0) -%}
+            {%- set gold_t_valid = (gold_t >= 40 and gold_t <= 100) -%}
+            {%- set gold_tgt = state_attr('climate.gold_room_room','temperature')|float(72) -%}
+            {%- set gold_d = (gold_tgt - gold_t) if gold_t_valid else 0 -%}
+            {%- set green_t = state_attr('climate.green_room_room','current_temperature')|float(0) -%}
+            {%- set green_t_valid = (green_t >= 40 and green_t <= 100) -%}
+            {%- set green_tgt = state_attr('climate.green_room_room','temperature')|float(72) -%}
+            {%- set green_d = (green_tgt - green_t) if green_t_valid else 0 -%}
+            {%- set grey_t = state_attr('climate.grey_room_room','current_temperature')|float(0) -%}
+            {%- set grey_t_valid = (grey_t >= 40 and grey_t <= 100) -%}
+            {%- set grey_tgt = state_attr('climate.grey_room_room','temperature')|float(72) -%}
+            {%- set grey_d = (grey_tgt - grey_t) if grey_t_valid else 0 -%}
+            {%- set guest_t = state_attr('climate.guest_room_room','current_temperature')|float(0) -%}
+            {%- set guest_t_valid = (guest_t >= 40 and guest_t <= 100) -%}
+            {%- set guest_tgt = state_attr('climate.guest_room_room','temperature')|float(72) -%}
+            {%- set guest_d = (guest_tgt - guest_t) if guest_t_valid else 0 -%}
+            {%- set family_t = state_attr('climate.family_room_room','current_temperature')|float(0) -%}
+            {%- set family_t_valid = (family_t >= 40 and family_t <= 100) -%}
+            {%- set family_tgt = state_attr('climate.family_room_room','temperature')|float(72) -%}
+            {%- set family_d = (family_tgt - family_t) if family_t_valid else 0 -%}
+            {%- set kitchen_t = state_attr('climate.kitchen_room_room','current_temperature')|float(0) -%}
+            {%- set kitchen_t_valid = (kitchen_t >= 40 and kitchen_t <= 100) -%}
+            {%- set kitchen_tgt = state_attr('climate.kitchen_room_room','temperature')|float(72) -%}
+            {%- set kitchen_d = (kitchen_tgt - kitchen_t) if kitchen_t_valid else 0 -%}
+            {%- set basement_t = state_attr('climate.basement_room','current_temperature')|float(0) -%}
+            {%- set basement_t_valid = (basement_t >= 40 and basement_t <= 100) -%}
+            {%- set basement_tgt = state_attr('climate.basement_room','temperature')|float(72) -%}
+            {%- set basement_d = (basement_tgt - basement_t) if basement_t_valid else 0 -%}
+            {%- set piano_t = (state_attr('climate.piano_room_room','current_temperature')|float(0) if states('climate.piano_room_room') != 'unavailable' else 0) -%}
+            {%- set piano_t_valid = (piano_t >= 40 and piano_t <= 100 and states('climate.piano_room_room') != 'unavailable') -%}
+            {%- set piano_tgt = (state_attr('climate.piano_room_room','temperature')|float(72) if states('climate.piano_room_room') != 'unavailable' else 72) -%}
+            {%- set piano_d = (piano_tgt - piano_t) if piano_t_valid else 0 -%}
+            {{ [
+              {'k':'master','d':master_d,'occ':is_state('binary_sensor.master_occupied_recent','on'),'group':'group.vents_master_bedroom','priority':states('input_number.master_priority')|int(5),'valid':master_t_valid},
+              {'k':'blue','d':blue_d,'occ':is_state('binary_sensor.blue_occupied_recent','on'),'group':'group.vents_blue_room','priority':states('input_number.blue_priority')|int(5),'valid':blue_t_valid},
+              {'k':'gold','d':gold_d,'occ':is_state('binary_sensor.gold_occupied_recent','on'),'group':'group.vents_gold_room','priority':states('input_number.gold_priority')|int(5),'valid':gold_t_valid},
+              {'k':'green','d':green_d,'occ':is_state('binary_sensor.green_occupied_recent','on'),'group':'group.vents_green_room','priority':states('input_number.green_priority')|int(5),'valid':green_t_valid},
+              {'k':'grey','d':grey_d,'occ':is_state('binary_sensor.grey_occupied_recent','on'),'group':'group.vents_grey_room','priority':states('input_number.grey_priority')|int(5),'valid':grey_t_valid},
+              {'k':'guest','d':guest_d,'occ':is_state('binary_sensor.guest_room_occupied_recent','on'),'group':'group.vents_guest_room','priority':states('input_number.guest_priority')|int(5),'valid':guest_t_valid},
+              {'k':'family','d':family_d,'occ':is_state('binary_sensor.family_room_occupied_recent','on'),'group':'group.vents_family_room','priority':states('input_number.family_priority')|int(5),'valid':family_t_valid},
+              {'k':'kitchen','d':kitchen_d,'occ':is_state('binary_sensor.kitchen_occupied_recent','on'),'group':'group.vents_kitchen','priority':states('input_number.kitchen_priority')|int(5),'valid':kitchen_t_valid},
+              {'k':'basement','d':basement_d,'occ':is_state('binary_sensor.basement_occupied_recent','on'),'group':'group.vents_basement','priority':states('input_number.basement_priority')|int(5),'valid':basement_t_valid},
+              {'k':'piano','d':piano_d,'occ':is_state('binary_sensor.piano_room_occupied_recent','on') if states('binary_sensor.piano_room_occupied_recent') != 'unavailable' else false,'group':'group.vents_piano_room','priority':states('input_number.piano_priority')|int(5),'valid':piano_t_valid}
+            ] }}
+
+          base_cand: >-
+            {% set excluded = [] %}
+            {% for r in rooms %}
+              {% if r.k not in selected_list %}
+                {% set excluded = excluded + [r] %}
+              {% endif %}
+            {% endfor %}
+            {{ excluded }}
+          cand: >-
+            {% if mode == 'heat' or action == 'heating' %}
+              {{ base_cand | selectattr('d','>=',0) | list }}
+            {% elif mode == 'cool' or action == 'cooling' %}
+              {{ base_cand | selectattr('d','<=',0) | list }}
+            {% else %}
+              {{ base_cand }}
+            {% endif %}
+
+          relief_scored: >-
+            {%- set scored = [] -%}
+            {%- for r in cand -%}
+              {%- set occ_rank = 1 if r.occ else 0 %}
+              {%- set priority_rank = r.priority|int(5) %}
+              {%- if mode == 'heat' or action == 'heating' -%}
+                {%- set temp_rank = -r.d %}
+              {%- elif mode == 'cool' or action == 'cooling' -%}
+                {%- set temp_rank =  r.d %}
+              {%- else -%}
+                {%- set temp_rank = abs(r.d) %}
+              {%- endif -%}
+              {%- set numeric_score = (occ_rank * 10000) + (priority_rank * 100) + temp_rank %}
+              {%- set scored = scored + [{'k':r.k,'group':r.group,'score':numeric_score}] -%}
+            {%- endfor -%}
+            {%- set sorted_scored = scored | sort(attribute='score', reverse=true) | list -%}
+            {%- set limited = [] -%}
+            {%- for i in range(sorted_scored|count) -%}
+              {%- if i < max_relief -%}
+                {%- set limited = limited + [sorted_scored[i]] -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {{ limited }}
+
+      # 1) Expand all vents from all groups into a flat list
+      - variables:
+          all_vent_entities: >-
+            {{ expand('group.vent_groups_all')
+               | map(attribute='entity_id') | map('expand') | sum(start=[])
+               | map(attribute='entity_id') | list }}
+      - if:
+          condition: template
+          value_template: "{{ debug }}"
+        then:
+            - action: system_log.write
+              data:
+                message: >-
+                  Zone Controller: Starting vent adjustment. Mode={{ mode }}, Action={{ action }}, 
+                  Selected={{ selected_list|join(',') }}, Rooms={{ rooms|count }}, 
+                  Total Vents={{ all_vent_entities|count }}
+
+      # 2) Set ALL vents to the safe minimum (set individually to ensure all are set)
+      - repeat:
+          for_each: "{{ all_vent_entities }}"
+          sequence:
+            - if:
+                condition: template
+                value_template: "{{ states(repeat.item) != 'unavailable' }}"
+              then:
+                - action: cover.set_cover_position
+                  target:
+                    entity_id: "{{ repeat.item }}"
+                  data:
+                    position: "{{ min_other }}"
+              else:
+                - if:
+                    condition: template
+                    value_template: "{{ debug }}"
+                  then:
+                    - action: system_log.write
+                      data:
+                        message: "Zone Controller: Skipping unavailable vent {{ repeat.item }}"
+
+      # 3) Open selected rooms fully (100%) - set each vent individually
+      - repeat:
+          for_each: "{{ selected_list }}"
+          sequence:
+            - variables:
+                room_key: "{{ repeat.item | string | trim }}"
+                room_data: >-
+                  {% set item = (rooms | selectattr('k','equalto',room_key) | list) %}
+                  {{ item[0] if item|count > 0 else none }}
+                room_vent_entities: >-
+                  {% if room_data is not none %}
+                    {{ expand(room_data.group) | map(attribute='entity_id') | list }}
+                  {% else %}
+                    {{ [] }}
+                  {% endif %}
+            - if:
+                condition: template
+                value_template: "{{ room_data is not none and room_key in selected_list }}"
+              then:
+                - if:
+                    condition: template
+                    value_template: "{{ debug }}"
+                  then:
+                    - action: system_log.write
+                      data:
+                        message: "Zone Controller: Opening {{ room_key }} vents to 100%"
+                - repeat:
+                    for_each: "{{ room_vent_entities }}"
+                    sequence:
+                      - if:
+                          condition: template
+                          value_template: "{{ states(repeat.item) != 'unavailable' }}"
+                        then:
+                          - action: cover.set_cover_position
+                            target:
+                              entity_id: "{{ repeat.item }}"
+                            data:
+                              position: 100
+                        else:
+                          - if:
+                              condition: template
+                              value_template: "{{ debug }}"
+                            then:
+                              - action: system_log.write
+                                data:
+                                  message: "Zone Controller: Skipping unavailable vent {{ repeat.item }} for {{ room_key }}"
+
+      # 3.5) Explicitly close vents for rooms that don't need conditioning (safety check)
+      # For heating: close rooms above target (d < 0)
+      # For cooling: close rooms below target (d > 0)
+      - variables:
+          rooms_to_close: >-
+            {% if mode == 'heat' or action == 'heating' %}
+              {% set filtered = [] %}
+              {% for r in rooms %}
+                {% if r.d < 0 and r.k not in selected_list %}
+                  {% set filtered = filtered + [r] %}
+                {% endif %}
+              {% endfor %}
+              {{ filtered }}
+            {% elif mode == 'cool' or action == 'cooling' %}
+              {% set filtered = [] %}
+              {% for r in rooms %}
+                {% if r.d > 0 and r.k not in selected_list %}
+                  {% set filtered = filtered + [r] %}
+                {% endif %}
+              {% endfor %}
+              {{ filtered }}
+            {% else %}
+              {{ [] }}
+            {% endif %}
+      - repeat:
+          for_each: "{{ rooms_to_close }}"
+          sequence:
+            - variables:
+                close_vent_entities: >-
+                  {{ expand(repeat.item.group) | map(attribute='entity_id') | list }}
+            - if:
+                condition: template
+                value_template: "{{ debug }}"
+              then:
+                - action: system_log.write
+                  data:
+                    message: "Zone Controller: Closing {{ repeat.item.k }} vents to minimum (above/below target)"
+            - repeat:
+                for_each: "{{ close_vent_entities }}"
+                sequence:
+                  - if:
+                      condition: template
+                      value_template: "{{ states(repeat.item) != 'unavailable' }}"
+                    then:
+                      - action: cover.set_cover_position
+                        target:
+                          entity_id: "{{ repeat.item }}"
+                        data:
+                          position: "{{ min_other }}"
+
+      # 4) Enforce ≤ 1/3 closed using temp/occ-aware relief ordering
+      - variables:
+          closed_count: >-
+            {{ expand(all_vent_entities)
+               | selectattr('attributes.current_position','defined')
+               | map(attribute='attributes.current_position')
+               | select('le', close_thr) | list | count }}
+          total_vents: "{{ all_vent_entities | count }}"
+          max_closed: "{{ (total_vents // 3) | int }}"
+      - if:
+          condition: template
+          value_template: "{{ debug }}"
+        then:
+          - action: system_log.write
+            data:
+              message: >-
+                Zone Controller: Relief check - Closed={{ closed_count }}, 
+                Max={{ max_closed }}, Relief candidates={{ relief_scored|count }}
+      - if:
+          condition: template
+          value_template: "{{ total_vents > 0 and closed_count > max_closed and relief_scored | count > 0 }}"
+        then:
+          - if:
+              condition: template
+              value_template: "{{ debug }}"
+            then:
+              - action: system_log.write
+                data:
+                  message: >-
+                    Zone Controller: Opening relief vents. Need {{ closed_count - max_closed }} more open.
+                    Relief rooms: {{ relief_scored|map(attribute='k')|join(',') }}
+          - repeat:
+              for_each: "{{ relief_scored }}"
+              sequence:
+                - variables:
+                    relief_vent_entities: >-
+                      {{ expand(repeat.item.group) | map(attribute='entity_id') | list }}
+                - if:
+                    condition: template
+                    value_template: "{{ debug }}"
+                  then:
+                    - action: system_log.write
+                      data:
+                        message: "Zone Controller: Opening relief vents for {{ repeat.item.k }} to {{ relief_pct }}%"
+                - repeat:
+                    for_each: "{{ relief_vent_entities }}"
+                    sequence:
+                      - if:
+                          condition: template
+                          value_template: "{{ states(repeat.item) != 'unavailable' }}"
+                        then:
+                          - action: cover.set_cover_position
+                            target:
+                              entity_id: "{{ repeat.item }}"
+                            data:
+                              position: "{{ relief_pct }}"
+                - delay:
+                    milliseconds: 500
+                - variables:
+                    closed_now: >-
+                      {{ expand(all_vent_entities)
+                         | selectattr('attributes.current_position','defined')
+                         | map(attribute='attributes.current_position')
+                         | select('le', close_thr) | list | count }}
+                - if:
+                    condition: template
+                    value_template: "{{ debug }}"
+                  then:
+                    - action: system_log.write
+                      data:
+                        message: "Zone Controller: After {{ repeat.item.k }} relief - Closed={{ closed_now }}, Max={{ max_closed }}"
+                - if:
+                    condition: template
+                    value_template: "{{ closed_now <= max_closed }}"
+                  then:
+                    - if:
+                        condition: template
+                        value_template: "{{ debug }}"
+                      then:
+                        - action: system_log.write
+                          data:
+                            message: "Zone Controller: Relief complete. Closed count satisfied."
+                    - stop: "⅓-closed limit satisfied (delta/occ-aware relief complete)"
+
+  apply_ecobee_hold_for_rooms:
+    alias: "Apply Ecobee hold for multiple rooms (with heat boost; per-room targets)"
+    mode: restart
+    fields:
+      rooms_csv: {}
+    sequence:
+      - variables:
+          do_boost: "{{ is_state('input_boolean.heat_boost_enabled','on') }}"
+          boost: "{{ states('input_number.heat_boost_f') | float(0) }}"
+          mode: "{{ states('climate.main_floor_thermostat') }}"
+          action: "{{ state_attr('climate.main_floor_thermostat','hvac_action') | default('idle') }}"
+          auto_control_enabled: "{{ is_state('input_boolean.auto_thermostat_control','on') }}"
+          manual_override: "{{ is_state('sensor.thermostat_manual_override','on') }}"
+          should_set_thermostat: "{{ auto_control_enabled and not manual_override }}"
+          debug: "{{ is_state('input_boolean.debug_mode','on') }}"
+          default_temp: "{{ states('input_number.default_thermostat_temp') | float(72) }}"
+          sel: >-
+            {% set s = (rooms_csv|default('')|trim) | replace(' ','') %}
+            {% if s not in ['','none',none] %}
+              {% set parts = [] %}
+              {% set current = '' %}
+              {% for char in s %}
+                {% if char == ',' %}
+                  {% if current != '' %}
+                    {% set parts = parts + [current] %}
+                    {% set current = '' %}
+                  {% endif %}
+                {% else %}
+                  {% set current = current + char %}
+                {% endif %}
+              {% endfor %}
+              {% if current != '' %}
+                {% set parts = parts + [current] %}
+              {% endif %}
+              {% set valid_keys = ['master','blue','gold','green','grey','guest','family','kitchen','basement','piano'] %}
+              {% set filtered = [] %}
+              {% for p in parts %}
+                {% if p in valid_keys %}
+                  {% set filtered = filtered + [p] %}
+                {% endif %}
+              {% endfor %}
+              {{ filtered }}
+            {% else %}
+              {{ [] }}
+            {% endif %}
+
+          tgt:
+            master: "{{ states('sensor.master_target_degf')|float(72) }}"
+            blue:   "{{ states('sensor.blue_target_degf')  |float(72) }}"
+            gold:   "{{ states('sensor.gold_target_degf')  |float(72) }}"
+            green:  "{{ states('sensor.green_target_degf') |float(72) }}"
+            grey:   "{{ states('sensor.grey_target_degf')  |float(72) }}"
+            guest:  "{{ states('sensor.guest_target_degf') |float(72) }}"
+            family: "{{ states('sensor.family_target_degf')|float(72) }}"
+            kitchen: "{{ states('sensor.kitchen_target_degf')|float(72) }}"
+            basement: "{{ states('sensor.basement_target_degf')|float(72) }}"
+            piano: "{{ states('sensor.piano_target_degf')|float(72) if states('sensor.piano_target_degf') != 'unavailable' else (state_attr('climate.piano_room_room','temperature')|float(72) if states('climate.piano_room_room') != 'unavailable' else 72) }}"
+
+          heat_target: >-
+            {% set nums = [] %}
+            {% for k in sel %}{% set nums = nums + [tgt[k] | float(72)] %}{% endfor %}
+            {{ (nums|max) if nums|count>0 else default_temp }}
+          cool_target: >-
+            {% set nums = [] %}
+            {% for k in sel %}{% set nums = nums + [tgt[k] | float(72)] %}{% endfor %}
+            {{ (nums|min) if nums|count>0 else default_temp }}
+
+      - variables:
+          cycle_protection_enabled: >-
+            {% set min_runtime = states('input_number.hvac_min_runtime_min')|int(10) %}
+            {% set min_off_time = states('input_number.hvac_min_off_time_min')|int(5) %}
+            {{ min_runtime > 0 or min_off_time > 0 }}
+          can_change_setpoint: >-
+            {% set min_runtime = states('input_number.hvac_min_runtime_min')|int(10) * 60 %}
+            {% set min_off_time = states('input_number.hvac_min_off_time_min')|int(5) * 60 %}
+            {% if action in ['heating','cooling'] %}
+              {% set start_ts = states('input_number.hvac_cycle_start_timestamp')|float(0) %}
+              {% if start_ts > 0 %}
+                {% set runtime = (now().timestamp() - start_ts)|int %}
+                {{ runtime >= min_runtime }}
+              {% else %}
+                true
+              {% endif %}
+            {% elif action == 'idle' %}
+              {% set end_ts = states('input_number.hvac_cycle_end_timestamp')|float(0) %}
+              {% if end_ts > 0 %}
+                {% set off_time = (now().timestamp() - end_ts)|int %}
+                {{ off_time >= min_off_time }}
+              {% else %}
+                true
+              {% endif %}
+            {% else %}
+              true
+            {% endif %}
+          should_proceed: "{{ should_set_thermostat and (not cycle_protection_enabled or can_change_setpoint) }}"
+
+      - if:
+          condition: template
+          value_template: "{{ debug }}"
+        then:
+          - action: system_log.write
+            data:
+              message: >-
+                Thermostat Control: Mode={{ mode }}, Action={{ action }}, 
+                Selected={{ sel|join(',') }}, Auto={{ auto_control_enabled }}, 
+                Override={{ manual_override }}, Cycle Protection={{ cycle_protection_enabled }}, 
+                Can Change={{ can_change_setpoint }}, Should Set={{ should_proceed }}
+
+      - if:
+          condition: template
+          value_template: "{{ not should_proceed and cycle_protection_enabled }}"
+        then:
+          - if:
+              condition: template
+              value_template: "{{ debug }}"
+            then:
+              - action: system_log.write
+                data:
+                  message: >-
+                    Thermostat Control: BLOCKED by cycle protection. 
+                    Action={{ action }}, Can Change={{ can_change_setpoint }}
+          - stop: "Cycle protection active - preventing setpoint change"
+
+      - choose:
+          # HEAT: nudge setpoint by boost; never change hvac_mode
+          - conditions: 
+              - condition: template
+                value_template: "{{ mode == 'heat' or action == 'heating' }}"
+              - condition: template
+                value_template: "{{ should_proceed }}"
+            sequence:
+              - variables:
+                  new_setpoint: "{{ heat_target + (boost if do_boost else 0) }}"
+              - if:
+                  condition: template
+                  value_template: "{{ debug }}"
+                then:
+                  - action: system_log.write
+                    data:
+                      message: >-
+                        Thermostat Control: Setting HEAT to {{ new_setpoint }}°F 
+                        (target={{ heat_target }}°F, boost={{ boost if do_boost else 0 }}°F)
+              - action: climate.set_temperature
+                target:
+                  entity_id: climate.main_floor_thermostat
+                data:
+                  temperature: "{{ new_setpoint }}"
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.last_thermostat_setpoint
+                data:
+                  value: "{{ new_setpoint }}"
+          # COOL: hold at min selected target; never change hvac_mode
+          - conditions:
+              - condition: template
+                value_template: "{{ mode == 'cool' or action == 'cooling' }}"
+              - condition: template
+                value_template: "{{ should_proceed }}"
+            sequence:
+              - if:
+                  condition: template
+                  value_template: "{{ debug }}"
+                then:
+                  - action: system_log.write
+                    data:
+                      message: "Thermostat Control: Setting COOL to {{ cool_target }}°F"
+              - action: climate.set_temperature
+                target:
+                  entity_id: climate.main_floor_thermostat
+                data:
+                  temperature: "{{ cool_target }}"
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.last_thermostat_setpoint
+                data:
+                  value: "{{ cool_target }}"
+          # AUTO/HEAT_COOL: bias low bound upward by boost for heat calls
+          - conditions:
+              - condition: template
+                value_template: "{{ mode in ['auto','heat_cool'] }}"
+              - condition: template
+                value_template: "{{ should_proceed }}"
+            sequence:
+              - variables:
+                  lo: "{{ heat_target + (boost if do_boost else 0) }}"
+                  hi: "{{ cool_target }}"
+              - if:
+                  condition: template
+                  value_template: "{{ debug }}"
+                then:
+                  - action: system_log.write
+                    data:
+                      message: >-
+                        Thermostat Control: Setting AUTO/HEAT_COOL to {{ lo }}°F-{{ hi }}°F 
+                        (heat={{ heat_target }}°F, cool={{ cool_target }}°F, boost={{ boost if do_boost else 0 }}°F)
+              - action: climate.set_temperature
+                target:
+                  entity_id: climate.main_floor_thermostat
+                data:
+                  target_temp_low: "{{ lo }}"
+                  target_temp_high: "{{ hi }}"
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.last_thermostat_setpoint
+                data:
+                  value: "{{ (lo + hi) / 2 }}"
+      # Handle empty selected list - reset to default
+      - if:
+          condition: template
+          value_template: "{{ sel|count == 0 and should_proceed }}"
+        then:
+          - if:
+              condition: template
+              value_template: "{{ debug }}"
+            then:
+              - action: system_log.write
+                data:
+                  message: "Thermostat Control: No rooms need conditioning. Resetting to default {{ default_temp }}°F"
+          - action: climate.set_temperature
+            target:
+              entity_id: climate.main_floor_thermostat
+            data:
+              temperature: "{{ default_temp }}"
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.last_thermostat_setpoint
+            data:
+              value: "{{ default_temp }}"
+      - if:
+          condition: template
+          value_template: "{{ not should_set_thermostat and debug }}"
+        then:
+          - action: system_log.write
+            data:
+              message: >-
+                Thermostat Control: Skipped (Auto={{ auto_control_enabled }}, 
+                Override={{ manual_override }})
+
+# ───────────────────────────
+# AUTOMATION – main control loop
+# ───────────────────────────
+automation:
+  - id: zone_conditioner_multiroom
+    alias: "Zone Controller – Multi-Room (Per-Room Targets / Delta)"
+    mode: queued
+    trigger:
+      # Climate entities trigger (when temperature or current_temperature changes)
+      - trigger: state
+        entity_id:
+          - climate.master_bedroom_room
+          - climate.blue_room_room
+          - climate.gold_room_room
+          - climate.green_room_room
+          - climate.grey_room_room
+          - climate.guest_room_room
+          - climate.family_room_room
+          - climate.kitchen_room_room
+          - climate.basement_room
+      # Also trigger on temperature attribute changes
+      - trigger: state
+        entity_id:
+          - climate.master_bedroom_room
+          - climate.blue_room_room
+          - climate.gold_room_room
+          - climate.green_room_room
+          - climate.grey_room_room
+          - climate.guest_room_room
+          - climate.family_room_room
+          - climate.kitchen_room_room
+          - climate.basement_room
+        attribute: temperature
+      - trigger: state
+        entity_id:
+          - climate.master_bedroom_room
+          - climate.blue_room_room
+          - climate.gold_room_room
+          - climate.green_room_room
+          - climate.grey_room_room
+          - climate.guest_room_room
+          - climate.family_room_room
+          - climate.kitchen_room_room
+          - climate.basement_room
+        attribute: current_temperature
+      # Occupancy sensors trigger
+      - trigger: state
+        entity_id:
+          - binary_sensor.master_occupied_recent
+          - binary_sensor.blue_occupied_recent
+          - binary_sensor.gold_occupied_recent
+          - binary_sensor.green_occupied_recent
+          - binary_sensor.grey_occupied_recent
+          - binary_sensor.guest_room_occupied_recent
+          - binary_sensor.family_room_occupied_recent
+          - binary_sensor.kitchen_occupied_recent
+          - binary_sensor.basement_occupied_recent
+          - binary_sensor.piano_room_occupied_recent
+      # Thermostat state change trigger
+      - trigger: state
+        entity_id: climate.main_floor_thermostat
+      # Thermostat HVAC action attribute change trigger
+      - trigger: state
+        entity_id: climate.main_floor_thermostat
+        attribute: hvac_action
+      # Periodic check every 5 minutes
+      - trigger: time_pattern
+        minutes: "/5"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ states('climate.main_floor_thermostat') in ['heat','cool','auto','heat_cool'] }}
+      - condition: template
+        value_template: >-
+          {% set cooldown = states('input_number.automation_cooldown_sec')|int(30) %}
+          {% if cooldown == 0 %}
+            {{ true }}
+          {% else %}
+            {% set last_triggered = state_attr('automation.zone_controller_multi_room_per_room_targets_delta','last_triggered') %}
+            {% if last_triggered is none %}
+              {{ true }}
+            {% else %}
+              {% set elapsed = (now() - as_timestamp(last_triggered))|int %}
+              {{ elapsed >= cooldown }}
+            {% endif %}
+          {% endif %}
+    action:
+      - variables:
+          rooms_csv: "{{ states('sensor.rooms_to_condition') }}"
+      - if:
+          condition: template
+          value_template: "{{ is_state('input_boolean.auto_vent_control','on') }}"
+        then:
+          - action: script.set_multi_room_vents
+            data:
+              rooms_csv: "{{ rooms_csv }}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ rooms_csv not in ['','none'] }}"
+            sequence:
+              - action: script.apply_ecobee_hold_for_rooms
+                data:
+                  rooms_csv: "{{ rooms_csv }}"
+          - conditions:
+              - condition: template
+                value_template: "{{ rooms_csv in ['','none'] and is_state('input_boolean.auto_thermostat_control','on') }}"
+            sequence:
+              - action: script.apply_ecobee_hold_for_rooms
+                data:
+                  rooms_csv: "{{ rooms_csv }}"
+
+  - id: track_hvac_cycle_timing
+    alias: "Track HVAC Cycle Timing (for short-cycle protection)"
+    mode: single
+    trigger:
+      - trigger: state
+        entity_id: climate.main_floor_thermostat
+        attribute: hvac_action
+    action:
+      - variables:
+          current_action: "{{ state_attr('climate.main_floor_thermostat','hvac_action')|default('idle') }}"
+          last_action: "{{ states('input_text.hvac_last_action')|default('idle') }}"
+      - choose:
+          # HVAC just started (transitioned from idle to heating/cooling)
+          - conditions:
+              - condition: template
+                value_template: "{{ current_action in ['heating','cooling'] and last_action == 'idle' }}"
+            sequence:
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.hvac_cycle_start_timestamp
+                data:
+                  value: "{{ now().timestamp() }}"
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.hvac_last_action
+                data:
+                  value: "{{ current_action }}"
+              - if:
+                  condition: template
+                  value_template: "{{ is_state('input_boolean.debug_mode','on') }}"
+                then:
+                  - action: system_log.write
+                    data:
+                      message: >-
+                        HVAC Cycle: Started {{ current_action }} at {{ now().strftime('%H:%M:%S') }}. 
+                        Minimum runtime: {{ states('input_number.hvac_min_runtime_min')|int(10) }} minutes
+          # HVAC just stopped (transitioned from heating/cooling to idle)
+          - conditions:
+              - condition: template
+                value_template: "{{ current_action == 'idle' and last_action in ['heating','cooling'] }}"
+            sequence:
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.hvac_cycle_end_timestamp
+                data:
+                  value: "{{ now().timestamp() }}"
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.hvac_last_action
+                data:
+                  value: "{{ current_action }}"
+              - if:
+                  condition: template
+                  value_template: "{{ is_state('input_boolean.debug_mode','on') }}"
+                then:
+                  - action: system_log.write
+                    data:
+                      message: >-
+                        HVAC Cycle: Stopped {{ last_action }} at {{ now().strftime('%H:%M:%S') }}. 
+                        Minimum off time: {{ states('input_number.hvac_min_off_time_min')|int(5) }} minutes
+          # Just update last_action for other transitions
+          - conditions:
+              - condition: template
+                value_template: "{{ current_action != last_action }}"
+            sequence:
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.hvac_last_action
+                data:
+                  value: "{{ current_action }}"
+
+  - id: clear_manual_override_on_cycle_complete
+    alias: "Clear Manual Override When Cycle Completes"
+    mode: single
+    trigger:
+      - trigger: state
+        entity_id: climate.main_floor_thermostat
+        attribute: hvac_action
+        to: "idle"
+        from:
+          - "heating"
+          - "cooling"
+    condition:
+      - condition: template
+        value_template: "{{ is_state('input_boolean.auto_thermostat_control','on') }}"
+      - condition: template
+        value_template: "{{ is_state('sensor.thermostat_manual_override','on') }}"
+    action:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.last_thermostat_setpoint
+        data:
+          value: "{{ state_attr('climate.main_floor_thermostat','temperature') | float(72) }}"
+      - action: system_log.write
+        data:
+          message: "Manual override cleared after cycle completion. Resuming auto control."
+

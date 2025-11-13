@@ -1,0 +1,238 @@
+square: false
+type: grid
+title: Room Comfort Overview
+columns: 1
+cards:
+  - type: custom:mushroom-template-card
+    entity: climate.master_bedroom_room
+    primary: Master Bedroom
+    secondary: >-
+      {% set t = states('sensor.master_bedroom_temperature')|float(0) %} {% set
+      g = state_attr('climate.master_bedroom_room','temperature')|float(0) %} {%
+      set v1 =
+      state_attr('cover.master_bedroom_v1_vent','current_tilt_position')|int(0)
+      %} {% set v2 =
+      state_attr('cover.master_bedroom_v2_vent','current_tilt_position')|int(0)
+      %}       {% set vents = [v1, v2] | reject('equalto', None) | list %} {%
+      set vavg = (vents | sum / (vents|count)) | round(0) if (vents|count) > 0
+      else 0 %} {% set occ =
+      is_state('binary_sensor.master_occupied_recent','on') %} {{ t|round(1) }}°
+      • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤 Occupied' if occ
+      else 'Empty' }}
+    icon: mdi:home-thermometer
+    tap_action:
+      action: more-info
+    color: >-
+      {% set d = (states('sensor.master_bedroom_temperature')|float) -
+      (state_attr('climate.master_bedroom_room','temperature')|float) %} {{
+      'blue' if d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    features_position: bottom
+  - type: custom:mushroom-template-card
+    entity: climate.blue_room_room
+    primary: Blue Room
+    secondary: >-
+      {% set t = states('sensor.blue_room_temperature')|float(0) %} {% set g =
+      state_attr('climate.blue_room_room','temperature')|float(0) %} {% set v1 =
+      state_attr('cover.blue_v1_vent','current_tilt_position')|int(0) %} {% set
+      v2 = state_attr('cover.blue_v2_vent','current_tilt_position')|int(0) %} {%
+      set vents = [v1, v2] | reject('equalto', None) | list %} {% set vavg =
+      (vents | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {%
+      set occ = is_state('binary_sensor.blue_occupied_recent','on') %} {{
+      t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤
+      Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.blue_room_temperature')|float) -
+      (state_attr('climate.blue_room_room','temperature')|float) %} {{ 'blue' if
+      d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.gold_room_room
+    primary: Gold Room
+    secondary: >-
+      {% set t = states('sensor.gold_room_sensor_temperature')|float(0) %} {%
+      set g = state_attr('climate.gold_room_room','temperature')|float(0) %} {%
+      set v1 = state_attr('cover.gold_v1_vent','current_tilt_position')|int(0)
+      %} {% set v2 =
+      state_attr('cover.gold_v2_vent','current_tilt_position')|int(0) %} {% set
+      vents = [v1, v2] | reject('equalto', None) | list %} {% set vavg = (vents
+      | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {% set
+      occ = is_state('binary_sensor.gold_occupied_recent','on') %} {{ t|round(1)
+      }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤 Occupied' if
+      occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.gold_room_sensor_temperature')|float) -
+      (state_attr('climate.gold_room_room','temperature')|float) %} {{ 'blue' if
+      d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.green_room_room
+    primary: Green Room
+    secondary: >-
+      {% set t = states('sensor.green_room_temperature')|float(0) %} {% set g =
+      state_attr('climate.green_room_room','temperature')|float(0) %} {% set v1
+      = state_attr('cover.green_v1_vent','current_tilt_position')|int(0) %} {%
+      set v2 = state_attr('cover.green_v2_vent','current_tilt_position')|int(0)
+      %}       {% set vents = [v1, v2] | reject('equalto', None) | list %} {%
+      set vavg = (vents | sum / (vents|count)) | round(0) if (vents|count) > 0
+      else 0 %} {% set occ =
+      is_state('binary_sensor.green_occupied_recent','on') %} {{ t|round(1) }}°
+      • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤 Occupied' if occ
+      else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.green_room_temperature')|float) -
+      (state_attr('climate.green_room_room','temperature')|float) %} {{ 'blue'
+      if d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.grey_room_room
+    primary: Grey Room
+    secondary: >-
+      {% set t = states('sensor.grey_room_temperature')|float(0) %} {% set g =
+      state_attr('climate.grey_room_room','temperature')|float(0) %} {% set v1 =
+      state_attr('cover.grey_v1_vent','current_tilt_position')|int(0) %} {% set
+      v2 = state_attr('cover.grey_v2_vent','current_tilt_position')|int(0) %} {%
+      set vents = [v1, v2] | reject('equalto', None) | list %} {% set vavg =
+      (vents | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {%
+      set occ = is_state('binary_sensor.grey_occupied_recent','on') %} {{
+      t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤
+      Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.grey_room_temperature')|float) -
+      (state_attr('climate.grey_room_room','temperature')|float) %} {{ 'blue' if
+      d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.basement_room
+    primary: Basement
+    secondary: >-
+      {% set t = states('sensor.basement_temperature')|float(0) %} {% set g =
+      state_attr('climate.basement_room','temperature')|float(0) %} {% set v1 =
+      state_attr('cover.basement_v1_vent','current_tilt_position')|int(0) %} {%
+      set v2 =
+      state_attr('cover.basement_v2_vent','current_tilt_position')|int(0) %} {%
+      set v3 =
+      state_attr('cover.basement_v3_vent','current_tilt_position')|int(0) %} {%
+      set vents = [v1, v2, v3] | reject('equalto', None) | list %} {% set vavg =
+      (vents | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {%
+      set occ = is_state('binary_sensor.basement_occupied_recent','on') %} {{
+      t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤
+      Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.basement_temperature')|float) -
+      (state_attr('climate.basement_room','temperature')|float) %} {{ 'blue' if
+      d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.guest_room_room
+    primary: Guest Room
+    secondary: >-
+      {% set t = states('sensor.guest_room_temperature')|float(0) %} {% set g =
+      state_attr('climate.guest_room_room','temperature')|float(0) %} {% set v1
+      = (state_attr('cover.guest_room_v1','current_tilt_position')|int(0) if
+      states('cover.guest_room_v1') != 'unavailable' else
+      (state_attr('cover.guest_room_v1_vent','current_tilt_position')|int(0) if
+      states('cover.guest_room_v1_vent') != 'unavailable' else 0)) %} {% set v2
+      = (state_attr('cover.guest_room_v2','current_tilt_position')|int(0) if
+      states('cover.guest_room_v2') != 'unavailable' else
+      (state_attr('cover.guest_room_v2_vent','current_tilt_position')|int(0) if
+      states('cover.guest_room_v2_vent') != 'unavailable' else 0)) %} {% set
+      vents = [v1, v2] | reject('equalto', None) | list %} {% set vavg = (vents
+      | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {% set
+      occ = is_state('binary_sensor.guest_room_occupied_recent','on') %} {{
+      t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤
+      Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.guest_room_temperature')|float) -
+      (state_attr('climate.guest_room_room','temperature')|float) %} {{ 'blue'
+      if d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.family_room_room
+    primary: Family Room
+    secondary: >-
+      {% set s = states('sensor.family_room_temp_degf') %} {% set t = (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.family_room_room','current_temperature')|float(0)) %} {% set g =
+      state_attr('climate.family_room_room','temperature')|float(0) %} {% set v1
+      = (state_attr('cover.family_room_v1','current_tilt_position')|int(0) if
+      states('cover.family_room_v1') != 'unavailable' else
+      (state_attr('cover.family_room_v1_vent','current_tilt_position')|int(0) if
+      states('cover.family_room_v1_vent') != 'unavailable' else 0)) %} {% set v2
+      = (state_attr('cover.family_room_v2','current_tilt_position')|int(0) if
+      states('cover.family_room_v2') != 'unavailable' else
+      (state_attr('cover.family_room_v2_vent','current_tilt_position')|int(0) if
+      states('cover.family_room_v2_vent') != 'unavailable' else 0)) %} {% set
+      vents = [v1, v2] | reject('equalto', None) | list %} {% set vavg = (vents
+      | sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {% set
+      occ = is_state('binary_sensor.family_room_occupied_recent','on') %} {{
+      t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤
+      Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set s = states('sensor.family_room_temp_degf') %} {% set t = (s|float) if s not in ['unknown','unavailable','None','none'] else (state_attr('climate.family_room_room','current_temperature')|float(0)) %} {% set d = (t|float) -
+      (state_attr('climate.family_room_room','temperature')|float) %} {{ 'blue'
+      if d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.kitchen_room_room
+    primary: Kitchen
+    secondary: >-
+      {% set t = states('sensor.kitchen_temperature')|float(0) %} {% set g =
+      state_attr('climate.kitchen_room_room','temperature')|float(0) %} {% set
+      v1 = (state_attr('cover.kitchen_v1','current_tilt_position')|int(0) if
+      states('cover.kitchen_v1') != 'unavailable' else
+      (state_attr('cover.kitchen_v1_vent','current_tilt_position')|int(0) if
+      states('cover.kitchen_v1_vent') != 'unavailable' else 0)) %} {% set v2 =
+      (state_attr('cover.kitchen_v2','current_tilt_position')|int(0) if
+      states('cover.kitchen_v2') != 'unavailable' else
+      (state_attr('cover.kitchen_v2_vent','current_tilt_position')|int(0) if
+      states('cover.kitchen_v2_vent') != 'unavailable' else 0)) %} {% set vents
+      = [v1, v2] | reject('equalto', None) | list %} {% set vavg = (vents | sum
+      / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {% set occ =
+      is_state('binary_sensor.kitchen_occupied_recent','on') %} {{ t|round(1)
+      }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}% • {{ '👤 Occupied' if
+      occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (states('sensor.kitchen_temperature')|float) -
+      (state_attr('climate.kitchen_room_room','temperature')|float) %} {{ 'blue'
+      if d < -0.5 else 'red' if d > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: climate.piano_room_room
+    primary: Piano Room
+    secondary: >-
+      {% set t = (states('sensor.piano_room_temperature')|float(0) if
+      states('sensor.piano_room_temperature') != 'unavailable' else
+      (state_attr('climate.piano_room_room','current_temperature')|float(0) if
+      states('climate.piano_room_room') != 'unavailable' else 0)) %} {% set g =
+      (state_attr('climate.piano_room_room','temperature')|float(0) if
+      states('climate.piano_room_room') != 'unavailable' else 72) %} {% set v1 =
+      (state_attr('cover.piano_room_v1','current_tilt_position')|int(0) if
+      states('cover.piano_room_v1') != 'unavailable' else
+      (state_attr('cover.piano_room_v1_vent','current_tilt_position')|int(0) if
+      states('cover.piano_room_v1_vent') != 'unavailable' else 0)) %} {% set
+      vents = [v1] | reject('equalto', None) | list %} {% set vavg = (vents |
+      sum / (vents|count)) | round(0) if (vents|count) > 0 else 0 %} {% set occ
+      = (is_state('binary_sensor.piano_room_occupied_recent','on') if
+      states('binary_sensor.piano_room_occupied_recent') != 'unavailable' else
+      false) %} {{ t|round(1) }}° • Target {{ g|round(0) }}° • Vent {{ vavg }}%
+      • {{ '👤 Occupied' if occ else 'Empty' }}
+    icon: mdi:home-thermometer
+    icon_color: >-
+      {% set d = (t|float) - (g|float) %} {{ 'blue' if d < -0.5 else 'red' if d
+      > 0.5 else 'green' }}
+    tap_action:
+      action: more-info
