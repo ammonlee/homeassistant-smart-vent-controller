@@ -1,6 +1,8 @@
-# Smart Vent Controller Integration
+# Smart Vent Controller
 
 A comprehensive Home Assistant custom integration for intelligent multi-room HVAC zone control with vent management, occupancy awareness, and cycle protection.
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 ## Features
 
@@ -16,12 +18,23 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 
 ## Installation
 
-### Method 1: Manual Installation
+### Method 1: HACS (Recommended)
+
+1. Open HACS → Integrations
+2. Click the three dots (⋮) → Custom repositories
+3. Add repository: `https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller`
+4. Category: Integration
+5. Click Install
+6. Restart Home Assistant
+7. Go to Settings → Devices & Services → Add Integration → Smart Vent Controller
+
+### Method 2: Manual Installation
 
 1. Copy the `custom_components/smart_vent_controller` folder to your Home Assistant `custom_components` directory:
    ```bash
-   cp -r smart_vent_controller_integration/custom_components/smart_vent_controller \
-     ~/.homeassistant/custom_components/
+   cd /config/custom_components
+   git clone https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller.git
+   mv homeassistant-smart-vent-controller/custom_components/smart_vent_controller smart_vent_controller
    ```
 
 2. Restart Home Assistant
@@ -29,10 +42,6 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 3. Go to **Settings** → **Devices & Services** → **Add Integration**
 
 4. Search for **"Smart Vent Controller"** and follow the setup wizard
-
-### Method 2: HACS (Future)
-
-Once submitted to HACS, you'll be able to install via the HACS UI.
 
 ## Configuration
 
@@ -50,202 +59,62 @@ The integration uses a multi-step configuration wizard:
    - Priority (0-10, default 5)
 3. **Configure Settings**: Adjust thresholds and protection settings
 
-### Required Helper Entities
+### Options Flow
 
-The integration requires several helper entities. See `HELPER_ENTITIES.md` for the complete list and YAML configuration.
+After installation, you can update settings without reconfiguring rooms:
 
-**Quick Setup** (add to `configuration.yaml`):
-
-```yaml
-input_number:
-  min_other_room_open_pct:
-    name: "Minimum Other Room Open %"
-    initial: 20
-    min: 0
-    max: 100
-    step: 1
-  
-  # ... (see HELPER_ENTITIES.md for complete list)
-
-input_boolean:
-  require_occupancy:
-    name: "Condition Only When Occupied"
-    initial: true
-  
-  auto_vent_control:
-    name: "Auto Vent Control"
-    initial: true
-  
-  auto_thermostat_control:
-    name: "Auto Thermostat Control"
-    initial: true
-  
-  # ... (see HELPER_ENTITIES.md for complete list)
-```
-
-**Note**: The integration's Number and Switch platforms will create most configuration entities automatically. You may only need to create the internal tracking entities manually.
+1. Go to **Settings** → **Devices & Services** → **Smart Vent Controller** → **Options**
+2. Adjust any settings
+3. Changes take effect immediately
 
 ## Usage
 
 ### Services
 
-The integration provides two main services:
+The integration provides custom services:
 
-#### `smart_vent_controller.set_multi_room_vents`
+- `smart_vent_controller.set_multi_room_vents`: Adjust vent positions for multiple rooms
+- `smart_vent_controller.apply_ecobee_hold_for_rooms`: Set thermostat for multiple rooms
+- `smart_vent_controller.set_room_priority`: Change room priority
+- `smart_vent_controller.reset_to_defaults`: Reset all settings to defaults
 
-Adjusts vent positions for multiple rooms.
+### Dashboard Cards
 
-**Service Data**:
-- `rooms_csv` (string, optional): Comma-separated list of room keys to fully open (e.g., `"master,blue"`)
+Example dashboard cards are available in the `dashboard/` folder. See `dashboard/README.md` for details.
 
-**Example**:
-```yaml
-service: smart_vent_controller.set_multi_room_vents
-data:
-  rooms_csv: "master,blue,guest"
-```
+## Documentation
 
-#### `smart_vent_controller.apply_ecobee_hold_for_rooms`
+- **[Installation Guide](INSTALLATION_GUIDE.md)** - Detailed installation instructions
+- **[Quick Install](QUICK_INSTALL.md)** - Quick reference guide
+- **[UI Configuration Guide](UI_CONFIGURATION_GUIDE.md)** - Step-by-step UI setup
+- **[Feature Parity](FEATURE_PARITY.md)** - Comparison with YAML script
+- **[Testing Guide](TESTING_GUIDE.md)** - Testing and validation
+- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Complete Features Summary](COMPLETE_FEATURES_SUMMARY.md)** - All features documented
 
-Adjusts thermostat setpoint based on selected rooms' targets.
+## Requirements
 
-**Service Data**:
-- `rooms_csv` (string, optional): Comma-separated list of room keys
-
-**Example**:
-```yaml
-service: smart_vent_controller.apply_ecobee_hold_for_rooms
-data:
-  rooms_csv: "master,blue"
-```
-
-### Automations
-
-The integration automatically sets up three automations:
-
-1. **Zone Conditioner Multi-Room**: Main control loop that triggers on:
-   - Room temperature changes
-   - Occupancy changes
-   - Thermostat state changes
-   - Periodic (every 5 minutes)
-
-2. **Track HVAC Cycle Timing**: Tracks HVAC cycle start/end times for cycle protection
-
-3. **Clear Manual Override**: Clears manual override when HVAC cycle completes
-
-### Sensors
-
-The integration creates sensors for each room:
-
-- `sensor.{room}_temp_degf`: Current room temperature
-- `sensor.{room}_target_degf`: Room target temperature
-- `sensor.{room}_delta_degf`: Temperature delta (target - current)
-- `binary_sensor.{room}_occupied_recent`: Recent occupancy (with dynamic linger)
-- `sensor.rooms_to_condition`: Comma-separated list of rooms needing conditioning
-- `binary_sensor.thermostat_manual_override`: Manual override detection
-- `sensor.hvac_cycle_protection_status`: Cycle protection status
-- `sensor.smart_vent_controller_statistics`: System statistics
-
-### Configuration Options
-
-Access via **Settings** → **Devices & Services** → **Smart Vent Controller** → **Options**:
-
-- **Minimum Other Room Open %**: Minimum vent position for non-conditioned rooms (default: 20%)
-- **Closed Threshold %**: Position below which a vent is considered closed (default: 10%)
-- **Relief Open %**: Position for relief vents (default: 60%)
-- **Max Relief Rooms**: Maximum number of rooms to use for relief (default: 3)
-- **Room Hysteresis (°F)**: Temperature difference threshold (default: 1.0°F)
-- **Occupancy Linger (day, min)**: How long to consider room occupied during day (default: 30 min)
-- **Occupancy Linger (night, min)**: How long to consider room occupied at night (default: 60 min)
-- **Heat Boost (°F)**: Temperature boost for heating cycles (default: 1.0°F)
-- **HVAC Minimum Runtime (min)**: Minimum runtime before allowing setpoint change (default: 10 min)
-- **HVAC Minimum Off Time (min)**: Minimum off time before allowing setpoint change (default: 5 min)
-- **Default Thermostat Temp (°F)**: Default temperature when no rooms need conditioning (default: 72°F)
-- **Automation Cooldown (sec)**: Minimum time between automation triggers (default: 30 sec)
-
-### Switches
-
-- **Condition Only When Occupied**: Only condition rooms when recently occupied
-- **Heat Boost Enabled**: Enable heat boost feature
-- **Auto Thermostat Control**: Enable automatic thermostat control
-- **Auto Vent Control**: Enable automatic vent control
-- **Debug Mode**: Enable enhanced logging
-
-## How It Works
-
-1. **Room Selection**: The integration continuously monitors room temperatures and determines which rooms need conditioning based on:
-   - Temperature delta (target - current)
-   - Hysteresis threshold
-   - Occupancy (if required)
-   - HVAC mode (heat/cool/auto)
-
-2. **Vent Control**: 
-   - Opens selected rooms' vents to 100%
-   - Sets other rooms to minimum
-   - Enforces ≤1/3 closed rule by opening relief vents
-   - Selects relief vents based on temperature, occupancy, and priority
-
-3. **Thermostat Control**:
-   - Calculates setpoint based on selected rooms' targets
-   - Applies heat boost for heating cycles
-   - Respects cycle protection (minimum runtime/off time)
-   - Detects and respects manual overrides
-
-4. **Cycle Protection**:
-   - Tracks HVAC cycle start/end times
-   - Prevents setpoint changes during minimum runtime
-   - Prevents setpoint changes during minimum off time
-
-## Troubleshooting
-
-### Integration Not Appearing
-
-- Verify `custom_components/smart_vent_controller` exists
-- Check `manifest.json` is valid
-- Restart Home Assistant
-- Check logs for errors
-
-### Entities Not Creating
-
-- Verify config entry was created successfully
-- Check coordinator is running
-- Enable debug logging:
-  ```yaml
-  logger:
-    default: info
-    logs:
-      custom_components.smart_vent_controller: debug
-  ```
-
-### Scripts Not Working
-
-- Verify helper entities exist (see `HELPER_ENTITIES.md`)
-- Check service calls in Developer Tools
-- Enable debug mode switch
-- Check Home Assistant logs
-
-### Vents Not Adjusting
-
-- Verify `auto_vent_control` switch is on
-- Check vent entities are valid
-- Verify vent entities are in room configuration
-- Check for errors in logs
-
-### Thermostat Not Adjusting
-
-- Verify `auto_thermostat_control` switch is on
-- Check manual override detection
-- Verify cycle protection settings
-- Check thermostat entity is correct
-
-## Development
-
-See `QUICK_START.md` for development setup and testing instructions.
-
-## License
-
-[Your License Here]
+- Home Assistant 2024.1 or later
+- HVAC system with:
+  - Main thermostat (climate entity)
+  - Room climate entities (e.g., Flair room controllers)
+  - Vent entities (cover entities, e.g., Flair vents)
+  - Optional: Temperature sensors, occupancy sensors
 
 ## Support
 
-[Your Support Information Here]
+- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller/issues)
+- **Documentation**: See the `docs/` folder
+- **Logs**: Enable debug mode in integration options for detailed logging
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+[Add your license here]
+
+## Credits
+
+Developed for intelligent multi-room HVAC control with Flair vents and Home Assistant.
