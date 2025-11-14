@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Zone Controller Setup",
+        "title": "Smart Vent Controller Setup",
         "description": "Select your main HVAC thermostat{migration_note}",
         "data": {
           "main_thermostat": "Main Thermostat",
@@ -59,14 +59,14 @@
       "no_rooms": "At least one room must be configured"
     },
     "abort": {
-      "already_configured": "Zone Controller is already configured"
+      "already_configured": "Smart Vent Controller is already configured"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Zone Controller Options",
-        "description": "Adjust Zone Controller settings. Changes take effect immediately.",
+        "title": "Smart Vent Controller Options",
+        "description": "Adjust Smart Vent Controller settings. Changes take effect immediately.",
         "data": {
           "min_other_room_open_pct": "Minimum Other Room Open %",
           "closed_threshold_pct": "Closed Threshold %",

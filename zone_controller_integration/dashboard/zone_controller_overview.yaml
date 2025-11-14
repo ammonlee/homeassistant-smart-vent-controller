@@ -1,4 +1,4 @@
-# Zone Controller - Overview Dashboard Card
+# Smart Vent Controller - Overview Dashboard Card
 # Add this card to your Lovelace dashboard
 
 type: vertical-stack
@@ -6,7 +6,7 @@ cards:
   # Header Card
   - type: markdown
     content: |
-      # 🏠 Zone Controller
+      # 🏠 Smart Vent Controller
       **Status:** {{ states('sensor.rooms_to_condition') }}
       
       **Thermostat:** {{ states('climate.main_floor_thermostat') }} | 
@@ -50,7 +50,7 @@ cards:
     title: System Statistics
     show_header_toggle: false
     entities:
-      - entity: sensor.zone_controller_statistics
+      - entity: sensor.smart_vent_controller_statistics
         name: Statistics
       - entity: sensor.hvac_cycle_protection_status
         name: Cycle Protection
@@ -65,6 +65,6 @@ cards:
         name: Reset to Defaults
         tap_action:
           action: call-service
-          service: zone_controller.reset_to_defaults
+          service: smart_vent_controller.reset_to_defaults
         icon: mdi:restore
 

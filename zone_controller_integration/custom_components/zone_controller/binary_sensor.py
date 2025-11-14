@@ -1,4 +1,4 @@
-"""Binary sensor platform for Zone Controller."""
+"""Binary sensor platform for Smart Vent Controller."""
 
 from datetime import datetime, time
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
-from .coordinator import ZoneControllerCoordinator
+from .coordinator import SmartVentControllerCoordinator
 from .device import get_room_device_id
 from homeassistant.helpers.device_registry import DeviceInfo
 
@@ -17,8 +17,8 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Zone Controller binary sensors."""
-    coordinator: ZoneControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up Smart Vent Controller binary sensors."""
+    coordinator: SmartVentControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
     rooms = entry.data.get("rooms", [])
     
     entities = []
@@ -67,7 +67,7 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
         return DeviceInfo(
             identifiers={get_room_device_id(self._entry, self._room_key)},
             name=f"{self._room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
         )
     

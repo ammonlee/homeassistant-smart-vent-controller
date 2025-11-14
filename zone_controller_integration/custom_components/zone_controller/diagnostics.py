@@ -1,4 +1,4 @@
-"""Diagnostics support for Zone Controller."""
+"""Diagnostics support for Smart Vent Controller."""
 
 from typing import Any
 from datetime import datetime
@@ -183,7 +183,7 @@ async def async_get_config_entry_diagnostics(
         manual_override = manual_override_entity.state == "on"
     
     # Get statistics
-    stats_entity = hass.states.get("sensor.zone_controller_stats")
+    stats_entity = hass.states.get("sensor.smart_vent_controller_stats")
     statistics = None
     if stats_entity:
         statistics = stats_entity.attributes

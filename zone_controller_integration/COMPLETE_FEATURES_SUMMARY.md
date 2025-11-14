@@ -1,8 +1,8 @@
-# Zone Controller Integration - Complete Features Summary
+# Smart Vent Controller Integration - Complete Features Summary
 
 ## Overview
 
-The Zone Controller integration is a comprehensive Home Assistant custom integration that provides intelligent multi-room HVAC zone control with vent management, thermostat automation, and occupancy-aware conditioning.
+The Smart Vent Controller integration is a comprehensive Home Assistant custom integration that provides intelligent multi-room HVAC zone control with vent management, thermostat automation, and occupancy-aware conditioning.
 
 ## ✅ Core Features (100% Complete)
 
@@ -200,9 +200,9 @@ The Zone Controller integration is a comprehensive Home Assistant custom integra
 ## 📁 File Structure
 
 ```
-zone_controller_integration/
+smart_vent_controller_integration/
 ├── custom_components/
-│   └── zone_controller/
+│   └── smart_vent_controller/
 │       ├── __init__.py              # Main integration entry
 │       ├── manifest.json            # Integration metadata
 │       ├── config_flow.py           # UI configuration wizard
@@ -297,7 +297,7 @@ zone_controller_integration/
 
 ## 🚀 Ready for Production
 
-The Zone Controller integration is **production-ready** with:
+The Smart Vent Controller integration is **production-ready** with:
 - ✅ Complete feature set
 - ✅ Robust error handling
 - ✅ Performance optimizations

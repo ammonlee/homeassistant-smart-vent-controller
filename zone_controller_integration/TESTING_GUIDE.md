@@ -1,8 +1,8 @@
-# Testing Guide for Zone Controller Integration
+# Testing Guide for Smart Vent Controller Integration
 
 ## Overview
 
-This guide explains how to run and write tests for the Zone Controller integration.
+This guide explains how to run and write tests for the Smart Vent Controller integration.
 
 ## Test Structure
 
@@ -21,7 +21,7 @@ tests/
 ### Install Test Dependencies
 
 ```bash
-cd zone_controller_integration
+cd smart_vent_controller_integration
 pip install -r requirements-test.txt
 ```
 
@@ -61,7 +61,7 @@ pytest -v
 ### Run with Coverage
 
 ```bash
-pytest --cov=custom_components.zone_controller --cov-report=html
+pytest --cov=custom_components.smart_vent_controller --cov-report=html
 ```
 
 ## Test Fixtures

@@ -1,4 +1,4 @@
-# Zone Controller - Individual Room Card Template
+# Smart Vent Controller - Individual Room Card Template
 # Use this template for each room, replacing {room} with the room key (e.g., master, blue, gold)
 
 type: custom:mushroom-entity-card

@@ -1,4 +1,4 @@
-"""Config flow for Zone Controller integration."""
+"""Config flow for Smart Vent Controller integration."""
 
 from typing import Any
 import voluptuous as vol
@@ -34,8 +34,8 @@ from .const import (
 )
 
 
-class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Zone Controller."""
+class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Smart Vent Controller."""
 
     VERSION = 1
 
@@ -78,7 +78,7 @@ class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         # Create entry
         return self.async_create_entry(
-            title=f"Zone Controller ({main_thermostat})",
+            title=f"Smart Vent Controller ({main_thermostat})",
             data=self.data,
             options=options,
         )
@@ -257,7 +257,7 @@ class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data.update(user_input)  # Keep in data for initial setup
             
             return self.async_create_entry(
-                title=f"Zone Controller ({self.data[CONF_MAIN_THERMOSTAT]})",
+                title=f"Smart Vent Controller ({self.data[CONF_MAIN_THERMOSTAT]})",
                 data=self.data,
                 options=options,
             )
@@ -340,11 +340,11 @@ class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
         """Return options flow handler."""
-        return ZoneControllerOptionsFlowHandler(config_entry)
+        return SmartVentControllerOptionsFlowHandler(config_entry)
 
 
 class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Zone Controller."""
+    """Handle options flow for Smart Vent Controller."""
     
     def __init__(self, config_entry: config_entries.ConfigEntry):
         """Initialize options flow."""

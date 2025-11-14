@@ -1,4 +1,4 @@
-# Zone Controller Integration - Quick Start Guide
+# Smart Vent Controller Integration - Quick Start Guide
 
 ## Installation for Development
 
@@ -6,14 +6,14 @@
 
 ```bash
 # Copy the integration folder to your Home Assistant custom_components directory
-cp -r zone_controller_integration/custom_components/zone_controller \
+cp -r smart_vent_controller_integration/custom_components/smart_vent_controller \
   ~/.homeassistant/custom_components/
 ```
 
 Or if using Docker/container:
 ```bash
 # Mount the directory or copy into the container
-docker cp zone_controller_integration/custom_components/zone_controller \
+docker cp smart_vent_controller_integration/custom_components/smart_vent_controller \
   homeassistant:/config/custom_components/
 ```
 
@@ -25,7 +25,7 @@ Restart Home Assistant to load the new integration.
 
 1. Go to **Settings** → **Devices & Services**
 2. Click **Add Integration**
-3. Search for **"Zone Controller"**
+3. Search for **"Smart Vent Controller"**
 4. Follow the setup wizard
 
 ## Testing the Integration
@@ -61,7 +61,7 @@ Enable debug logging in `configuration.yaml`:
 logger:
   default: info
   logs:
-    custom_components.zone_controller: debug
+    custom_components.smart_vent_controller: debug
 ```
 
 ## Current Status
@@ -136,7 +136,7 @@ This allows you to:
 ## Troubleshooting
 
 ### Integration Not Appearing
-- Check `custom_components/zone_controller/` exists
+- Check `custom_components/smart_vent_controller/` exists
 - Verify `manifest.json` is valid
 - Check Home Assistant logs for errors
 - Restart Home Assistant

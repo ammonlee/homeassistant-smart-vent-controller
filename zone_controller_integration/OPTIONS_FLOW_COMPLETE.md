@@ -2,13 +2,13 @@
 
 ## Status: **FULLY IMPLEMENTED**
 
-The Options Flow for Zone Controller is complete and ready to use!
+The Options Flow for Smart Vent Controller is complete and ready to use!
 
 ## What's Implemented
 
 ### ✅ Options Flow Handler
 - **Location:** `config_flow.py` → `ZoneControllerOptionsFlowHandler`
-- **Access:** Settings → Devices & Services → Zone Controller → Options
+- **Access:** Settings → Devices & Services → Smart Vent Controller → Options
 - **Functionality:** Update all settings without reconfiguring rooms
 
 ### ✅ All Settings Available
@@ -68,8 +68,8 @@ The options flow includes all 16 configuration settings:
    Settings → Devices & Services
    ```
 
-2. **Find Zone Controller:**
-   - Look for "Zone Controller" in integrations list
+2. **Find Smart Vent Controller:**
+   - Look for "Smart Vent Controller" in integrations list
    - Click on it
 
 3. **Open Options:**
@@ -99,7 +99,7 @@ The options flow includes all 16 configuration settings:
 
 ```python
 class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Zone Controller."""
+    """Handle options flow for Smart Vent Controller."""
     
     async def async_step_init(self, user_input=None):
         """Manage the options."""

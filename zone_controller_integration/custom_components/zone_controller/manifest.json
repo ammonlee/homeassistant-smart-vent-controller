@@ -1,9 +1,9 @@
 {
-  "domain": "zone_controller",
-  "name": "Zone Controller",
+  "domain": "smart_vent_controller",
+  "name": "Smart Vent Controller",
   "version": "1.0.0",
-  "documentation": "https://github.com/yourusername/homeassistant-zone-controller",
-  "issue_tracker": "https://github.com/yourusername/homeassistant-zone-controller/issues",
+  "documentation": "https://github.com/yourusername/homeassistant-smart-vent-controller",
+  "issue_tracker": "https://github.com/yourusername/homeassistant-smart-vent-controller/issues",
   "codeowners": ["@yourusername"],
   "requirements": [],
   "config_flow": true,

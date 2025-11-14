@@ -6,7 +6,7 @@ This document outlines the implementation of a migration tool to help users tran
 
 ## Current State
 
-- **YAML Configuration:** Users have `vent_zone_controller.yaml` with room definitions
+- **YAML Configuration:** Users have `vent_smart_vent_controller.yaml` with room definitions
 - **Integration:** New UI-based integration with config flow
 - **Gap:** Manual migration required, which can be error-prone
 
@@ -15,7 +15,7 @@ This document outlines the implementation of a migration tool to help users tran
 ### Detection Phase
 
 1. **Scan for YAML Configuration:**
-   - Check for `vent_zone_controller.yaml` in packages directory
+   - Check for `vent_smart_vent_controller.yaml` in packages directory
    - Parse YAML to extract configuration
    - Identify rooms, thermostat, settings
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines remaining optional enhancements and future improvements for the Zone Controller integration.
+This document outlines remaining optional enhancements and future improvements for the Smart Vent Controller integration.
 
 ## 🚧 Remaining High-Priority Items
 
@@ -12,7 +12,7 @@ This document outlines remaining optional enhancements and future improvements f
 **Estimated Effort:** 2-3 hours
 
 **Description:**
-- Detect existing YAML configuration (`vent_zone_controller.yaml`)
+- Detect existing YAML configuration (`vent_smart_vent_controller.yaml`)
 - Parse YAML to extract rooms, thermostat, settings
 - Import into integration via config flow
 - Guided wizard for migration

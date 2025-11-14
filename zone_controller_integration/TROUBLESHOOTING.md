@@ -4,7 +4,7 @@
 
 ### Issue: Integration Not Appearing in Search
 
-If "Zone Controller" doesn't show up when searching for integrations:
+If "Smart Vent Controller" doesn't show up when searching for integrations:
 
 #### 1. Check File Location
 
@@ -12,7 +12,7 @@ If "Zone Controller" doesn't show up when searching for integrations:
 
 ```bash
 # On your Home Assistant server
-ls -la /config/custom_components/zone_controller/
+ls -la /config/custom_components/smart_vent_controller/
 ```
 
 **Should see:**
@@ -26,23 +26,23 @@ coordinator.py
 ```
 
 **Common mistakes:**
-- ❌ `/config/custom_components/zone_controller_integration/zone_controller/` (wrong - nested too deep)
-- ❌ `/config/custom_components/zone_controller/custom_components/zone_controller/` (wrong - double nested)
-- ✅ `/config/custom_components/zone_controller/` (correct)
+- ❌ `/config/custom_components/smart_vent_controller_integration/smart_vent_controller/` (wrong - nested too deep)
+- ❌ `/config/custom_components/smart_vent_controller/custom_components/smart_vent_controller/` (wrong - double nested)
+- ✅ `/config/custom_components/smart_vent_controller/` (correct)
 
 #### 2. Verify manifest.json
 
 **Check that manifest.json exists and is valid:**
 
 ```bash
-cat /config/custom_components/zone_controller/manifest.json
+cat /config/custom_components/smart_vent_controller/manifest.json
 ```
 
 **Should contain:**
 ```json
 {
-  "domain": "zone_controller",
-  "name": "Zone Controller",
+  "domain": "smart_vent_controller",
+  "name": "Smart Vent Controller",
   "codeowners": ["@yourusername"],
   "config_flow": true,
   "dependencies": [],
@@ -59,7 +59,7 @@ cat /config/custom_components/zone_controller/manifest.json
 **Look for errors in the logs:**
 
 1. Go to **Settings** → **System** → **Logs**
-2. Look for errors related to `zone_controller` or `custom_components`
+2. Look for errors related to `smart_vent_controller` or `custom_components`
 3. Common errors:
    - `ModuleNotFoundError` - Missing files
    - `SyntaxError` - Python syntax error
@@ -67,7 +67,7 @@ cat /config/custom_components/zone_controller/manifest.json
 
 **Or check via SSH:**
 ```bash
-tail -f /config/home-assistant.log | grep -i zone_controller
+tail -f /config/home-assistant.log | grep -i smart_vent_controller
 ```
 
 #### 4. Verify Python Files Are Present
@@ -75,7 +75,7 @@ tail -f /config/home-assistant.log | grep -i zone_controller
 **Check that all required Python files exist:**
 
 ```bash
-ls -la /config/custom_components/zone_controller/*.py
+ls -la /config/custom_components/smart_vent_controller/*.py
 ```
 
 **Required files:**
@@ -114,8 +114,8 @@ ha core check
 
 1. Go to **Settings** → **Devices & Services**
 2. Click **Add Integration** (bottom right)
-3. Scroll down to see if "Zone Controller" appears in the list
-4. If not, try typing the domain name: `zone_controller`
+3. Scroll down to see if "Smart Vent Controller" appears in the list
+4. If not, try typing the domain name: `smart_vent_controller`
 
 #### 7. Verify Integration Type
 
@@ -132,9 +132,9 @@ The integration should appear as a "hub" type integration. If it's not showing:
 **Ensure files are readable:**
 
 ```bash
-chmod -R 644 /config/custom_components/zone_controller/*.py
-chmod -R 644 /config/custom_components/zone_controller/*.json
-chmod 755 /config/custom_components/zone_controller/
+chmod -R 644 /config/custom_components/smart_vent_controller/*.py
+chmod -R 644 /config/custom_components/smart_vent_controller/*.json
+chmod 755 /config/custom_components/smart_vent_controller/
 ```
 
 #### 9. Validate Python Syntax
@@ -142,8 +142,8 @@ chmod 755 /config/custom_components/zone_controller/
 **Check for syntax errors:**
 
 ```bash
-python3 -m py_compile /config/custom_components/zone_controller/__init__.py
-python3 -m py_compile /config/custom_components/zone_controller/config_flow.py
+python3 -m py_compile /config/custom_components/smart_vent_controller/__init__.py
+python3 -m py_compile /config/custom_components/smart_vent_controller/config_flow.py
 ```
 
 **If errors, fix them before restarting.**
@@ -163,7 +163,7 @@ python3 -m py_compile /config/custom_components/zone_controller/config_flow.py
 ```bash
 # On Home Assistant server
 cd /config
-ls -la custom_components/zone_controller/ | head -20
+ls -la custom_components/smart_vent_controller/ | head -20
 ```
 
 **Expected output:**
@@ -180,13 +180,13 @@ drwxr-xr-x 1 root root  4096 Jan 1 12:00 ..
 ### Step 2: Check Logs
 
 ```bash
-# Check for zone_controller in logs
-grep -i "zone_controller" /config/home-assistant.log | tail -20
+# Check for smart_vent_controller in logs
+grep -i "smart_vent_controller" /config/home-assistant.log | tail -20
 ```
 
 **Look for:**
-- `Successfully set up zone_controller` (good)
-- `Error setting up zone_controller` (bad - check error message)
+- `Successfully set up smart_vent_controller` (good)
+- `Error setting up smart_vent_controller` (bad - check error message)
 - No mention (integration not loading)
 
 ### Step 3: Test Import
@@ -196,7 +196,7 @@ grep -i "zone_controller" /config/home-assistant.log | tail -20
 ```bash
 # On Home Assistant server
 cd /config
-python3 -c "import sys; sys.path.insert(0, 'custom_components'); import zone_controller; print('Import successful')"
+python3 -c "import sys; sys.path.insert(0, 'custom_components'); import smart_vent_controller; print('Import successful')"
 ```
 
 **If error, fix the Python issue first.**
@@ -206,7 +206,7 @@ python3 -c "import sys; sys.path.insert(0, 'custom_components'); import zone_con
 **Verify config_flow.py is valid:**
 
 ```bash
-python3 -m py_compile /config/custom_components/zone_controller/config_flow.py
+python3 -m py_compile /config/custom_components/smart_vent_controller/config_flow.py
 ```
 
 **No output = success, errors = fix them**
@@ -217,16 +217,16 @@ If the integration still doesn't appear:
 
 1. **Check Developer Tools:**
    - Go to **Developer Tools** → **Services**
-   - Look for `zone_controller.*` services
+   - Look for `smart_vent_controller.*` services
    - If services exist, integration is loaded but not discoverable
 
 2. **Try Direct URL:**
-   - Navigate to: `http://your-ha-ip:8123/config/integrations/config_flow?domain=zone_controller`
+   - Navigate to: `http://your-ha-ip:8123/config/integrations/config_flow?domain=smart_vent_controller`
    - This should open the config flow directly
 
 3. **Check Integration Registry:**
    - Go to **Developer Tools** → **States**
-   - Search for `zone_controller`
+   - Search for `smart_vent_controller`
    - If entities exist, integration is working
 
 ## Still Not Working?
@@ -244,14 +244,14 @@ If none of the above works:
    logger:
      default: info
      logs:
-       custom_components.zone_controller: debug
+       custom_components.smart_vent_controller: debug
    ```
    Then restart and check logs again.
 
 3. **Verify All Files Copied:**
    ```bash
    # Count files
-   find /config/custom_components/zone_controller -type f | wc -l
+   find /config/custom_components/smart_vent_controller -type f | wc -l
    # Should be ~20+ files
    ```
 
@@ -267,7 +267,7 @@ If none of the above works:
 
 ## Quick Checklist
 
-- [ ] Files in `/config/custom_components/zone_controller/`
+- [ ] Files in `/config/custom_components/smart_vent_controller/`
 - [ ] `__init__.py` exists and is valid
 - [ ] `manifest.json` exists and is valid JSON
 - [ ] All Python files present
@@ -282,7 +282,7 @@ If none of the above works:
 If still stuck, provide:
 1. Home Assistant version
 2. Full error from logs
-3. Output of `ls -la /config/custom_components/zone_controller/`
+3. Output of `ls -la /config/custom_components/smart_vent_controller/`
 4. Contents of `manifest.json`
 5. Any Python import errors
 

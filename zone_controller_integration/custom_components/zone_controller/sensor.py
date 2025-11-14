@@ -1,4 +1,4 @@
-"""Sensor platform for Zone Controller."""
+"""Sensor platform for Smart Vent Controller."""
 
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
@@ -8,7 +8,7 @@ from homeassistant.helpers.template import Template
 from homeassistant.const import UnitOfTemperature
 
 from .const import DOMAIN
-from .coordinator import ZoneControllerCoordinator
+from .coordinator import SmartVentControllerCoordinator
 
 
 async def async_setup_entry(
@@ -16,8 +16,8 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Zone Controller sensors."""
-    coordinator: ZoneControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up Smart Vent Controller sensors."""
+    coordinator: SmartVentControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
     rooms = entry.data.get("rooms", [])
     
     entities = []
@@ -83,7 +83,7 @@ class RoomTemperatureSensor(SensorEntity):
         return DeviceInfo(
             identifiers={get_room_device_id(self._entry, self._room_key)},
             name=f"{self._room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
         )
     
@@ -134,7 +134,7 @@ class RoomTargetSensor(SensorEntity):
         return DeviceInfo(
             identifiers={get_room_device_id(self._entry, self._room_key)},
             name=f"{self._room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
         )
     
@@ -182,7 +182,7 @@ class RoomDeltaSensor(SensorEntity):
         return DeviceInfo(
             identifiers={get_room_device_id(self._entry, self._room_key)},
             name=f"{self._room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
         )
     
@@ -427,7 +427,7 @@ class HVACCycleEndTimeSensor(SensorEntity):
 
 
 class ZoneControllerStatsSensor(SensorEntity):
-    """Sensor for zone controller statistics."""
+    """Sensor for Smart Vent Controller statistics."""
     
     _attr_icon = "mdi:chart-line"
     
@@ -435,8 +435,8 @@ class ZoneControllerStatsSensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self._entry = entry
-        self._attr_unique_id = "zone_controller_stats"
-        self._attr_name = "Zone Controller Statistics"
+        self._attr_unique_id = "smart_vent_controller_stats"
+        self._attr_name = "Smart Vent Controller Statistics"
     
     @property
     def native_value(self):

@@ -15,8 +15,8 @@
    # On your Home Assistant server
    cd /config
    mkdir -p custom_components
-   # Copy the zone_controller folder to custom_components/
-   cp -r zone_controller_integration/custom_components/zone_controller custom_components/
+   # Copy the smart_vent_controller folder to custom_components/
+   cp -r smart_vent_controller_integration/custom_components/smart_vent_controller custom_components/
    ```
 
 2. **Restart Home Assistant:**
@@ -26,7 +26,7 @@
 3. **Add Integration:**
    - Go to Settings → Devices & Services
    - Click "Add Integration"
-   - Search for "Zone Controller"
+   - Search for "Smart Vent Controller"
    - Click on it and follow the setup wizard
 
 ### Method 2: HACS Installation (Future)
@@ -43,19 +43,19 @@ Once published to HACS:
    - Category: Integration
 
 3. **Install:**
-   - Find "Zone Controller" in HACS
+   - Find "Smart Vent Controller" in HACS
    - Click Install
    - Restart Home Assistant
 
 4. **Configure:**
    - Go to Settings → Devices & Services
-   - Add Integration → Zone Controller
+   - Add Integration → Smart Vent Controller
 
 ## Initial Setup
 
 ### Step 1: Main Thermostat
 
-1. Click "Add Integration" → "Zone Controller"
+1. Click "Add Integration" → "Smart Vent Controller"
 2. Select your main HVAC thermostat from the dropdown
 3. Click "Submit"
 
@@ -115,7 +115,7 @@ If you have an existing YAML configuration:
 ### Verify Installation
 
 1. **Check Entities:**
-   - Go to Settings → Devices & Services → Zone Controller
+   - Go to Settings → Devices & Services → Smart Vent Controller
    - Verify all rooms are listed
    - Check that sensors are created (temperature, target, delta, occupancy)
 
@@ -126,7 +126,7 @@ If you have an existing YAML configuration:
 
 3. **Check Scripts:**
    - Go to Developer Tools → Services
-   - Look for `zone_controller.set_multi_room_vents` and `zone_controller.apply_ecobee_hold_for_rooms`
+   - Look for `smart_vent_controller.set_multi_room_vents` and `smart_vent_controller.apply_ecobee_hold_for_rooms`
 
 ### Testing
 
@@ -137,15 +137,15 @@ If you have an existing YAML configuration:
    - Check thermostat setpoint changes
 
 2. **Enable Debug Mode:**
-   - Go to Settings → Devices & Services → Zone Controller → Options
+   - Go to Settings → Devices & Services → Smart Vent Controller → Options
    - Enable "Debug Mode"
    - Check logs: Settings → System → Logs
-   - Look for "Zone Controller" entries
+   - Look for "Smart Vent Controller" entries
 
 ### Troubleshooting
 
 **Integration not showing:**
-- Check that `custom_components/zone_controller/` exists
+- Check that `custom_components/smart_vent_controller/` exists
 - Verify `manifest.json` is present
 - Restart Home Assistant
 - Check logs for errors
@@ -178,6 +178,6 @@ If you have an existing YAML configuration:
 For issues or questions:
 1. Check logs (Settings → System → Logs)
 2. Enable debug mode for detailed logging
-3. Check diagnostics (Settings → Devices & Services → Zone Controller → Diagnostics)
+3. Check diagnostics (Settings → Devices & Services → Smart Vent Controller → Diagnostics)
 4. Review documentation in `README.md` and other `.md` files
 

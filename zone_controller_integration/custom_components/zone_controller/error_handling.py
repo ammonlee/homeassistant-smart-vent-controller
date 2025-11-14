@@ -1,4 +1,4 @@
-"""Error handling utilities for Zone Controller."""
+"""Error handling utilities for Smart Vent Controller."""
 
 import logging
 from typing import Any, Callable, TypeVar, Optional
@@ -13,22 +13,22 @@ _LOGGER = logging.getLogger(__name__)
 T = TypeVar('T')
 
 
-class ZoneControllerError(HomeAssistantError):
-    """Base exception for Zone Controller errors."""
+class SmartVentControllerError(HomeAssistantError):
+    """Base exception for Smart Vent Controller errors."""
     pass
 
 
-class EntityUnavailableError(ZoneControllerError):
+class EntityUnavailableError(SmartVentControllerError):
     """Raised when an entity is unavailable."""
     pass
 
 
-class InvalidConfigurationError(ZoneControllerError):
+class InvalidConfigurationError(SmartVentControllerError):
     """Raised when configuration is invalid."""
     pass
 
 
-class ServiceCallError(ZoneControllerError):
+class ServiceCallError(SmartVentControllerError):
     """Raised when a service call fails."""
     pass
 

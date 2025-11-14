@@ -1,4 +1,4 @@
-# Zone Controller Integration - Implementation Status
+# Smart Vent Controller Integration - Implementation Status
 
 ## ✅ Completed
 

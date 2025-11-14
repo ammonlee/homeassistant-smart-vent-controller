@@ -1,4 +1,4 @@
-# Zone Controller Integration - Next Steps & Improvements
+# Smart Vent Controller Integration - Next Steps & Improvements
 
 ## ✅ Completed
 
@@ -32,7 +32,7 @@ def async_get_options_flow(config_entry):
     return ZoneControllerOptionsFlowHandler(config_entry)
 
 class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Zone Controller."""
+    """Handle options flow for Smart Vent Controller."""
     # Allow updating settings without reconfiguring rooms
 ```
 
@@ -56,7 +56,7 @@ device_registry.async_get_or_create(
     config_entry_id=entry.entry_id,
     identifiers={(DOMAIN, room_key)},
     name=room_name,
-    manufacturer="Zone Controller",
+    manufacturer="Smart Vent Controller",
     model="Room Controller",
 )
 ```

@@ -2,7 +2,7 @@
 
 ## How the Configuration Wizard Works
 
-The Zone Controller integration uses Home Assistant's **Config Flow** system, which provides a step-by-step UI wizard. No YAML editing required!
+The Smart Vent Controller integration uses Home Assistant's **Config Flow** system, which provides a step-by-step UI wizard. No YAML editing required!
 
 ## Step-by-Step Process
 
@@ -33,7 +33,7 @@ selector.EntitySelector(
 **User Experience:**
 ```
 ┌─────────────────────────────────────┐
-│ Zone Controller Setup               │
+│ Smart Vent Controller Setup               │
 ├─────────────────────────────────────┤
 │                                     │
 │ Main Thermostat:                    │
@@ -277,7 +277,7 @@ Entity Selectors are Home Assistant UI components that provide:
 
 After initial setup, you can update settings via:
 
-**Settings → Devices & Services → Zone Controller → Options**
+**Settings → Devices & Services → Smart Vent Controller → Options**
 
 This shows the same settings form (Step 3) but updates existing values.
 

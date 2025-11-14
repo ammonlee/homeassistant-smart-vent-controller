@@ -1,4 +1,4 @@
-"""Number platform for Zone Controller."""
+"""Number platform for Smart Vent Controller."""
 
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
@@ -8,7 +8,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
-from .coordinator import ZoneControllerCoordinator
+from .coordinator import SmartVentControllerCoordinator
 from .device import get_room_device_id
 
 
@@ -17,8 +17,8 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Zone Controller number entities."""
-    coordinator: ZoneControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up Smart Vent Controller number entities."""
+    coordinator: SmartVentControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
     
     entities = []
     
@@ -230,7 +230,7 @@ class RoomPriorityNumber(NumberEntity, RestoreEntity):
         return DeviceInfo(
             identifiers={get_room_device_id(self._entry, self._room_key)},
             name=f"{self._room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
         )
     

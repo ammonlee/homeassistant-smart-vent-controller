@@ -1,4 +1,4 @@
-"""Helper entities initialization for Zone Controller."""
+"""Helper entities initialization for Smart Vent Controller."""
 
 import logging
 from homeassistant.core import HomeAssistant
@@ -17,13 +17,13 @@ STORAGE_VERSION = 1
 
 async def async_setup_helpers(hass: HomeAssistant, entry: ConfigEntry):
     """Set up helper entities automatically."""
-    _LOGGER.info("Setting up Zone Controller helper entities...")
+    _LOGGER.info("Setting up Smart Vent Controller helper entities...")
     
     # Create helper entities via YAML config injection
     # This is the most reliable method
     await _create_helpers_via_yaml(hass, entry)
     
-    _LOGGER.info("Zone Controller helper entities setup complete")
+    _LOGGER.info("Smart Vent Controller helper entities setup complete")
 
 
 async def _create_helpers_via_yaml(hass: HomeAssistant, entry: ConfigEntry):

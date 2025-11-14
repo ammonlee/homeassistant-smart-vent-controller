@@ -1,6 +1,6 @@
-"""Constants for Zone Controller integration."""
+"""Constants for Smart Vent Controller integration."""
 
-DOMAIN = "zone_controller"
+DOMAIN = "smart_vent_controller"
 
 # Default configuration values
 DEFAULT_MIN_OTHER_ROOM_OPEN_PCT = 20

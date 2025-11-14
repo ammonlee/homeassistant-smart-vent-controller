@@ -1,4 +1,4 @@
-"""Zone Controller integration for Home Assistant."""
+"""Smart Vent Controller integration for Home Assistant."""
 
 import logging
 
@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 
 from .const import DOMAIN
-from .coordinator import ZoneControllerCoordinator
+from .coordinator import SmartVentControllerCoordinator
 from . import script, automation
 from .helpers import async_setup_helpers
 from .device import async_create_room_devices, async_remove_room_devices
@@ -31,11 +31,11 @@ PLATFORMS = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Zone Controller from a config entry."""
+    """Set up Smart Vent Controller from a config entry."""
     hass.data.setdefault(DOMAIN, {})
     
     # Create coordinator
-    coordinator = ZoneControllerCoordinator(hass, entry)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     
     hass.data[DOMAIN][entry.entry_id] = coordinator
@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload Zone Controller entry."""
+    """Unload Smart Vent Controller entry."""
     # Remove room devices
     try:
         await async_remove_room_devices(hass, entry)
@@ -152,7 +152,7 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
         }
         
         hass.config_entries.async_update_entry(entry, options=options)
-        _LOGGER.info("Zone Controller options reset to defaults")
+        _LOGGER.info("Smart Vent Controller options reset to defaults")
     
     # Register services
     hass.services.async_register(DOMAIN, "set_room_priority", set_room_priority)

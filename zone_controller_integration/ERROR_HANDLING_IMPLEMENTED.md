@@ -2,7 +2,7 @@
 
 ## Status: **FULLY IMPLEMENTED**
 
-Comprehensive error handling and recovery mechanisms have been added to the Zone Controller integration.
+Comprehensive error handling and recovery mechanisms have been added to the Smart Vent Controller integration.
 
 ## What's Implemented
 

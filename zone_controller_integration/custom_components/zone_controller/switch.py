@@ -1,4 +1,4 @@
-"""Switch platform for Zone Controller."""
+"""Switch platform for Smart Vent Controller."""
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
-from .coordinator import ZoneControllerCoordinator
+from .coordinator import SmartVentControllerCoordinator
 
 
 async def async_setup_entry(
@@ -14,8 +14,8 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Zone Controller switch entities."""
-    coordinator: ZoneControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up Smart Vent Controller switch entities."""
+    coordinator: SmartVentControllerCoordinator = hass.data[DOMAIN][entry.entry_id]
     
     entities = [
         ConfigSwitch(

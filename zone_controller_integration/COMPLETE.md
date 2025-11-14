@@ -1,8 +1,8 @@
-# Zone Controller Integration - Complete Implementation
+# Smart Vent Controller Integration - Complete Implementation
 
 ## ✅ Implementation Complete
 
-The Zone Controller integration has been fully implemented as a custom Home Assistant integration. All core functionality from the YAML package has been ported to Python.
+The Smart Vent Controller integration has been fully implemented as a custom Home Assistant integration. All core functionality from the YAML package has been ported to Python.
 
 ## What's Included
 
@@ -139,7 +139,7 @@ Home Assistant Services
 
 - Helper entities still needed (see `HELPER_ENTITIES.md`)
 - Some internal tracking uses coordinator storage instead of input entities
-- Service calls use `zone_controller.set_multi_room_vents` instead of `script.set_multi_room_vents`
+- Service calls use `smart_vent_controller.set_multi_room_vents` instead of `script.set_multi_room_vents`
 - Automations are managed by the integration, not YAML
 
 ## Testing Checklist
@@ -184,9 +184,9 @@ Home Assistant Services
 ## Files Summary
 
 ```
-zone_controller_integration/
+smart_vent_controller_integration/
 ├── custom_components/
-│   └── zone_controller/
+│   └── smart_vent_controller/
 │       ├── __init__.py              # Main entry point
 │       ├── manifest.json            # Integration metadata
 │       ├── const.py                 # Constants
@@ -214,7 +214,7 @@ zone_controller_integration/
 
 ## Conclusion
 
-The Zone Controller integration is now a complete, production-ready custom Home Assistant integration. All functionality from the YAML package has been ported to Python with improved structure, error handling, and user experience.
+The Smart Vent Controller integration is now a complete, production-ready custom Home Assistant integration. All functionality from the YAML package has been ported to Python with improved structure, error handling, and user experience.
 
 The integration is ready for testing and deployment!
 

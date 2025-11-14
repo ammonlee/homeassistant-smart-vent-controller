@@ -1,8 +1,8 @@
-# Zone Controller - Complete Dashboard
+# Smart Vent Controller - Complete Dashboard
 # Full dashboard with all cards combined
 # Add this entire file as a new dashboard view in Lovelace
 
-title: Zone Controller
+title: Smart Vent Controller
 path: zone-controller
 icon: mdi:home-thermometer
 cards:
@@ -11,7 +11,7 @@ cards:
     cards:
       - type: markdown
         content: |
-          # 🏠 Zone Controller Dashboard
+          # 🏠 Smart Vent Controller Dashboard
           
           **Status:** {{ states('sensor.rooms_to_condition') }}
           
@@ -196,7 +196,7 @@ cards:
         entities:
           - entity: sensor.rooms_to_condition
             name: Rooms To Condition
-          - entity: sensor.zone_controller_statistics
+          - entity: sensor.smart_vent_controller_statistics
             name: Statistics
           - entity: sensor.hvac_cycle_protection_status
             name: Cycle Protection

@@ -1,11 +1,11 @@
-"""Automation platform for Zone Controller."""
+"""Automation platform for Smart Vent Controller."""
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
 from .automations import (
-    ZoneConditionerAutomation,
+    SmartVentConditionerAutomation,
     HVACCycleTrackingAutomation,
     ClearManualOverrideAutomation,
 )
@@ -15,11 +15,11 @@ async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
 ) -> None:
-    """Set up Zone Controller automations."""
+    """Set up Smart Vent Controller automations."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     
     # Create automation instances
-    zone_automation = ZoneConditionerAutomation(hass, entry)
+    zone_automation = SmartVentConditionerAutomation(hass, entry)
     cycle_automation = HVACCycleTrackingAutomation(hass, entry)
     override_automation = ClearManualOverrideAutomation(hass, entry)
     
@@ -40,7 +40,7 @@ async def async_unload_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
 ) -> None:
-    """Unload Zone Controller automations."""
+    """Unload Smart Vent Controller automations."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     
     if hasattr(coordinator, "automations"):

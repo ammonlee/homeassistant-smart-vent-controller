@@ -2,7 +2,7 @@
 
 ## Status: **FULLY IMPLEMENTED**
 
-Performance optimizations have been added to the Zone Controller integration to improve response times and reduce load on Home Assistant.
+Performance optimizations have been added to the Smart Vent Controller integration to improve response times and reduce load on Home Assistant.
 
 ## What's Implemented
 

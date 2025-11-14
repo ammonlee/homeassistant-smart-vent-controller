@@ -1,4 +1,4 @@
-"""Caching utilities for Zone Controller."""
+"""Caching utilities for Smart Vent Controller."""
 
 from typing import Any, Optional
 from datetime import datetime, timedelta

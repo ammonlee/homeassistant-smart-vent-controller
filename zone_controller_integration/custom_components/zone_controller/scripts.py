@@ -1,4 +1,4 @@
-"""Script implementations for Zone Controller."""
+"""Script implementations for Smart Vent Controller."""
 
 from typing import Any
 from datetime import datetime, time as dt_time
@@ -76,7 +76,7 @@ class VentControlScript:
             
             if debug_mode:
                 _LOGGER.info(
-                    f"Zone Controller: Starting vent adjustment. "
+                    f"Smart Vent Controller: Starting vent adjustment. "
                     f"Mode={mode}, Action={action}, Selected={','.join(selected_list)}"
                 )
             
@@ -140,7 +140,7 @@ class VentControlScript:
         rooms_data = []
         
         # Get coordinator for cache access
-        coordinator = self.hass.data.get("zone_controller", {}).get(self.entry.entry_id)
+        coordinator = self.hass.data.get(DOMAIN, {}).get(self.entry.entry_id)
         use_cache = coordinator is not None
         
         for room_config in rooms_config:

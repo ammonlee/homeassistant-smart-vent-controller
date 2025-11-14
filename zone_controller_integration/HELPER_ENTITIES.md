@@ -1,6 +1,6 @@
 # Helper Entities Setup
 
-The Zone Controller integration requires several helper entities (input_number, input_boolean, input_text) to function properly. These can be created via YAML or through the Home Assistant UI.
+The Smart Vent Controller integration requires several helper entities (input_number, input_boolean, input_text) to function properly. These can be created via YAML or through the Home Assistant UI.
 
 ## Required Helper Entities
 

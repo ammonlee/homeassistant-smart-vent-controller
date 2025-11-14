@@ -8,7 +8,7 @@
 
 ```bash
 # On your Home Assistant server (via SSH or Samba)
-ls -la /config/custom_components/zone_controller/
+ls -la /config/custom_components/smart_vent_controller/
 ```
 
 **You should see:**
@@ -18,8 +18,8 @@ ls -la /config/custom_components/zone_controller/
 - And ~15 other Python files
 
 **Common mistake:** Files might be in:
-- ❌ `/config/custom_components/zone_controller_integration/zone_controller/` (WRONG - too nested)
-- ✅ `/config/custom_components/zone_controller/` (CORRECT)
+- ❌ `/config/custom_components/smart_vent_controller_integration/smart_vent_controller/` (WRONG - too nested)
+- ✅ `/config/custom_components/smart_vent_controller/` (CORRECT)
 
 ### 2. Fix manifest.json ✅
 
@@ -27,8 +27,8 @@ The `integration_type: "system"` might cause issues. I've updated it. Make sure 
 
 ```json
 {
-  "domain": "zone_controller",
-  "name": "Zone Controller",
+  "domain": "smart_vent_controller",
+  "name": "Smart Vent Controller",
   "version": "1.0.0",
   "documentation": "https://github.com/yourusername/homeassistant-zone-controller",
   "issue_tracker": "https://github.com/yourusername/homeassistant-zone-controller/issues",
@@ -55,7 +55,7 @@ The `integration_type: "system"` might cause issues. I've updated it. Make sure 
 **Look for errors:**
 
 1. Go to **Settings** → **System** → **Logs**
-2. Search for: `zone_controller` or `custom_components`
+2. Search for: `smart_vent_controller` or `custom_components`
 3. Look for any red errors
 
 **Common errors:**
@@ -69,7 +69,7 @@ The `integration_type: "system"` might cause issues. I've updated it. Make sure 
 
 1. Open this URL in your browser (replace with your HA IP):
    ```
-   http://YOUR_HA_IP:8123/config/integrations/config_flow?domain=zone_controller
+   http://YOUR_HA_IP:8123/config/integrations/config_flow?domain=smart_vent_controller
    ```
 
 2. This should open the config flow directly
@@ -81,7 +81,7 @@ The `integration_type: "system"` might cause issues. I've updated it. Make sure 
 1. Go to **Settings** → **Devices & Services**
 2. Click **Add Integration** (bottom right)
 3. **Don't search** - just scroll down the list
-4. Look for "Zone Controller" in the list
+4. Look for "Smart Vent Controller" in the list
 
 ### 7. Verify Python Syntax ✅
 
@@ -89,8 +89,8 @@ The `integration_type: "system"` might cause issues. I've updated it. Make sure 
 
 ```bash
 # On Home Assistant server
-python3 -m py_compile /config/custom_components/zone_controller/__init__.py
-python3 -m py_compile /config/custom_components/zone_controller/config_flow.py
+python3 -m py_compile /config/custom_components/smart_vent_controller/__init__.py
+python3 -m py_compile /config/custom_components/smart_vent_controller/config_flow.py
 ```
 
 **No output = success. Errors = fix them.**
@@ -101,20 +101,20 @@ python3 -m py_compile /config/custom_components/zone_controller/config_flow.py
 
 ```bash
 # On your development machine, copy the integration folder
-# Make sure you copy the zone_controller folder, not zone_controller_integration
+# Make sure you copy the smart_vent_controller folder, not smart_vent_controller_integration
 
 # Correct:
-cp -r zone_controller_integration/custom_components/zone_controller /path/to/ha/config/custom_components/
+cp -r smart_vent_controller_integration/custom_components/smart_vent_controller /path/to/ha/config/custom_components/
 
 # Wrong:
-cp -r zone_controller_integration /path/to/ha/config/custom_components/
+cp -r smart_vent_controller_integration /path/to/ha/config/custom_components/
 ```
 
 ### Step 2: Verify Structure
 
 ```bash
 # On Home Assistant server
-cd /config/custom_components/zone_controller
+cd /config/custom_components/smart_vent_controller
 ls -la
 ```
 
@@ -128,8 +128,8 @@ ls -la
 
 ```bash
 # Make sure files are readable
-chmod 644 /config/custom_components/zone_controller/*.py
-chmod 644 /config/custom_components/zone_controller/*.json
+chmod 644 /config/custom_components/smart_vent_controller/*.py
+chmod 644 /config/custom_components/smart_vent_controller/*.json
 ```
 
 ### Step 4: Restart and Check Logs
@@ -152,7 +152,7 @@ Add to `configuration.yaml`:
 logger:
   default: info
   logs:
-    custom_components.zone_controller: debug
+    custom_components.smart_vent_controller: debug
 ```
 
 Then restart and check logs again.
@@ -162,7 +162,7 @@ Then restart and check logs again.
 ```bash
 # On Home Assistant server
 cd /config
-python3 -c "import sys; sys.path.insert(0, 'custom_components'); import zone_controller; print('SUCCESS')"
+python3 -c "import sys; sys.path.insert(0, 'custom_components'); import smart_vent_controller; print('SUCCESS')"
 ```
 
 **If this fails, there's a Python error to fix.**
@@ -179,7 +179,7 @@ If the UI integration doesn't work, you can try configuring via YAML (though the
 
 1. Add to `configuration.yaml`:
 ```yaml
-zone_controller:
+smart_vent_controller:
   main_thermostat: climate.main_floor_thermostat
   rooms:
     - name: "Master Bedroom"
@@ -195,7 +195,7 @@ zone_controller:
 
 Run through this checklist:
 
-- [ ] Files copied to `/config/custom_components/zone_controller/`
+- [ ] Files copied to `/config/custom_components/smart_vent_controller/`
 - [ ] `__init__.py` exists
 - [ ] `manifest.json` exists and is valid JSON
 - [ ] `manifest.json` does NOT have `"integration_type": "system"`
@@ -210,7 +210,7 @@ Run through this checklist:
 
 If still stuck, share:
 
-1. **File location:** Output of `ls -la /config/custom_components/zone_controller/`
+1. **File location:** Output of `ls -la /config/custom_components/smart_vent_controller/`
 2. **Log errors:** Any errors from logs
 3. **HA version:** From Settings → System → About
 4. **manifest.json contents:** Copy the file contents

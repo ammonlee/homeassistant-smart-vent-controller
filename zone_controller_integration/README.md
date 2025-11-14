@@ -1,4 +1,4 @@
-# Zone Controller Integration
+# Smart Vent Controller Integration
 
 A comprehensive Home Assistant custom integration for intelligent multi-room HVAC zone control with vent management, occupancy awareness, and cycle protection.
 
@@ -18,9 +18,9 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 
 ### Method 1: Manual Installation
 
-1. Copy the `custom_components/zone_controller` folder to your Home Assistant `custom_components` directory:
+1. Copy the `custom_components/smart_vent_controller` folder to your Home Assistant `custom_components` directory:
    ```bash
-   cp -r zone_controller_integration/custom_components/zone_controller \
+   cp -r smart_vent_controller_integration/custom_components/smart_vent_controller \
      ~/.homeassistant/custom_components/
    ```
 
@@ -28,7 +28,7 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 
 3. Go to **Settings** → **Devices & Services** → **Add Integration**
 
-4. Search for **"Zone Controller"** and follow the setup wizard
+4. Search for **"Smart Vent Controller"** and follow the setup wizard
 
 ### Method 2: HACS (Future)
 
@@ -91,7 +91,7 @@ input_boolean:
 
 The integration provides two main services:
 
-#### `zone_controller.set_multi_room_vents`
+#### `smart_vent_controller.set_multi_room_vents`
 
 Adjusts vent positions for multiple rooms.
 
@@ -100,12 +100,12 @@ Adjusts vent positions for multiple rooms.
 
 **Example**:
 ```yaml
-service: zone_controller.set_multi_room_vents
+service: smart_vent_controller.set_multi_room_vents
 data:
   rooms_csv: "master,blue,guest"
 ```
 
-#### `zone_controller.apply_ecobee_hold_for_rooms`
+#### `smart_vent_controller.apply_ecobee_hold_for_rooms`
 
 Adjusts thermostat setpoint based on selected rooms' targets.
 
@@ -114,7 +114,7 @@ Adjusts thermostat setpoint based on selected rooms' targets.
 
 **Example**:
 ```yaml
-service: zone_controller.apply_ecobee_hold_for_rooms
+service: smart_vent_controller.apply_ecobee_hold_for_rooms
 data:
   rooms_csv: "master,blue"
 ```
@@ -144,11 +144,11 @@ The integration creates sensors for each room:
 - `sensor.rooms_to_condition`: Comma-separated list of rooms needing conditioning
 - `binary_sensor.thermostat_manual_override`: Manual override detection
 - `sensor.hvac_cycle_protection_status`: Cycle protection status
-- `sensor.zone_controller_statistics`: System statistics
+- `sensor.smart_vent_controller_statistics`: System statistics
 
 ### Configuration Options
 
-Access via **Settings** → **Devices & Services** → **Zone Controller** → **Options**:
+Access via **Settings** → **Devices & Services** → **Smart Vent Controller** → **Options**:
 
 - **Minimum Other Room Open %**: Minimum vent position for non-conditioned rooms (default: 20%)
 - **Closed Threshold %**: Position below which a vent is considered closed (default: 10%)
@@ -200,7 +200,7 @@ Access via **Settings** → **Devices & Services** → **Zone Controller** → *
 
 ### Integration Not Appearing
 
-- Verify `custom_components/zone_controller` exists
+- Verify `custom_components/smart_vent_controller` exists
 - Check `manifest.json` is valid
 - Restart Home Assistant
 - Check logs for errors
@@ -214,7 +214,7 @@ Access via **Settings** → **Devices & Services** → **Zone Controller** → *
   logger:
     default: info
     logs:
-      custom_components.zone_controller: debug
+      custom_components.smart_vent_controller: debug
   ```
 
 ### Scripts Not Working

@@ -65,7 +65,7 @@
 | `{room}_delta_degf` | ✅ (10 rooms) | ✅ (dynamic) | ✅ **Parity** |
 | `rooms_to_condition` | ✅ | ✅ | ✅ **Parity** |
 | `parse_rooms_csv` | ✅ | ⚠️ Inline parsing | ⚠️ **Different implementation** |
-| `zone_controller_statistics` | ✅ | ✅ | ✅ **Parity** |
+| `smart_vent_controller_statistics` | ✅ | ✅ | ✅ **Parity** |
 | `hvac_cycle_protection_status` | ✅ | ✅ | ✅ **Parity** |
 | `hvac_cycle_start_time` | ✅ | ✅ | ✅ **Parity** |
 | `hvac_cycle_end_time` | ✅ | ✅ | ✅ **Parity** |

@@ -1,4 +1,4 @@
-"""Device registry helpers for Zone Controller."""
+"""Device registry helpers for Smart Vent Controller."""
 
 from homeassistant.helpers import device_registry as dr
 from homeassistant.config_entries import ConfigEntry
@@ -39,7 +39,7 @@ async def async_create_room_devices(hass: HomeAssistant, entry: ConfigEntry):
             config_entry_id=entry.entry_id,
             identifiers={get_room_device_id(entry, room_key)},
             name=f"{room_name} Zone",
-            manufacturer="Zone Controller",
+            manufacturer="Smart Vent Controller",
             model="Room Controller",
             via_device=None,  # No parent device
         )

@@ -2,7 +2,7 @@
 
 ## Status: **FULLY IMPLEMENTED**
 
-Diagnostics support has been added to the Zone Controller integration, providing comprehensive information for troubleshooting and support.
+Diagnostics support has been added to the Smart Vent Controller integration, providing comprehensive information for troubleshooting and support.
 
 ## What's Implemented
 
@@ -34,8 +34,8 @@ Diagnostics support has been added to the Zone Controller integration, providing
 1. **Go to Settings:**
    - Settings → Devices & Services
 
-2. **Find Zone Controller:**
-   - Click on "Zone Controller" integration
+2. **Find Smart Vent Controller:**
+   - Click on "Smart Vent Controller" integration
 
 3. **Download Diagnostics:**
    - Click the three dots menu (⋮)

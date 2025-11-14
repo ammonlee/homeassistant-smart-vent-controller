@@ -1,4 +1,4 @@
-"""Script platform for Zone Controller."""
+"""Script platform for Smart Vent Controller."""
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -12,7 +12,7 @@ async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
 ) -> None:
-    """Set up Zone Controller scripts as services."""
+    """Set up Smart Vent Controller scripts as services."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     
     vent_script = VentControlScript(hass, entry)

@@ -2,7 +2,7 @@
 
 ## Status: **FULLY IMPLEMENTED**
 
-Device representation has been added to the Zone Controller integration, organizing all room entities under logical device groupings.
+Device representation has been added to the Smart Vent Controller integration, organizing all room entities under logical device groupings.
 
 ## What's Implemented
 
@@ -16,9 +16,9 @@ Device representation has been added to the Zone Controller integration, organiz
 **Device Structure:**
 - Each room gets its own device
 - Device name: "{Room Name} Zone"
-- Manufacturer: "Zone Controller"
+- Manufacturer: "Smart Vent Controller"
 - Model: "Room Controller"
-- Unique identifier: `(zone_controller, "{entry_id}_{room_key}")`
+- Unique identifier: `(smart_vent_controller, "{entry_id}_{room_key}")`
 
 ### ✅ Entity Device Linking
 
@@ -37,7 +37,7 @@ def device_info(self) -> DeviceInfo:
     return DeviceInfo(
         identifiers={get_room_device_id(self._entry, self._room_key)},
         name=f"{self._room_name} Zone",
-        manufacturer="Zone Controller",
+        manufacturer="Smart Vent Controller",
         model="Room Controller",
     )
 ```
@@ -76,9 +76,9 @@ def device_info(self) -> DeviceInfo:
 
 **Device:**
 - Name: "Master Bedroom Zone"
-- Manufacturer: "Zone Controller"
+- Manufacturer: "Smart Vent Controller"
 - Model: "Room Controller"
-- Identifier: `(zone_controller, "{entry_id}_master_bedroom")`
+- Identifier: `(smart_vent_controller, "{entry_id}_master_bedroom")`
 
 **Entities Linked to Device:**
 - `sensor.master_bedroom_temp_degf` - Temperature sensor
@@ -101,7 +101,7 @@ for room in rooms:
         config_entry_id=entry.entry_id,
         identifiers={get_room_device_id(entry, room_key)},
         name=f"{room_name} Zone",
-        manufacturer="Zone Controller",
+        manufacturer="Smart Vent Controller",
         model="Room Controller",
     )
 ```
@@ -116,7 +116,7 @@ def device_info(self) -> DeviceInfo:
     return DeviceInfo(
         identifiers={get_room_device_id(self._entry, self._room_key)},
         name=f"{self._room_name} Zone",
-        manufacturer="Zone Controller",
+        manufacturer="Smart Vent Controller",
         model="Room Controller",
     )
 ```
@@ -153,7 +153,7 @@ async def async_unload_entry(...):
 
 2. **Check Devices:**
    - Go to Settings → Devices & Services
-   - Find "Zone Controller" integration
+   - Find "Smart Vent Controller" integration
    - Click on it
    - See room devices listed
 
@@ -168,7 +168,7 @@ async def async_unload_entry(...):
 
 4. **Verify Device Info:**
    - Device shows correct name
-   - Manufacturer: "Zone Controller"
+   - Manufacturer: "Smart Vent Controller"
    - Model: "Room Controller"
 
 ## Summary

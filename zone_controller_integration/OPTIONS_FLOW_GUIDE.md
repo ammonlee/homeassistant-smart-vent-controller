@@ -2,15 +2,15 @@
 
 ## Overview
 
-The Zone Controller integration includes a complete **Options Flow** that allows you to update settings without reconfiguring rooms. This makes it easy to fine-tune the system after initial setup.
+The Smart Vent Controller integration includes a complete **Options Flow** that allows you to update settings without reconfiguring rooms. This makes it easy to fine-tune the system after initial setup.
 
 ## How to Access Options Flow
 
 1. **Go to Settings:**
    - **Settings** → **Devices & Services**
 
-2. **Find Zone Controller:**
-   - Look for "Zone Controller" in your integrations list
+2. **Find Smart Vent Controller:**
+   - Look for "Smart Vent Controller" in your integrations list
    - Click on it
 
 3. **Open Options:**
@@ -104,7 +104,7 @@ All values are validated:
 ### Scenario: Adjust Heat Boost
 
 1. **Open Options:**
-   - Settings → Devices & Services → Zone Controller → Options
+   - Settings → Devices & Services → Smart Vent Controller → Options
 
 2. **Change Heat Boost:**
    - Find "Heat Boost (°F)"
@@ -119,7 +119,7 @@ All values are validated:
 ### Scenario: Disable Vent Control Temporarily
 
 1. **Open Options:**
-   - Settings → Devices & Services → Zone Controller → Options
+   - Settings → Devices & Services → Smart Vent Controller → Options
 
 2. **Disable Vent Control:**
    - Find "Auto Vent Control"
@@ -137,7 +137,7 @@ All values are validated:
 
 ```python
 class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Zone Controller."""
+    """Handle options flow for Smart Vent Controller."""
     
     async def async_step_init(self, user_input=None):
         """Manage the options."""
@@ -193,7 +193,7 @@ The Number and Switch platforms automatically sync with options:
 2. **Change values back**
 3. **Or use "Reset to Defaults" service:**
    ```yaml
-   service: zone_controller.reset_to_defaults
+   service: smart_vent_controller.reset_to_defaults
    ```
 
 ## Troubleshooting

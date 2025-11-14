@@ -1,4 +1,4 @@
-"""Automation implementations for Zone Controller."""
+"""Automation implementations for Smart Vent Controller."""
 
 from typing import Any
 from datetime import datetime
@@ -14,7 +14,7 @@ from .scripts import VentControlScript, ThermostatControlScript
 _LOGGER = logging.getLogger(__name__)
 
 
-class ZoneConditionerAutomation:
+class SmartVentConditionerAutomation:
     """Main zone conditioner automation."""
     
     def __init__(self, hass: HomeAssistant, entry):
@@ -77,7 +77,7 @@ class ZoneConditionerAutomation:
             )
         )
         
-        _LOGGER.info("Zone Controller automation set up and running")
+        _LOGGER.info("Smart Vent Controller automation set up and running")
     
     async def async_unload(self):
         """Unload the automation."""

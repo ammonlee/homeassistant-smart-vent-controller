@@ -1,4 +1,4 @@
-zone_controller:
+smart_vent_controller:
   set_room_priority:
     name: Set Room Priority
     description: Change the priority of a room for relief vent selection

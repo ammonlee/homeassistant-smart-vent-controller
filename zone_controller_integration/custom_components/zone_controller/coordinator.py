@@ -1,4 +1,4 @@
-"""Data coordinator for Zone Controller."""
+"""Data coordinator for Smart Vent Controller."""
 
 from datetime import timedelta
 from homeassistant.core import HomeAssistant
@@ -9,8 +9,8 @@ from .const import DOMAIN
 from .cache import RoomDataCache, EntityStateCache
 
 
-class ZoneControllerCoordinator(DataUpdateCoordinator):
-    """Class to manage Zone Controller data updates."""
+class SmartVentControllerCoordinator(DataUpdateCoordinator):
+    """Class to manage Smart Vent Controller data updates."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize coordinator."""
@@ -27,7 +27,7 @@ class ZoneControllerCoordinator(DataUpdateCoordinator):
         self.entity_cache = EntityStateCache(ttl_seconds=2)
 
     async def _async_update_data(self):
-        """Fetch data from Zone Controller."""
+        """Fetch data from Smart Vent Controller."""
         try:
             # Update room temperatures, vent positions, occupancy states
             # This would coordinate updates across all platforms
@@ -72,5 +72,5 @@ class ZoneControllerCoordinator(DataUpdateCoordinator):
             return data
             
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with Zone Controller: {err}") from err
+            raise UpdateFailed(f"Error communicating with Smart Vent Controller: {err}") from err
 

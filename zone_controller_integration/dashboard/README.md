@@ -1,10 +1,10 @@
-# Zone Controller Dashboard Cards
+# Smart Vent Controller Dashboard Cards
 
-This directory contains dashboard card configurations for the Zone Controller integration.
+This directory contains dashboard card configurations for the Smart Vent Controller integration.
 
 ## Available Cards
 
-### 1. `zone_controller_complete_dashboard.yaml`
+### 1. `smart_vent_controller_complete_dashboard.yaml`
 **Complete dashboard** - Full dashboard with all features in one file.
 
 **Usage:**
@@ -12,7 +12,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - Add as a new dashboard view in Lovelace
 - Or add individual cards to existing dashboard
 
-### 2. `zone_controller_overview.yaml`
+### 2. `smart_vent_controller_overview.yaml`
 **Overview card** - System status, control toggles, and quick stats.
 
 **Features:**
@@ -22,7 +22,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - System statistics
 - Quick actions
 
-### 3. `zone_controller_all_rooms.yaml`
+### 3. `smart_vent_controller_all_rooms.yaml`
 **All rooms grid** - Grid view of all rooms with temperature, target, and delta.
 
 **Features:**
@@ -30,7 +30,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - Temperature, target, and delta display
 - Tap to see more info
 
-### 4. `zone_controller_room_card.yaml`
+### 4. `smart_vent_controller_room_card.yaml`
 **Individual room card template** - Template for creating room-specific cards.
 
 **Usage:**
@@ -38,7 +38,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - Replace `{Room Name}` with friendly name (e.g., `Master Bedroom`)
 - Copy and customize for each room
 
-### 5. `zone_controller_room_detailed.yaml`
+### 5. `smart_vent_controller_room_detailed.yaml`
 **Detailed room card** - Comprehensive room card with all details.
 
 **Features:**
@@ -48,7 +48,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - Room priority
 - Status indicators
 
-### 6. `zone_controller_controls.yaml`
+### 6. `smart_vent_controller_controls.yaml`
 **Controls panel** - Configuration and control settings.
 
 **Features:**
@@ -58,7 +58,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 - HVAC protection settings
 - Room priorities
 
-### 7. `zone_controller_thermostat.yaml`
+### 7. `smart_vent_controller_thermostat.yaml`
 **Thermostat card** - Main thermostat control and status.
 
 **Features:**
@@ -71,7 +71,7 @@ This directory contains dashboard card configurations for the Zone Controller in
 
 ### Method 1: Complete Dashboard
 
-1. Copy `zone_controller_complete_dashboard.yaml`
+1. Copy `smart_vent_controller_complete_dashboard.yaml`
 2. In Home Assistant, go to **Settings** → **Dashboards**
 3. Click **Add Dashboard** → **New Dashboard**
 4. Click the three dots menu → **Edit Dashboard**
@@ -144,7 +144,7 @@ type: vertical-stack
 cards:
   - type: markdown
     content: |
-      # Zone Controller
+      # Smart Vent Controller
       **Status:** {{ states('sensor.rooms_to_condition') }}
   
   - type: grid

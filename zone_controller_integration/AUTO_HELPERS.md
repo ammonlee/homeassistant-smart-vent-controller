@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Zone Controller integration attempts to automatically create all required helper entities (input_number, input_boolean, input_text) when the integration is installed.
+The Smart Vent Controller integration attempts to automatically create all required helper entities (input_number, input_boolean, input_text) when the integration is installed.
 
 ## How It Works
 
@@ -32,7 +32,7 @@ When you add the integration via the UI, the integration will:
 After installation, check if helpers were created:
 
 1. **Go to Settings** → **Devices & Services** → **Helpers**
-2. **Look for Zone Controller helpers:**
+2. **Look for Smart Vent Controller helpers:**
    - Input Numbers: `min_other_room_open_pct`, `occupancy_linger_min`, etc.
    - Input Booleans: `auto_vent_control`, `debug_mode`, etc.
    - Input Text: `hvac_last_action`
@@ -43,7 +43,7 @@ If helpers weren't created automatically:
 
 1. **Check logs:**
    - Settings → System → Logs
-   - Look for Zone Controller messages
+   - Look for Smart Vent Controller messages
 
 2. **Create manually:**
    - See `HELPER_ENTITIES.md` for complete YAML configuration
@@ -90,7 +90,7 @@ If helpers weren't created automatically:
 If auto-creation doesn't work, use the YAML configuration from `HELPER_ENTITIES.md`:
 
 1. **Copy the YAML** from `HELPER_ENTITIES.md`
-2. **Add to `configuration.yaml`** or `packages/zone_controller_helpers.yaml`
+2. **Add to `configuration.yaml`** or `packages/smart_vent_controller_helpers.yaml`
 3. **Restart Home Assistant**
 4. **Verify** in Settings → Devices & Services → Helpers
 

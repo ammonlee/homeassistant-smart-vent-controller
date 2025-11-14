@@ -1,4 +1,4 @@
-# Zone Controller Integration - Installation Guide
+# Smart Vent Controller Integration - Installation Guide
 
 ## Prerequisites
 
@@ -27,13 +27,13 @@
 3. **Copy the integration:**
    ```bash
    # From your development directory
-   cp -r zone_controller_integration/custom_components/zone_controller \
+   cp -r smart_vent_controller_integration/custom_components/smart_vent_controller \
      /config/custom_components/
    ```
 
 4. **Verify the structure:**
    ```
-   /config/custom_components/zone_controller/
+   /config/custom_components/smart_vent_controller/
    ├── __init__.py
    ├── manifest.json
    ├── const.py
@@ -61,7 +61,7 @@ Once submitted to HACS:
 1. Open HACS
 2. Go to **Integrations**
 3. Click **Explore & Download Repositories**
-4. Search for "Zone Controller"
+4. Search for "Smart Vent Controller"
 5. Click **Download**
 6. Restart Home Assistant
 
@@ -71,12 +71,12 @@ The integration requires helper entities. You can create them via YAML or UI.
 
 ### Option A: YAML Configuration (Recommended)
 
-1. **Open `configuration.yaml`** (or create a `packages/zone_controller_helpers.yaml`)
+1. **Open `configuration.yaml`** (or create a `packages/smart_vent_controller_helpers.yaml`)
 
 2. **Add the helper entities:**
 
 ```yaml
-# Add to configuration.yaml or packages/zone_controller_helpers.yaml
+# Add to configuration.yaml or packages/smart_vent_controller_helpers.yaml
 
 input_number:
   min_other_room_open_pct:
@@ -353,7 +353,7 @@ input_text:
 
 2. **Add Integration:**
    - Click **Add Integration** (bottom right)
-   - Search for **"Zone Controller"**
+   - Search for **"Smart Vent Controller"**
    - Click on it
 
 3. **Step 1: Select Main Thermostat**
@@ -379,7 +379,7 @@ input_text:
    - Click **Submit**
 
 6. **Integration Created:**
-   - You'll see "Zone Controller" in your integrations list
+   - You'll see "Smart Vent Controller" in your integrations list
    - Entities will start appearing
 
 ## Step 4: Verify Installation
@@ -387,30 +387,30 @@ input_text:
 ### Check Entities
 
 1. **Go to Developer Tools** → **States**
-2. **Search for `zone_controller`** or room names
+2. **Search for `smart_vent_controller`** or room names
 3. **Verify sensors exist:**
    - `sensor.{room}_temp_degf`
    - `sensor.{room}_target_degf`
    - `sensor.{room}_delta_degf`
    - `binary_sensor.{room}_occupied_recent`
    - `sensor.rooms_to_condition`
-   - `sensor.zone_controller_statistics`
+   - `sensor.smart_vent_controller_statistics`
 
 ### Check Services
 
 1. **Go to Developer Tools** → **Services**
-2. **Search for `zone_controller`**
+2. **Search for `smart_vent_controller`**
 3. **Verify services exist:**
-   - `zone_controller.set_multi_room_vents`
-   - `zone_controller.apply_ecobee_hold_for_rooms`
-   - `zone_controller.set_room_priority`
-   - `zone_controller.reset_to_defaults`
+   - `smart_vent_controller.set_multi_room_vents`
+   - `smart_vent_controller.apply_ecobee_hold_for_rooms`
+   - `smart_vent_controller.set_room_priority`
+   - `smart_vent_controller.reset_to_defaults`
 
 ### Check Automations
 
 1. **Go to Settings** → **Automations & Scenes**
 2. **Look for automations:**
-   - Zone Controller automations should be running
+   - Smart Vent Controller automations should be running
    - They're managed by the integration (not visible in UI)
 
 ## Step 5: Test the Integration
@@ -425,7 +425,7 @@ input_text:
 ### Test 2: Manual Service Call
 
 1. **Go to Developer Tools** → **Services**
-2. **Select `zone_controller.set_multi_room_vents`**
+2. **Select `smart_vent_controller.set_multi_room_vents`**
 3. **Service Data:**
    ```yaml
    rooms_csv: "master,blue"
@@ -435,15 +435,15 @@ input_text:
 
 ### Test 3: Enable Debug Mode
 
-1. **Go to Settings** → **Devices & Services** → **Zone Controller** → **Options**
+1. **Go to Settings** → **Devices & Services** → **Smart Vent Controller** → **Options**
 2. **Enable Debug Mode**
 3. **Check Logs:**
    - **Settings** → **System** → **Logs**
-   - Look for Zone Controller messages
+   - Look for Smart Vent Controller messages
 
 ## Step 6: Add Dashboard Cards (Optional)
 
-1. **Copy dashboard card YAML** from `dashboard/zone_controller_complete_dashboard.yaml`
+1. **Copy dashboard card YAML** from `dashboard/smart_vent_controller_complete_dashboard.yaml`
 2. **In Home Assistant:**
    - Go to your dashboard
    - Click **Add Card** → **Manual**
@@ -465,14 +465,14 @@ The integration uses each room's climate entity target temperature. To set targe
 
 ### Integration Not Appearing
 
-- **Check file structure:** Verify `custom_components/zone_controller/` exists
+- **Check file structure:** Verify `custom_components/smart_vent_controller/` exists
 - **Check `manifest.json`:** Ensure it's valid JSON
 - **Restart Home Assistant:** Full restart required
 - **Check logs:** Look for errors in Home Assistant logs
 
 ### Entities Not Creating
 
-- **Verify config entry:** Check Settings → Devices & Services → Zone Controller
+- **Verify config entry:** Check Settings → Devices & Services → Smart Vent Controller
 - **Check coordinator:** Look for errors in logs
 - **Verify helper entities:** Ensure all required helpers exist
 - **Enable debug logging:**
@@ -480,7 +480,7 @@ The integration uses each room's climate entity target temperature. To set targe
   logger:
     default: info
     logs:
-      custom_components.zone_controller: debug
+      custom_components.smart_vent_controller: debug
   ```
 
 ### Scripts Not Working
@@ -494,7 +494,7 @@ The integration uses each room's climate entity target temperature. To set targe
 
 - **Check `auto_vent_control`:** Ensure toggle is ON
 - **Verify vent entities:** Check entity IDs in room configuration
-- **Check service:** Test `zone_controller.set_multi_room_vents` manually
+- **Check service:** Test `smart_vent_controller.set_multi_room_vents` manually
 - **Check logs:** Enable debug mode and check for errors
 
 ### Thermostat Not Adjusting
