@@ -281,23 +281,33 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             entity_id for entity_id in self.hass.states.async_entity_ids("cover")
         ])
 
+        # Get descriptions from translations
+        room_name_desc = await self._get_description("rooms", "room_name")
+        climate_desc = await self._get_description("rooms", "climate_entity")
+        temp_sensor_desc = await self._get_description("rooms", "temp_sensor")
+        occupancy_desc = await self._get_description("rooms", "occupancy_sensor")
+        vents_desc = await self._get_description("rooms", "vent_entities")
+        priority_desc = await self._get_description("rooms", "priority")
+        add_another_desc = await self._get_description("rooms", "add_another")
+        
         schema_dict = {
-            vol.Optional(CONF_ROOM_NAME): str,
-            vol.Optional(CONF_ROOM_CLIMATE): selector.EntitySelector(
+            vol.Optional(CONF_ROOM_NAME, description=room_name_desc): str,
+            vol.Optional(CONF_ROOM_CLIMATE, description=climate_desc): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="climate")
             ),
-            vol.Optional(CONF_ROOM_TEMP_SENSOR): selector.EntitySelector(
+            vol.Optional(CONF_ROOM_TEMP_SENSOR, description=temp_sensor_desc): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor")
             ),
-            vol.Optional(CONF_ROOM_OCCUPANCY_SENSOR): selector.EntitySelector(
+            vol.Optional(CONF_ROOM_OCCUPANCY_SENSOR, description=occupancy_desc): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="binary_sensor")
             ),
-            vol.Optional(CONF_ROOM_VENTS): selector.EntitySelector(
+            vol.Optional(CONF_ROOM_VENTS, description=vents_desc): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="cover", multiple=True)
             ),
             vol.Optional(
                 CONF_ROOM_PRIORITY,
-                default=DEFAULT_ROOM_PRIORITY
+                default=DEFAULT_ROOM_PRIORITY,
+                description=priority_desc
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -306,7 +316,7 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     mode=selector.NumberSelectorMode.SLIDER
                 )
             ),
-            vol.Optional("add_another", default=False): bool,
+            vol.Optional("add_another", default=False, description=add_another_desc): bool,
         }
         
         return self.async_show_form(
