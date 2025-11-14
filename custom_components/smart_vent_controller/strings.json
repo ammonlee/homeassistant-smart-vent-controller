@@ -3,9 +3,10 @@
     "step": {
       "user": {
         "title": "Smart Vent Controller Setup",
-        "description": "Select your main HVAC thermostat{migration_note}",
+        "description": "Select the HVAC thermostat for this zone. You can configure multiple thermostats by adding this integration multiple times - each thermostat will operate independently with its own rooms, vents, and settings.{migration_note}",
         "data": {
-          "main_thermostat": "Main Thermostat",
+          "main_thermostat": "Thermostat for this zone",
+          "main_thermostat_description": "Select the thermostat that controls this zone. Each thermostat can be configured separately to operate independently.",
           "migrate_from_yaml": "Migrate from YAML Configuration"
         }
       },
@@ -83,7 +84,7 @@
       "no_rooms": "At least one room must be configured"
     },
     "abort": {
-      "already_configured": "Smart Vent Controller is already configured"
+      "already_configured": "This thermostat is already configured. Each thermostat can only be configured once. To configure multiple thermostats, add them as separate instances."
     }
   },
   "options": {

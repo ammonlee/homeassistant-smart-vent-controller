@@ -71,10 +71,6 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if import_info is None:
             return self.async_abort(reason="no_import_data")
         
-        # Check if already configured
-        await self.async_set_unique_id(DOMAIN)
-        self._abort_if_unique_id_configured()
-        
         # Validate imported data
         main_thermostat = import_info.get("main_thermostat")
         if not main_thermostat:
@@ -83,6 +79,11 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Validate thermostat exists
         if main_thermostat not in self.hass.states.async_entity_ids("climate"):
             return self.async_abort(reason="invalid_thermostat")
+        
+        # Check if this thermostat is already configured
+        # Use thermostat entity ID as unique identifier to allow multiple thermostats
+        await self.async_set_unique_id(main_thermostat)
+        self._abort_if_unique_id_configured()
         
         # Set up data
         self.data[CONF_MAIN_THERMOSTAT] = main_thermostat
@@ -103,14 +104,21 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle the initial step."""
         if user_input is not None:
+            main_thermostat = user_input[CONF_MAIN_THERMOSTAT]
+            
             # Validate thermostat exists
-            if user_input[CONF_MAIN_THERMOSTAT] not in self.hass.states.async_entity_ids("climate"):
+            if main_thermostat not in self.hass.states.async_entity_ids("climate"):
                 return self.async_show_form(
                     step_id="user",
                     errors={CONF_MAIN_THERMOSTAT: "invalid_thermostat"},
                 )
             
-            self.data[CONF_MAIN_THERMOSTAT] = user_input[CONF_MAIN_THERMOSTAT]
+            # Check if this thermostat is already configured
+            # Use thermostat entity ID as unique identifier to allow multiple thermostats
+            await self.async_set_unique_id(main_thermostat)
+            self._abort_if_unique_id_configured()
+            
+            self.data[CONF_MAIN_THERMOSTAT] = main_thermostat
             return await self.async_step_rooms()
 
         # Get available climate entities
