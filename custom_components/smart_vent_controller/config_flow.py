@@ -307,6 +307,12 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle settings configuration step."""
         if user_input is not None:
+            # Ensure float fields are actually floats
+            if "heat_boost_f" in user_input:
+                user_input["heat_boost_f"] = float(user_input["heat_boost_f"])
+            if "room_hysteresis_f" in user_input:
+                user_input["room_hysteresis_f"] = float(user_input["room_hysteresis_f"])
+            
             # Store settings in options, not data
             options = {}
             options.update(user_input)
@@ -411,11 +417,23 @@ class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
+            # Ensure heat_boost_f is a float
+            if "heat_boost_f" in user_input:
+                user_input["heat_boost_f"] = float(user_input["heat_boost_f"])
+            # Ensure room_hysteresis_f is a float
+            if "room_hysteresis_f" in user_input:
+                user_input["room_hysteresis_f"] = float(user_input["room_hysteresis_f"])
             # Update options
             return self.async_create_entry(title="", data=user_input)
         
         # Get current options
         current_options = self.config_entry.options or {}
+        
+        # Convert integer values to floats for float fields
+        if "heat_boost_f" in current_options and isinstance(current_options["heat_boost_f"], int):
+            current_options["heat_boost_f"] = float(current_options["heat_boost_f"])
+        if "room_hysteresis_f" in current_options and isinstance(current_options["room_hysteresis_f"], int):
+            current_options["room_hysteresis_f"] = float(current_options["room_hysteresis_f"])
         
         return self.async_show_form(
             step_id="init",
