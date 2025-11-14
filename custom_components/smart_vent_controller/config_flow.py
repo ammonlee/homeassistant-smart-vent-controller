@@ -172,27 +172,69 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle room configuration step."""
         if user_input is not None:
+            # Handle both "name" and "room_name" for compatibility
+            room_name = user_input.get("name") or user_input.get("room_name") or user_input.get(CONF_ROOM_NAME)
+            climate_entity = user_input.get("climate_entity") or user_input.get(CONF_ROOM_CLIMATE)
+            temp_sensor = user_input.get("temp_sensor") or user_input.get(CONF_ROOM_TEMP_SENSOR) or ""
+            occupancy_sensor = user_input.get("occupancy_sensor") or user_input.get(CONF_ROOM_OCCUPANCY_SENSOR) or ""
+            vent_entities = user_input.get("vent_entities") or user_input.get(CONF_ROOM_VENTS) or []
+            priority = user_input.get("priority") or user_input.get(CONF_ROOM_PRIORITY) or DEFAULT_ROOM_PRIORITY
+            
+            # Validate required fields
+            if not room_name or not climate_entity:
+                return self.async_show_form(
+                    step_id="rooms",
+                    data_schema=vol.Schema({
+                        vol.Required(CONF_ROOM_NAME): str,
+                        vol.Required(CONF_ROOM_CLIMATE): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="climate")
+                        ),
+                        vol.Optional(CONF_ROOM_TEMP_SENSOR): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="sensor")
+                        ),
+                        vol.Optional(CONF_ROOM_OCCUPANCY_SENSOR): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="binary_sensor")
+                        ),
+                        vol.Optional(CONF_ROOM_VENTS): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="cover", multiple=True)
+                        ),
+                        vol.Optional(
+                            CONF_ROOM_PRIORITY,
+                            default=DEFAULT_ROOM_PRIORITY
+                        ): selector.NumberSelector(
+                            selector.NumberSelectorConfig(
+                                min=0,
+                                max=10,
+                                step=1,
+                                mode=selector.NumberSelectorMode.SLIDER
+                            )
+                        ),
+                        vol.Optional("add_another", default=False): bool,
+                    }),
+                    errors={"base": "name_and_climate_required"},
+                )
+            
             if user_input.get("add_another"):
                 # Add room and continue
                 self.rooms.append({
-                    "name": user_input["room_name"],
-                    "climate_entity": user_input["climate_entity"],
-                    "temp_sensor": user_input.get("temp_sensor") or "",
-                    "occupancy_sensor": user_input.get("occupancy_sensor") or "",
-                    "vent_entities": user_input.get("vent_entities", []),
-                    "priority": user_input.get("priority", DEFAULT_ROOM_PRIORITY),
+                    "name": room_name,
+                    "climate_entity": climate_entity,
+                    "temp_sensor": temp_sensor,
+                    "occupancy_sensor": occupancy_sensor,
+                    "vent_entities": vent_entities if isinstance(vent_entities, list) else [vent_entities] if vent_entities else [],
+                    "priority": int(priority) if priority else DEFAULT_ROOM_PRIORITY,
                 })
                 return await self.async_step_rooms()
             else:
                 # Done adding rooms, move to settings
-                if user_input.get("room_name"):
+                if room_name:
                     self.rooms.append({
-                        "name": user_input["room_name"],
-                        "climate_entity": user_input["climate_entity"],
-                        "temp_sensor": user_input.get("temp_sensor") or "",
-                        "occupancy_sensor": user_input.get("occupancy_sensor") or "",
-                        "vent_entities": user_input.get("vent_entities", []),
-                        "priority": user_input.get("priority", DEFAULT_ROOM_PRIORITY),
+                        "name": room_name,
+                        "climate_entity": climate_entity,
+                        "temp_sensor": temp_sensor,
+                        "occupancy_sensor": occupancy_sensor,
+                        "vent_entities": vent_entities if isinstance(vent_entities, list) else [vent_entities] if vent_entities else [],
+                        "priority": int(priority) if priority else DEFAULT_ROOM_PRIORITY,
                     })
                 self.data[CONF_ROOMS] = self.rooms
                 return await self.async_step_settings()
