@@ -3,9 +3,17 @@
     "step": {
       "user": {
         "title": "Zone Controller Setup",
-        "description": "Select your main HVAC thermostat",
+        "description": "Select your main HVAC thermostat{migration_note}",
         "data": {
-          "main_thermostat": "Main Thermostat"
+          "main_thermostat": "Main Thermostat",
+          "migrate_from_yaml": "Migrate from YAML Configuration"
+        }
+      },
+      "migrate": {
+        "title": "Migrate from YAML",
+        "description": "Found YAML configuration with {rooms_count} rooms and thermostat {main_thermostat}.\n\nWarnings:\n{warnings}\n\nDo you want to import this configuration?",
+        "data": {
+          "confirm_migration": "Import YAML Configuration"
         }
       },
       "rooms": {

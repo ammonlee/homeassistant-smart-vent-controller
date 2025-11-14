@@ -43,6 +43,45 @@ class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self.data = {}
         self.rooms = []
+    
+    async def async_step_import(self, import_info: dict[str, Any] | None = None) -> FlowResult:
+        """Handle import from YAML configuration.
+        
+        Args:
+            import_info: Imported configuration data
+        
+        Returns:
+            Flow result
+        """
+        if import_info is None:
+            return self.async_abort(reason="no_import_data")
+        
+        # Check if already configured
+        await self.async_set_unique_id(DOMAIN)
+        self._abort_if_unique_id_configured()
+        
+        # Validate imported data
+        main_thermostat = import_info.get("main_thermostat")
+        if not main_thermostat:
+            return self.async_abort(reason="invalid_import_data")
+        
+        # Validate thermostat exists
+        if main_thermostat not in self.hass.states.async_entity_ids("climate"):
+            return self.async_abort(reason="invalid_thermostat")
+        
+        # Set up data
+        self.data[CONF_MAIN_THERMOSTAT] = main_thermostat
+        self.data[CONF_ROOMS] = import_info.get("rooms", [])
+        
+        # Set up options
+        options = import_info.get("options", {})
+        
+        # Create entry
+        return self.async_create_entry(
+            title=f"Zone Controller ({main_thermostat})",
+            data=self.data,
+            options=options,
+        )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -67,17 +106,66 @@ class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not climate_entities:
             return self.async_abort(reason="no_climate_entities")
 
+        # Check for YAML config
+        from .migration import detect_yaml_config
+        yaml_config = await detect_yaml_config(self.hass)
+        has_yaml = yaml_config is not None
+        
+        schema_dict = {
+            vol.Required(
+                CONF_MAIN_THERMOSTAT,
+                default=climate_entities[0] if climate_entities else None
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="climate")
+            ),
+        }
+        
+        if has_yaml:
+            schema_dict[vol.Optional("migrate_from_yaml", default=False)] = bool
+        
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({
-                vol.Required(
-                    CONF_MAIN_THERMOSTAT,
-                    default=climate_entities[0] if climate_entities else None
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="climate")
-                ),
-            }),
+            data_schema=vol.Schema(schema_dict),
+            description_placeholders={
+                "migration_note": "We found an existing YAML configuration. You can migrate it or start fresh."
+            } if has_yaml else {},
         )
+    
+    async def async_step_migrate(
+        self, yaml_config: dict[str, Any] | None = None, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle migration from YAML configuration."""
+        from .migration import detect_yaml_config, validate_migration_config
+        
+        if yaml_config is None:
+            yaml_config = await detect_yaml_config(self.hass)
+        
+        if yaml_config is None:
+            return self.async_abort(reason="no_yaml_config")
+        
+        if user_input is None:
+            # Validate configuration
+            is_valid, warnings = await validate_migration_config(self.hass, yaml_config)
+            
+            # Show migration form
+            return self.async_show_form(
+                step_id="migrate",
+                data_schema=vol.Schema({
+                    vol.Required("confirm_migration", default=True): bool,
+                }),
+                description_placeholders={
+                    "rooms_count": str(len(yaml_config.get("rooms", []))),
+                    "main_thermostat": yaml_config.get("main_thermostat", "Unknown"),
+                    "warnings": "\n".join(f"- {w}" for w in warnings) if warnings else "None",
+                },
+                errors={} if is_valid else {"base": "validation_warnings"},
+            )
+        
+        if not user_input.get("confirm_migration"):
+            return await self.async_step_user()
+        
+        # Import configuration
+        return await self.async_step_import(yaml_config)
 
     async def async_step_rooms(
         self, user_input: dict[str, Any] | None = None
