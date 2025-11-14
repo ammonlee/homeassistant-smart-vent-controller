@@ -1,0 +1,42 @@
+zone_controller:
+  set_room_priority:
+    name: Set Room Priority
+    description: Change the priority of a room for relief vent selection
+    fields:
+      room:
+        name: Room
+        description: Room name or key
+        required: true
+        selector:
+          text:
+      priority:
+        name: Priority
+        description: Priority value (0-10)
+        required: true
+        selector:
+          number:
+            min: 0
+            max: 10
+            step: 1
+  
+  override_room:
+    name: Override Room
+    description: Temporarily override room control
+    fields:
+      room:
+        name: Room
+        description: Room name or key
+        required: true
+        selector:
+          text:
+      enabled:
+        name: Enabled
+        description: Enable or disable override
+        required: true
+        selector:
+          boolean:
+  
+  reset_to_defaults:
+    name: Reset to Defaults
+    description: Reset all settings to default values
+

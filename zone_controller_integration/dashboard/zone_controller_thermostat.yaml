@@ -1,0 +1,59 @@
+# Zone Controller - Thermostat Control Card
+# Main thermostat status and control
+
+type: vertical-stack
+cards:
+  # Thermostat Status
+  - type: thermostat
+    entity: climate.main_floor_thermostat
+    name: Main Thermostat
+
+  # Current Status
+  - type: entities
+    title: Current Status
+    show_header_toggle: false
+    entities:
+      - entity: climate.main_floor_thermostat
+        name: Mode
+        attribute: hvac_mode
+      - entity: climate.main_floor_thermostat
+        name: Action
+        attribute: hvac_action
+      - entity: climate.main_floor_thermostat
+        name: Current Temperature
+        attribute: current_temperature
+      - entity: climate.main_floor_thermostat
+        name: Setpoint
+        attribute: temperature
+      - entity: input_number.last_thermostat_setpoint
+        name: Last Automation Setpoint
+
+  # Override Detection
+  - type: entity
+    entity: binary_sensor.thermostat_manual_override
+    name: Manual Override Detected
+    icon: mdi:hand-back-left
+
+  # Cycle Protection
+  - type: markdown
+    content: |
+      ## 🔄 Cycle Protection
+      
+      **Status:** {{ states('sensor.hvac_cycle_protection_status') }}
+      
+      **Start Time:** 
+      {% set start_ts = states('input_number.hvac_cycle_start_timestamp') | float(0) %}
+      {% if start_ts > 0 %}
+        {{ (start_ts | int) | timestamp_custom('%H:%M:%S') }}
+      {% else %}
+        Not started
+      {% endif %}
+      
+      **End Time:**
+      {% set end_ts = states('input_number.hvac_cycle_end_timestamp') | float(0) %}
+      {% if end_ts > 0 %}
+        {{ (end_ts | int) | timestamp_custom('%H:%M:%S') }}
+      {% else %}
+        Not ended
+      {% endif %}
+

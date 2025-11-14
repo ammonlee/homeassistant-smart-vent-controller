@@ -1,0 +1,348 @@
+"""Config flow for Zone Controller integration."""
+
+from typing import Any
+import voluptuous as vol
+
+from homeassistant import config_entries
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import selector
+
+from .const import (
+    DOMAIN,
+    CONF_MAIN_THERMOSTAT,
+    CONF_ROOMS,
+    CONF_ROOM_NAME,
+    CONF_ROOM_CLIMATE,
+    CONF_ROOM_TEMP_SENSOR,
+    CONF_ROOM_OCCUPANCY_SENSOR,
+    CONF_ROOM_VENTS,
+    CONF_ROOM_PRIORITY,
+    DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
+    DEFAULT_CLOSED_THRESHOLD_PCT,
+    DEFAULT_RELIEF_OPEN_PCT,
+    DEFAULT_MAX_RELIEF_ROOMS,
+    DEFAULT_ROOM_HYSTERESIS_F,
+    DEFAULT_OCCUPANCY_LINGER_MIN,
+    DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN,
+    DEFAULT_HEAT_BOOST_F,
+    DEFAULT_HVAC_MIN_RUNTIME_MIN,
+    DEFAULT_HVAC_MIN_OFF_TIME_MIN,
+    DEFAULT_DEFAULT_THERMOSTAT_TEMP,
+    DEFAULT_ROOM_PRIORITY,
+)
+
+
+class ZoneControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Zone Controller."""
+
+    VERSION = 1
+
+    def __init__(self):
+        """Initialize the config flow."""
+        self.data = {}
+        self.rooms = []
+
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
+        if user_input is not None:
+            # Validate thermostat exists
+            if user_input[CONF_MAIN_THERMOSTAT] not in self.hass.states.async_entity_ids("climate"):
+                return self.async_show_form(
+                    step_id="user",
+                    errors={CONF_MAIN_THERMOSTAT: "invalid_thermostat"},
+                )
+            
+            self.data[CONF_MAIN_THERMOSTAT] = user_input[CONF_MAIN_THERMOSTAT]
+            return await self.async_step_rooms()
+
+        # Get available climate entities
+        climate_entities = sorted([
+            entity_id for entity_id in self.hass.states.async_entity_ids("climate")
+        ])
+
+        if not climate_entities:
+            return self.async_abort(reason="no_climate_entities")
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_MAIN_THERMOSTAT,
+                    default=climate_entities[0] if climate_entities else None
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="climate")
+                ),
+            }),
+        )
+
+    async def async_step_rooms(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle room configuration step."""
+        if user_input is not None:
+            if user_input.get("add_another"):
+                # Add room and continue
+                self.rooms.append({
+                    "name": user_input["room_name"],
+                    "climate_entity": user_input["climate_entity"],
+                    "temp_sensor": user_input.get("temp_sensor") or "",
+                    "occupancy_sensor": user_input.get("occupancy_sensor") or "",
+                    "vent_entities": user_input.get("vent_entities", []),
+                    "priority": user_input.get("priority", DEFAULT_ROOM_PRIORITY),
+                })
+                return await self.async_step_rooms()
+            else:
+                # Done adding rooms, move to settings
+                if user_input.get("room_name"):
+                    self.rooms.append({
+                        "name": user_input["room_name"],
+                        "climate_entity": user_input["climate_entity"],
+                        "temp_sensor": user_input.get("temp_sensor") or "",
+                        "occupancy_sensor": user_input.get("occupancy_sensor") or "",
+                        "vent_entities": user_input.get("vent_entities", []),
+                        "priority": user_input.get("priority", DEFAULT_ROOM_PRIORITY),
+                    })
+                self.data[CONF_ROOMS] = self.rooms
+                return await self.async_step_settings()
+
+        # Get available entities for dropdowns
+        climate_entities = sorted([
+            entity_id for entity_id in self.hass.states.async_entity_ids("climate")
+        ])
+        temp_sensors = sorted([
+            entity_id for entity_id in self.hass.states.async_entity_ids("sensor")
+            if "temp" in entity_id.lower()
+        ])
+        occupancy_sensors = sorted([
+            entity_id for entity_id in self.hass.states.async_entity_ids("binary_sensor")
+            if "occup" in entity_id.lower()
+        ])
+        vent_entities = sorted([
+            entity_id for entity_id in self.hass.states.async_entity_ids("cover")
+        ])
+
+        schema_dict = {
+            vol.Optional(CONF_ROOM_NAME): str,
+            vol.Optional(CONF_ROOM_CLIMATE): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="climate")
+            ),
+            vol.Optional(CONF_ROOM_TEMP_SENSOR): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(CONF_ROOM_OCCUPANCY_SENSOR): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="binary_sensor")
+            ),
+            vol.Optional(CONF_ROOM_VENTS): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="cover", multiple=True)
+            ),
+            vol.Optional(
+                CONF_ROOM_PRIORITY,
+                default=DEFAULT_ROOM_PRIORITY
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=10,
+                    step=1,
+                    mode=selector.NumberSelectorMode.SLIDER
+                )
+            ),
+            vol.Optional("add_another", default=False): bool,
+        }
+        
+        return self.async_show_form(
+            step_id="rooms",
+            data_schema=vol.Schema(schema_dict),
+        )
+
+    async def async_step_settings(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle settings configuration step."""
+        if user_input is not None:
+            # Store settings in options, not data
+            options = {}
+            options.update(user_input)
+            self.data.update(user_input)  # Keep in data for initial setup
+            
+            return self.async_create_entry(
+                title=f"Zone Controller ({self.data[CONF_MAIN_THERMOSTAT]})",
+                data=self.data,
+                options=options,
+            )
+
+        return self.async_show_form(
+            step_id="settings",
+            data_schema=vol.Schema({
+                vol.Optional(
+                    "min_other_room_open_pct",
+                    default=DEFAULT_MIN_OTHER_ROOM_OPEN_PCT
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "closed_threshold_pct",
+                    default=DEFAULT_CLOSED_THRESHOLD_PCT
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "relief_open_pct",
+                    default=DEFAULT_RELIEF_OPEN_PCT
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "max_relief_rooms",
+                    default=DEFAULT_MAX_RELIEF_ROOMS
+                ): vol.All(int, vol.Range(min=1, max=10)),
+                vol.Optional(
+                    "room_hysteresis_f",
+                    default=DEFAULT_ROOM_HYSTERESIS_F
+                ): vol.All(float, vol.Range(min=0, max=5)),
+                vol.Optional(
+                    "hvac_min_runtime_min",
+                    default=DEFAULT_HVAC_MIN_RUNTIME_MIN
+                ): vol.All(int, vol.Range(min=0, max=30)),
+                vol.Optional(
+                    "hvac_min_off_time_min",
+                    default=DEFAULT_HVAC_MIN_OFF_TIME_MIN
+                ): vol.All(int, vol.Range(min=0, max=30)),
+                vol.Optional(
+                    "occupancy_linger_min",
+                    default=DEFAULT_OCCUPANCY_LINGER_MIN
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "occupancy_linger_night_min",
+                    default=DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "heat_boost_f",
+                    default=DEFAULT_HEAT_BOOST_F
+                ): vol.All(float, vol.Range(min=0, max=3)),
+                vol.Optional(
+                    "default_thermostat_temp",
+                    default=DEFAULT_DEFAULT_THERMOSTAT_TEMP
+                ): vol.All(int, vol.Range(min=65, max=80)),
+                vol.Optional(
+                    "automation_cooldown_sec",
+                    default=30
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "require_occupancy",
+                    default=True
+                ): bool,
+                vol.Optional(
+                    "heat_boost_enabled",
+                    default=True
+                ): bool,
+                vol.Optional(
+                    "auto_thermostat_control",
+                    default=True
+                ): bool,
+                vol.Optional(
+                    "auto_vent_control",
+                    default=True
+                ): bool,
+                vol.Optional(
+                    "debug_mode",
+                    default=False
+                ): bool,
+            }),
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
+        """Return options flow handler."""
+        return ZoneControllerOptionsFlowHandler(config_entry)
+
+
+class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options flow for Zone Controller."""
+    
+    def __init__(self, config_entry: config_entries.ConfigEntry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+    
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            # Update options
+            return self.async_create_entry(title="", data=user_input)
+        
+        # Get current options
+        current_options = self.config_entry.options or {}
+        
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Optional(
+                    "min_other_room_open_pct",
+                    default=current_options.get("min_other_room_open_pct", DEFAULT_MIN_OTHER_ROOM_OPEN_PCT)
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "closed_threshold_pct",
+                    default=current_options.get("closed_threshold_pct", DEFAULT_CLOSED_THRESHOLD_PCT)
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "relief_open_pct",
+                    default=current_options.get("relief_open_pct", DEFAULT_RELIEF_OPEN_PCT)
+                ): vol.All(int, vol.Range(min=0, max=100)),
+                vol.Optional(
+                    "max_relief_rooms",
+                    default=current_options.get("max_relief_rooms", DEFAULT_MAX_RELIEF_ROOMS)
+                ): vol.All(int, vol.Range(min=1, max=10)),
+                vol.Optional(
+                    "room_hysteresis_f",
+                    default=current_options.get("room_hysteresis_f", DEFAULT_ROOM_HYSTERESIS_F)
+                ): vol.All(float, vol.Range(min=0, max=5)),
+                vol.Optional(
+                    "hvac_min_runtime_min",
+                    default=current_options.get("hvac_min_runtime_min", DEFAULT_HVAC_MIN_RUNTIME_MIN)
+                ): vol.All(int, vol.Range(min=0, max=30)),
+                vol.Optional(
+                    "hvac_min_off_time_min",
+                    default=current_options.get("hvac_min_off_time_min", DEFAULT_HVAC_MIN_OFF_TIME_MIN)
+                ): vol.All(int, vol.Range(min=0, max=30)),
+                vol.Optional(
+                    "occupancy_linger_min",
+                    default=current_options.get("occupancy_linger_min", DEFAULT_OCCUPANCY_LINGER_MIN)
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "occupancy_linger_night_min",
+                    default=current_options.get("occupancy_linger_night_min", DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN)
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "heat_boost_f",
+                    default=current_options.get("heat_boost_f", DEFAULT_HEAT_BOOST_F)
+                ): vol.All(float, vol.Range(min=0, max=3)),
+                vol.Optional(
+                    "default_thermostat_temp",
+                    default=current_options.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP)
+                ): vol.All(int, vol.Range(min=65, max=80)),
+                vol.Optional(
+                    "automation_cooldown_sec",
+                    default=current_options.get("automation_cooldown_sec", 30)
+                ): vol.All(int, vol.Range(min=0, max=300)),
+                vol.Optional(
+                    "require_occupancy",
+                    default=current_options.get("require_occupancy", True)
+                ): bool,
+                vol.Optional(
+                    "heat_boost_enabled",
+                    default=current_options.get("heat_boost_enabled", True)
+                ): bool,
+                vol.Optional(
+                    "auto_thermostat_control",
+                    default=current_options.get("auto_thermostat_control", True)
+                ): bool,
+                vol.Optional(
+                    "auto_vent_control",
+                    default=current_options.get("auto_vent_control", True)
+                ): bool,
+                vol.Optional(
+                    "debug_mode",
+                    default=current_options.get("debug_mode", False)
+                ): bool,
+            }),
+        )

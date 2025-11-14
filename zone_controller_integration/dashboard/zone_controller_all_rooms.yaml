@@ -1,0 +1,157 @@
+# Zone Controller - All Rooms Overview Card
+# Displays all configured rooms in a grid layout
+
+type: grid
+square: false
+columns: 3
+cards:
+  # Master Bedroom
+  - type: custom:mushroom-entity-card
+    entity: sensor.master_temp_degf
+    name: Master Bedroom
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.master_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.master_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.master_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Blue Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.blue_temp_degf
+    name: Blue Room
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.blue_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.blue_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.blue_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Gold Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.gold_temp_degf
+    name: Gold Room
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.gold_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.gold_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.gold_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Green Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.green_temp_degf
+    name: Green Room
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.green_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.green_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.green_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Grey Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.grey_temp_degf
+    name: Grey Room
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.grey_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.grey_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.grey_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Guest Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.guest_temp_degf
+    name: Guest Room
+    icon: mdi:bed
+    icon_color: |
+      {% set delta = states('sensor.guest_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.guest_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.guest_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Family Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.family_temp_degf
+    name: Family Room
+    icon: mdi:sofa
+    icon_color: |
+      {% set delta = states('sensor.family_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.family_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.family_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Kitchen
+  - type: custom:mushroom-entity-card
+    entity: sensor.kitchen_temp_degf
+    name: Kitchen
+    icon: mdi:chef-hat
+    icon_color: |
+      {% set delta = states('sensor.kitchen_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.kitchen_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.kitchen_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Basement
+  - type: custom:mushroom-entity-card
+    entity: sensor.basement_temp_degf
+    name: Basement
+    icon: mdi:stairs
+    icon_color: |
+      {% set delta = states('sensor.basement_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.basement_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.basement_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+
+  # Piano Room
+  - type: custom:mushroom-entity-card
+    entity: sensor.piano_temp_degf
+    name: Piano Room
+    icon: mdi:music
+    icon_color: |
+      {% set delta = states('sensor.piano_delta_degf') | float(0) %}
+      {% if delta > 2 %}red{% elif delta > 0 %}orange{% elif delta < -2 %}blue{% elif delta < 0 %}light-blue{% else %}green{% endif %}
+    secondary_info: |
+      {{ states('sensor.piano_target_degf') | default('N/A') }}°F | 
+      Δ{{ states('sensor.piano_delta_degf') | default('0.0') }}°F
+    layout: vertical
+    tap_action:
+      action: more-info
+

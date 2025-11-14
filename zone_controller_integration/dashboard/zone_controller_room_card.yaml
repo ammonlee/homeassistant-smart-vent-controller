@@ -1,0 +1,30 @@
+# Zone Controller - Individual Room Card Template
+# Use this template for each room, replacing {room} with the room key (e.g., master, blue, gold)
+
+type: custom:mushroom-entity-card
+entity: sensor.{room}_temp_degf
+name: "{Room Name}"
+icon: mdi:home-thermometer
+icon_color: |
+  {% set delta = states('sensor.{room}_delta_degf') | float(0) %}
+  {% if delta > 2 %}
+    red
+  {% elif delta > 0 %}
+    orange
+  {% elif delta < -2 %}
+    blue
+  {% elif delta < 0 %}
+    light-blue
+  {% else %}
+    green
+  {% endif %}
+secondary_info: |
+  Target: {{ states('sensor.{room}_target_degf') | default('N/A') }}°F | 
+  Delta: {{ states('sensor.{room}_delta_degf') | default('0.0') }}°F
+layout: vertical
+fill_container: false
+tap_action:
+  action: more-info
+show_state: true
+show_name: true
+

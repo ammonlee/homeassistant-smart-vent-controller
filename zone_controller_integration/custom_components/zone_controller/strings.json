@@ -1,0 +1,88 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Zone Controller Setup",
+        "description": "Select your main HVAC thermostat",
+        "data": {
+          "main_thermostat": "Main Thermostat"
+        }
+      },
+      "rooms": {
+        "title": "Configure Rooms",
+        "description": "Add rooms to control. You can add multiple rooms.",
+        "data": {
+          "room_name": "Room Name",
+          "climate_entity": "Climate Entity",
+          "temp_sensor": "Temperature Sensor (optional)",
+          "occupancy_sensor": "Occupancy Sensor (optional)",
+          "vent_entities": "Vent Entities",
+          "priority": "Priority (0-10)",
+          "add_another": "Add Another Room"
+        }
+      },
+      "settings": {
+        "title": "Configure Settings",
+        "description": "Adjust thresholds and protection settings",
+        "data": {
+          "min_other_room_open_pct": "Minimum Other Room Open %",
+          "closed_threshold_pct": "Closed Threshold %",
+          "relief_open_pct": "Relief Open %",
+          "max_relief_rooms": "Max Relief Rooms",
+          "room_hysteresis_f": "Room Hysteresis (°F)",
+          "hvac_min_runtime_min": "HVAC Minimum Runtime (min)",
+          "hvac_min_off_time_min": "HVAC Minimum Off Time (min)",
+          "occupancy_linger_min": "Occupancy Linger (day, min)",
+          "occupancy_linger_night_min": "Occupancy Linger (night, min)",
+          "heat_boost_f": "Heat Boost (°F)",
+          "default_thermostat_temp": "Default Thermostat Temp (°F)",
+          "automation_cooldown_sec": "Automation Cooldown (sec)",
+          "require_occupancy": "Require Occupancy",
+          "heat_boost_enabled": "Heat Boost Enabled",
+          "auto_thermostat_control": "Auto Thermostat Control",
+          "auto_vent_control": "Auto Vent Control",
+          "debug_mode": "Debug Mode"
+        }
+      }
+    },
+    "error": {
+      "invalid_thermostat": "Selected thermostat is not valid",
+      "no_climate_entities": "No climate entities found. Please add a climate entity first.",
+      "no_rooms": "At least one room must be configured"
+    },
+    "abort": {
+      "already_configured": "Zone Controller is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Zone Controller Options",
+        "description": "Adjust Zone Controller settings. Changes take effect immediately.",
+        "data": {
+          "min_other_room_open_pct": "Minimum Other Room Open %",
+          "closed_threshold_pct": "Closed Threshold %",
+          "relief_open_pct": "Relief Open %",
+          "max_relief_rooms": "Max Relief Rooms",
+          "room_hysteresis_f": "Room Hysteresis (°F)",
+          "hvac_min_runtime_min": "HVAC Minimum Runtime (min)",
+          "hvac_min_off_time_min": "HVAC Minimum Off Time (min)",
+          "occupancy_linger_min": "Occupancy Linger (day, min)",
+          "occupancy_linger_night_min": "Occupancy Linger (night, min)",
+          "heat_boost_f": "Heat Boost (°F)",
+          "default_thermostat_temp": "Default Thermostat Temp (°F)",
+          "automation_cooldown_sec": "Automation Cooldown (sec)",
+          "require_occupancy": "Require Occupancy",
+          "heat_boost_enabled": "Heat Boost Enabled",
+          "auto_thermostat_control": "Auto Thermostat Control",
+          "auto_vent_control": "Auto Vent Control",
+          "debug_mode": "Debug Mode"
+        }
+      }
+    },
+    "error": {
+      "invalid_value": "Invalid value entered"
+    }
+  }
+}
+
