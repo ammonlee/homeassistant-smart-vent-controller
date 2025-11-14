@@ -103,7 +103,7 @@ class SmartVentConditionerAutomation:
             self._pending_task.cancel()
         
         # Schedule with small delay to batch rapid changes
-        import asyncio
+import asyncio
         self._pending_task = self.hass.async_create_task(
             self._debounced_run_automation()
         )

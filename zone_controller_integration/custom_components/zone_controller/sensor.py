@@ -53,7 +53,7 @@ async def async_setup_entry(
     entities.append(HVACCycleEndTimeSensor(coordinator, entry))
     
     # Statistics sensor
-    entities.append(ZoneControllerStatsSensor(coordinator, entry))
+    entities.append(SmartVentControllerStatsSensor(coordinator, entry))
     
     async_add_entities(entities)
 
@@ -426,7 +426,7 @@ class HVACCycleEndTimeSensor(SensorEntity):
         return 0
 
 
-class ZoneControllerStatsSensor(SensorEntity):
+class SmartVentControllerStatsSensor(SensorEntity):
     """Sensor for Smart Vent Controller statistics."""
     
     _attr_icon = "mdi:chart-line"
