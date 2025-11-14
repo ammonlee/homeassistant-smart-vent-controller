@@ -22,7 +22,7 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 
 1. Open HACS → Integrations
 2. Click the three dots (⋮) → Custom repositories
-3. Add repository: `https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller`
+3. Add repository: `https://github.com/ammonlee/homeassistant-smart-vent-controller`
 4. Category: Integration
 5. Click Install
 6. Restart Home Assistant
@@ -103,7 +103,7 @@ Example dashboard cards are available in the `dashboard/` folder. See `dashboard
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller/issues)
+- **Issues**: [GitHub Issues](https://github.com/ammonlee/homeassistant-smart-vent-controller/issues)
 - **Documentation**: See the `docs/` folder
 - **Logs**: Enable debug mode in integration options for detailed logging
 
