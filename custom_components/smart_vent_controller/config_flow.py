@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+from homeassistant.helpers.translation import async_get_translations
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,6 +47,17 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self.data = {}
         self.rooms = []
+    
+    async def _get_description(self, step: str, key: str) -> str:
+        """Get description for a config field from translations."""
+        try:
+            translations = await async_get_translations(
+                self.hass, self.hass.config.language, "config", [DOMAIN]
+            )
+            desc_key = f"config.step.{step}.data.{key}_description"
+            return translations.get(desc_key, "")
+        except Exception:
+            return ""
     
     async def async_step_import(self, import_info: dict[str, Any] | None = None) -> FlowResult:
         """Handle import from YAML configuration.
@@ -324,76 +336,112 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 options=options,
             )
 
+        # Get descriptions from translations
+        min_other_desc = await self._get_description("settings", "min_other_room_open_pct")
+        closed_threshold_desc = await self._get_description("settings", "closed_threshold_pct")
+        relief_open_desc = await self._get_description("settings", "relief_open_pct")
+        max_relief_desc = await self._get_description("settings", "max_relief_rooms")
+        hysteresis_desc = await self._get_description("settings", "room_hysteresis_f")
+        runtime_desc = await self._get_description("settings", "hvac_min_runtime_min")
+        off_time_desc = await self._get_description("settings", "hvac_min_off_time_min")
+        linger_day_desc = await self._get_description("settings", "occupancy_linger_min")
+        linger_night_desc = await self._get_description("settings", "occupancy_linger_night_min")
+        heat_boost_desc = await self._get_description("settings", "heat_boost_f")
+        default_temp_desc = await self._get_description("settings", "default_thermostat_temp")
+        cooldown_desc = await self._get_description("settings", "automation_cooldown_sec")
+        require_occ_desc = await self._get_description("settings", "require_occupancy")
+        boost_enabled_desc = await self._get_description("settings", "heat_boost_enabled")
+        auto_thermo_desc = await self._get_description("settings", "auto_thermostat_control")
+        auto_vent_desc = await self._get_description("settings", "auto_vent_control")
+        debug_desc = await self._get_description("settings", "debug_mode")
+        
         return self.async_show_form(
             step_id="settings",
             data_schema=vol.Schema({
                 vol.Optional(
                     "min_other_room_open_pct",
-                    default=DEFAULT_MIN_OTHER_ROOM_OPEN_PCT
+                    default=DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
+                    description=min_other_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "closed_threshold_pct",
-                    default=DEFAULT_CLOSED_THRESHOLD_PCT
+                    default=DEFAULT_CLOSED_THRESHOLD_PCT,
+                    description=closed_threshold_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "relief_open_pct",
-                    default=DEFAULT_RELIEF_OPEN_PCT
+                    default=DEFAULT_RELIEF_OPEN_PCT,
+                    description=relief_open_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "max_relief_rooms",
-                    default=DEFAULT_MAX_RELIEF_ROOMS
+                    default=DEFAULT_MAX_RELIEF_ROOMS,
+                    description=max_relief_desc
                 ): vol.All(int, vol.Range(min=1, max=10)),
                 vol.Optional(
                     "room_hysteresis_f",
-                    default=DEFAULT_ROOM_HYSTERESIS_F
+                    default=DEFAULT_ROOM_HYSTERESIS_F,
+                    description=hysteresis_desc
                 ): vol.All(float, vol.Range(min=0, max=5)),
                 vol.Optional(
                     "hvac_min_runtime_min",
-                    default=DEFAULT_HVAC_MIN_RUNTIME_MIN
+                    default=DEFAULT_HVAC_MIN_RUNTIME_MIN,
+                    description=runtime_desc
                 ): vol.All(int, vol.Range(min=0, max=30)),
                 vol.Optional(
                     "hvac_min_off_time_min",
-                    default=DEFAULT_HVAC_MIN_OFF_TIME_MIN
+                    default=DEFAULT_HVAC_MIN_OFF_TIME_MIN,
+                    description=off_time_desc
                 ): vol.All(int, vol.Range(min=0, max=30)),
                 vol.Optional(
                     "occupancy_linger_min",
-                    default=DEFAULT_OCCUPANCY_LINGER_MIN
+                    default=DEFAULT_OCCUPANCY_LINGER_MIN,
+                    description=linger_day_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "occupancy_linger_night_min",
-                    default=DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN
+                    default=DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN,
+                    description=linger_night_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "heat_boost_f",
-                    default=DEFAULT_HEAT_BOOST_F
+                    default=DEFAULT_HEAT_BOOST_F,
+                    description=heat_boost_desc
                 ): vol.All(float, vol.Range(min=0, max=3)),
                 vol.Optional(
                     "default_thermostat_temp",
-                    default=DEFAULT_DEFAULT_THERMOSTAT_TEMP
+                    default=DEFAULT_DEFAULT_THERMOSTAT_TEMP,
+                    description=default_temp_desc
                 ): vol.All(int, vol.Range(min=65, max=80)),
                 vol.Optional(
                     "automation_cooldown_sec",
-                    default=30
+                    default=30,
+                    description=cooldown_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "require_occupancy",
-                    default=True
+                    default=True,
+                    description=require_occ_desc
                 ): bool,
                 vol.Optional(
                     "heat_boost_enabled",
-                    default=True
+                    default=True,
+                    description=boost_enabled_desc
                 ): bool,
                 vol.Optional(
                     "auto_thermostat_control",
-                    default=True
+                    default=True,
+                    description=auto_thermo_desc
                 ): bool,
                 vol.Optional(
                     "auto_vent_control",
-                    default=True
+                    default=True,
+                    description=auto_vent_desc
                 ): bool,
                 vol.Optional(
                     "debug_mode",
-                    default=False
+                    default=False,
+                    description=debug_desc
                 ): bool,
             }),
         )
@@ -435,76 +483,112 @@ class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
         if "room_hysteresis_f" in current_options and isinstance(current_options["room_hysteresis_f"], int):
             current_options["room_hysteresis_f"] = float(current_options["room_hysteresis_f"])
         
+        # Get descriptions from translations
+        min_other_desc = await self._get_description("min_other_room_open_pct")
+        closed_threshold_desc = await self._get_description("closed_threshold_pct")
+        relief_open_desc = await self._get_description("relief_open_pct")
+        max_relief_desc = await self._get_description("max_relief_rooms")
+        hysteresis_desc = await self._get_description("room_hysteresis_f")
+        runtime_desc = await self._get_description("hvac_min_runtime_min")
+        off_time_desc = await self._get_description("hvac_min_off_time_min")
+        linger_day_desc = await self._get_description("occupancy_linger_min")
+        linger_night_desc = await self._get_description("occupancy_linger_night_min")
+        heat_boost_desc = await self._get_description("heat_boost_f")
+        default_temp_desc = await self._get_description("default_thermostat_temp")
+        cooldown_desc = await self._get_description("automation_cooldown_sec")
+        require_occ_desc = await self._get_description("require_occupancy")
+        boost_enabled_desc = await self._get_description("heat_boost_enabled")
+        auto_thermo_desc = await self._get_description("auto_thermostat_control")
+        auto_vent_desc = await self._get_description("auto_vent_control")
+        debug_desc = await self._get_description("debug_mode")
+        
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
                 vol.Optional(
                     "min_other_room_open_pct",
-                    default=current_options.get("min_other_room_open_pct", DEFAULT_MIN_OTHER_ROOM_OPEN_PCT)
+                    default=current_options.get("min_other_room_open_pct", DEFAULT_MIN_OTHER_ROOM_OPEN_PCT),
+                    description=min_other_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "closed_threshold_pct",
-                    default=current_options.get("closed_threshold_pct", DEFAULT_CLOSED_THRESHOLD_PCT)
+                    default=current_options.get("closed_threshold_pct", DEFAULT_CLOSED_THRESHOLD_PCT),
+                    description=closed_threshold_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "relief_open_pct",
-                    default=current_options.get("relief_open_pct", DEFAULT_RELIEF_OPEN_PCT)
+                    default=current_options.get("relief_open_pct", DEFAULT_RELIEF_OPEN_PCT),
+                    description=relief_open_desc
                 ): vol.All(int, vol.Range(min=0, max=100)),
                 vol.Optional(
                     "max_relief_rooms",
-                    default=current_options.get("max_relief_rooms", DEFAULT_MAX_RELIEF_ROOMS)
+                    default=current_options.get("max_relief_rooms", DEFAULT_MAX_RELIEF_ROOMS),
+                    description=max_relief_desc
                 ): vol.All(int, vol.Range(min=1, max=10)),
                 vol.Optional(
                     "room_hysteresis_f",
-                    default=current_options.get("room_hysteresis_f", DEFAULT_ROOM_HYSTERESIS_F)
+                    default=current_options.get("room_hysteresis_f", DEFAULT_ROOM_HYSTERESIS_F),
+                    description=hysteresis_desc
                 ): vol.All(float, vol.Range(min=0, max=5)),
                 vol.Optional(
                     "hvac_min_runtime_min",
-                    default=current_options.get("hvac_min_runtime_min", DEFAULT_HVAC_MIN_RUNTIME_MIN)
+                    default=current_options.get("hvac_min_runtime_min", DEFAULT_HVAC_MIN_RUNTIME_MIN),
+                    description=runtime_desc
                 ): vol.All(int, vol.Range(min=0, max=30)),
                 vol.Optional(
                     "hvac_min_off_time_min",
-                    default=current_options.get("hvac_min_off_time_min", DEFAULT_HVAC_MIN_OFF_TIME_MIN)
+                    default=current_options.get("hvac_min_off_time_min", DEFAULT_HVAC_MIN_OFF_TIME_MIN),
+                    description=off_time_desc
                 ): vol.All(int, vol.Range(min=0, max=30)),
                 vol.Optional(
                     "occupancy_linger_min",
-                    default=current_options.get("occupancy_linger_min", DEFAULT_OCCUPANCY_LINGER_MIN)
+                    default=current_options.get("occupancy_linger_min", DEFAULT_OCCUPANCY_LINGER_MIN),
+                    description=linger_day_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "occupancy_linger_night_min",
-                    default=current_options.get("occupancy_linger_night_min", DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN)
+                    default=current_options.get("occupancy_linger_night_min", DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN),
+                    description=linger_night_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "heat_boost_f",
-                    default=current_options.get("heat_boost_f", DEFAULT_HEAT_BOOST_F)
+                    default=current_options.get("heat_boost_f", DEFAULT_HEAT_BOOST_F),
+                    description=heat_boost_desc
                 ): vol.All(float, vol.Range(min=0, max=3)),
                 vol.Optional(
                     "default_thermostat_temp",
-                    default=current_options.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP)
+                    default=current_options.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP),
+                    description=default_temp_desc
                 ): vol.All(int, vol.Range(min=65, max=80)),
                 vol.Optional(
                     "automation_cooldown_sec",
-                    default=current_options.get("automation_cooldown_sec", 30)
+                    default=current_options.get("automation_cooldown_sec", 30),
+                    description=cooldown_desc
                 ): vol.All(int, vol.Range(min=0, max=300)),
                 vol.Optional(
                     "require_occupancy",
-                    default=current_options.get("require_occupancy", True)
+                    default=current_options.get("require_occupancy", True),
+                    description=require_occ_desc
                 ): bool,
                 vol.Optional(
                     "heat_boost_enabled",
-                    default=current_options.get("heat_boost_enabled", True)
+                    default=current_options.get("heat_boost_enabled", True),
+                    description=boost_enabled_desc
                 ): bool,
                 vol.Optional(
                     "auto_thermostat_control",
-                    default=current_options.get("auto_thermostat_control", True)
+                    default=current_options.get("auto_thermostat_control", True),
+                    description=auto_thermo_desc
                 ): bool,
                 vol.Optional(
                     "auto_vent_control",
-                    default=current_options.get("auto_vent_control", True)
+                    default=current_options.get("auto_vent_control", True),
+                    description=auto_vent_desc
                 ): bool,
                 vol.Optional(
                     "debug_mode",
-                    default=current_options.get("debug_mode", False)
+                    default=current_options.get("debug_mode", False),
+                    description=debug_desc
                 ): bool,
             }),
         )
