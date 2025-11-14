@@ -1,6 +1,7 @@
 """Config flow for Smart Vent Controller integration."""
 
 from typing import Any
+import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -8,6 +9,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+
+_LOGGER = logging.getLogger(__name__)
 
 from .const import (
     DOMAIN,
@@ -180,6 +183,14 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vent_entities = user_input.get("vent_entities") or user_input.get(CONF_ROOM_VENTS) or []
             priority = user_input.get("priority") or user_input.get(CONF_ROOM_PRIORITY) or DEFAULT_ROOM_PRIORITY
             
+            _LOGGER.debug(
+                "Room configuration received: name=%s, climate=%s, vents=%s, add_another=%s",
+                room_name,
+                climate_entity,
+                len(vent_entities) if isinstance(vent_entities, list) else 0,
+                user_input.get("add_another", False)
+            )
+            
             # Validate required fields
             if not room_name or not climate_entity:
                 return self.async_show_form(
@@ -215,15 +226,18 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             
             if user_input.get("add_another"):
-                # Add room and continue
-                self.rooms.append({
+                # Add room and continue to add another
+                room_data = {
                     "name": room_name,
                     "climate_entity": climate_entity,
                     "temp_sensor": temp_sensor,
                     "occupancy_sensor": occupancy_sensor,
                     "vent_entities": vent_entities if isinstance(vent_entities, list) else [vent_entities] if vent_entities else [],
                     "priority": int(priority) if priority else DEFAULT_ROOM_PRIORITY,
-                })
+                }
+                self.rooms.append(room_data)
+                _LOGGER.info("Added room '%s', total rooms: %d", room_name, len(self.rooms))
+                # Show form again to add another room (with empty form)
                 return await self.async_step_rooms()
             else:
                 # Done adding rooms, move to settings
