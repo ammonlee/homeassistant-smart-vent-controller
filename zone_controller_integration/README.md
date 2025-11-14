@@ -33,7 +33,7 @@ A comprehensive Home Assistant custom integration for intelligent multi-room HVA
 1. Copy the `custom_components/smart_vent_controller` folder to your Home Assistant `custom_components` directory:
    ```bash
    cd /config/custom_components
-   git clone https://github.com/YOUR_USERNAME/homeassistant-smart-vent-controller.git
+   git clone https://github.com/ammonlee/homeassistant-smart-vent-controller.git
    mv homeassistant-smart-vent-controller/custom_components/smart_vent_controller smart_vent_controller
    ```
 
