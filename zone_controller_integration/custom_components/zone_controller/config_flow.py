@@ -343,7 +343,7 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return SmartVentControllerOptionsFlowHandler(config_entry)
 
 
-class ZoneControllerOptionsFlowHandler(config_entries.OptionsFlow):
+class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Smart Vent Controller."""
     
     def __init__(self, config_entry: config_entries.ConfigEntry):
