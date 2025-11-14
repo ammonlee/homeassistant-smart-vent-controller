@@ -3,6 +3,7 @@
 from typing import Any
 from datetime import datetime
 import logging
+import asyncio
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change, async_track_time_interval
@@ -103,7 +104,6 @@ class SmartVentConditionerAutomation:
             self._pending_task.cancel()
         
         # Schedule with small delay to batch rapid changes
-import asyncio
         self._pending_task = self.hass.async_create_task(
             self._debounced_run_automation()
         )
