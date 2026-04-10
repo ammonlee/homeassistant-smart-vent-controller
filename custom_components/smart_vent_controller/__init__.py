@@ -1,5 +1,6 @@
 """Smart Vent Controller integration for Home Assistant."""
 
+import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -9,12 +10,10 @@ from homeassistant.const import Platform
 from .const import DOMAIN
 from .coordinator import SmartVentControllerCoordinator
 from . import script, automation
-from .helpers import async_setup_helpers
 from .device import async_create_room_devices, async_remove_room_devices
 
 _LOGGER = logging.getLogger(__name__)
 
-# Register diagnostics
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, config_entry: ConfigEntry
 ):
@@ -33,90 +32,77 @@ PLATFORMS = [
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Smart Vent Controller from a config entry."""
     hass.data.setdefault(DOMAIN, {})
-    
-    # Create coordinator
+
     coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
     await coordinator.async_config_entry_first_refresh()
-    
+
     hass.data[DOMAIN][entry.entry_id] = coordinator
-    
-    # Set up helper entities automatically (if possible)
-    # Note: This attempts to create helpers but may fall back to manual creation
-    try:
-        await async_setup_helpers(hass, entry)
-    except Exception as e:
-        _LOGGER.warning(
-            f"Could not auto-create helper entities: {e}. "
-            "Please create them manually. See HELPER_ENTITIES.md"
-        )
-    
-    # Create device registry entries for rooms
+
     try:
         await async_create_room_devices(hass, entry)
-    except Exception as e:
-        _LOGGER.warning(f"Could not create room devices: {e}")
-    
-    # Forward entry setup to platforms
+    except Exception as exc:
+        _LOGGER.warning("Could not create room devices: %s", exc)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    
-    # Set up scripts and automations
     await script.async_setup_entry(hass, entry)
     await automation.async_setup_entry(hass, entry)
-    
-    # Register services
     await _async_register_services(hass, entry)
-    
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Smart Vent Controller entry."""
-    # Remove room devices
     try:
         await async_remove_room_devices(hass, entry)
-    except Exception as e:
-        _LOGGER.warning(f"Could not remove room devices: {e}")
-    
+    except Exception as exc:
+        _LOGGER.warning("Could not remove room devices: %s", exc)
+
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    
-    # Unload scripts and automations
     await automation.async_unload_entry(hass, entry)
-    
+
     if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
-    
+        coordinator = hass.data[DOMAIN].pop(entry.entry_id, None)
+        if coordinator:
+            await coordinator.store.async_save()
+
     return unload_ok
 
 
 async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
     """Register custom services."""
-    
+
     async def set_room_priority(call):
-        """Handle set_room_priority service call."""
         room = call.data.get("room")
         priority = call.data.get("priority")
-        
-        # Update room priority in config entry
         rooms = list(entry.data.get("rooms", []))
-        for i, room_config in enumerate(rooms):
-            room_key = room_config.get("name", "").lower().replace(" ", "_")
-            if room_key == room.lower().replace(" ", "_"):
-                rooms[i] = {**room_config, "priority": priority}
+        for i, rc in enumerate(rooms):
+            key = rc.get("name", "").lower().replace(" ", "_")
+            if key == room.lower().replace(" ", "_"):
+                rooms[i] = {**rc, "priority": priority}
                 break
-        
         data = dict(entry.data)
         data["rooms"] = rooms
-        
         hass.config_entries.async_update_entry(entry, data=data)
-    
+
     async def override_room(call):
-        """Handle override_room service call."""
-        # TODO: Implement room override logic
-        pass
-    
+        room = call.data.get("room", "")
+        enabled = call.data.get("enabled", True)
+        duration = call.data.get("duration_min", 60)
+        coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if coordinator is None:
+            _LOGGER.error("Coordinator not found for override_room")
+            return
+        room_key = room.lower().replace(" ", "_")
+        coordinator.set_room_override(room_key, enabled, duration)
+        await coordinator.store.async_save()
+        _LOGGER.info(
+            "Room override %s for %s (%d min)",
+            "enabled" if enabled else "disabled", room_key, duration,
+        )
+
     async def reset_to_defaults(call):
-        """Handle reset_to_defaults service call."""
-        # Reset all options to defaults
         from .const import (
             DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
             DEFAULT_CLOSED_THRESHOLD_PCT,
@@ -129,8 +115,15 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
             DEFAULT_HVAC_MIN_RUNTIME_MIN,
             DEFAULT_HVAC_MIN_OFF_TIME_MIN,
             DEFAULT_DEFAULT_THERMOSTAT_TEMP,
+            DEFAULT_VENT_GRANULARITY,
+            DEFAULT_MIN_ADJUSTMENT_PCT,
+            DEFAULT_MIN_ADJUSTMENT_INTERVAL_MIN,
+            DEFAULT_TEMP_ERROR_OVERRIDE_F,
+            DEFAULT_CONVENTIONAL_VENT_COUNT,
+            DEFAULT_CONTROL_STRATEGY,
+            DEFAULT_POLL_INTERVAL_ACTIVE_SEC,
+            DEFAULT_POLL_INTERVAL_IDLE_SEC,
         )
-        
         options = {
             "min_other_room_open_pct": DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
             "closed_threshold_pct": DEFAULT_CLOSED_THRESHOLD_PCT,
@@ -149,12 +142,51 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
             "auto_thermostat_control": True,
             "auto_vent_control": True,
             "debug_mode": False,
+            "vent_granularity": DEFAULT_VENT_GRANULARITY,
+            "min_adjustment_pct": DEFAULT_MIN_ADJUSTMENT_PCT,
+            "min_adjustment_interval_min": DEFAULT_MIN_ADJUSTMENT_INTERVAL_MIN,
+            "temp_error_override_f": DEFAULT_TEMP_ERROR_OVERRIDE_F,
+            "conventional_vent_count": DEFAULT_CONVENTIONAL_VENT_COUNT,
+            "control_strategy": DEFAULT_CONTROL_STRATEGY,
+            "poll_interval_active_sec": DEFAULT_POLL_INTERVAL_ACTIVE_SEC,
+            "poll_interval_idle_sec": DEFAULT_POLL_INTERVAL_IDLE_SEC,
         }
-        
         hass.config_entries.async_update_entry(entry, options=options)
         _LOGGER.info("Smart Vent Controller options reset to defaults")
-    
-    # Register services
+
+    async def export_efficiency(call):
+        coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if coordinator is None:
+            return
+        data = coordinator.store.export_efficiency()
+        path = call.data.get("path", "")
+        if path:
+            config_dir = hass.config.path()
+            full = f"{config_dir}/{path}"
+            with open(full, "w") as f:
+                json.dump(data, f, indent=2)
+            _LOGGER.info("Efficiency data exported to %s", full)
+        else:
+            _LOGGER.info("Efficiency data: %s", json.dumps(data))
+
+    async def import_efficiency(call):
+        coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if coordinator is None:
+            return
+        payload = call.data.get("payload")
+        path = call.data.get("path", "")
+        if path:
+            config_dir = hass.config.path()
+            full = f"{config_dir}/{path}"
+            with open(full) as f:
+                payload = json.load(f)
+        if payload:
+            coordinator.store.import_efficiency(payload)
+            await coordinator.store.async_save()
+            _LOGGER.info("Efficiency data imported")
+
     hass.services.async_register(DOMAIN, "set_room_priority", set_room_priority)
     hass.services.async_register(DOMAIN, "override_room", override_room)
     hass.services.async_register(DOMAIN, "reset_to_defaults", reset_to_defaults)
+    hass.services.async_register(DOMAIN, "export_efficiency", export_efficiency)
+    hass.services.async_register(DOMAIN, "import_efficiency", import_efficiency)

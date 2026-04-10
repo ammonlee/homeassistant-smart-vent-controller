@@ -5,7 +5,7 @@ from datetime import datetime
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN
 from .error_handling import validate_entity_state, get_safe_state, get_safe_attribute
@@ -14,25 +14,15 @@ from .error_handling import validate_entity_state, get_safe_state, get_safe_attr
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, config_entry: ConfigEntry
 ) -> dict[str, Any]:
-    """Return diagnostics for a config entry.
-    
-    Args:
-        hass: Home Assistant instance
-        config_entry: Configuration entry
-    
-    Returns:
-        Dictionary containing diagnostic information
-    """
+    """Return diagnostics for a config entry."""
     coordinator = hass.data.get(DOMAIN, {}).get(config_entry.entry_id)
-    
-    # Get basic configuration
+
     config = {
         "main_thermostat": config_entry.data.get("main_thermostat"),
         "rooms_count": len(config_entry.data.get("rooms", [])),
         "options": config_entry.options or {},
     }
-    
-    # Get room states
+
     rooms = []
     for room_config in config_entry.data.get("rooms", []):
         room_name = room_config.get("name", "")
@@ -41,8 +31,7 @@ async def async_get_config_entry_diagnostics(
         temp_sensor = room_config.get("temp_sensor", "")
         occ_sensor = room_config.get("occupancy_sensor", "")
         vent_entities = room_config.get("vent_entities", [])
-        
-        # Get room state
+
         room_state = {
             "name": room_name,
             "key": room_key,
@@ -55,8 +44,7 @@ async def async_get_config_entry_diagnostics(
             "vent_count": len(vent_entities),
             "vent_entities": vent_entities,
         }
-        
-        # Get current temperature
+
         current_temp = None
         if temp_sensor and validate_entity_state(hass, temp_sensor, "sensor"):
             temp_value = get_safe_state(hass, temp_sensor)
@@ -64,7 +52,6 @@ async def async_get_config_entry_diagnostics(
                 current_temp = float(temp_value) if temp_value else None
             except (ValueError, TypeError):
                 pass
-        
         if current_temp is None and climate_entity and validate_entity_state(hass, climate_entity, "climate"):
             temp = get_safe_attribute(hass, climate_entity, "current_temperature")
             if temp is not None:
@@ -72,8 +59,7 @@ async def async_get_config_entry_diagnostics(
                     current_temp = float(temp)
                 except (ValueError, TypeError):
                     pass
-        
-        # Get target temperature
+
         target_temp = None
         if climate_entity and validate_entity_state(hass, climate_entity, "climate"):
             temp = get_safe_attribute(hass, climate_entity, "temperature")
@@ -90,46 +76,37 @@ async def async_get_config_entry_diagnostics(
                         target_temp = (float(lo) + float(hi)) / 2
                     except (ValueError, TypeError):
                         pass
-        
-        # Calculate delta
-        delta = None
-        if current_temp is not None and target_temp is not None:
-            delta = target_temp - current_temp
-        
-        # Get occupancy
+
+        delta = (target_temp - current_temp) if (current_temp is not None and target_temp is not None) else None
         occupied = False
         if occ_sensor and validate_entity_state(hass, occ_sensor, "binary_sensor"):
-            occ_state = get_safe_state(hass, occ_sensor)
-            occupied = occ_state == "on"
-        
-        # Get vent positions
+            occupied = get_safe_state(hass, occ_sensor) == "on"
+
         vent_positions = []
         for vent_entity in vent_entities:
             if validate_entity_state(hass, vent_entity, "cover"):
                 position = get_safe_attribute(hass, vent_entity, "current_position", 100)
-                vent_positions.append({
-                    "entity": vent_entity,
-                    "position": position,
-                    "available": True,
-                })
+                vent_positions.append({"entity": vent_entity, "position": position, "available": True})
             else:
-                vent_positions.append({
-                    "entity": vent_entity,
-                    "position": None,
-                    "available": False,
-                })
-        
+                vent_positions.append({"entity": vent_entity, "position": None, "available": False})
+
+        efficiency = {}
+        if coordinator:
+            efficiency = {
+                "heating_rate": coordinator.store.get_heating_rate(room_key),
+                "cooling_rate": coordinator.store.get_cooling_rate(room_key),
+            }
+
         room_state.update({
             "current_temperature": current_temp,
             "target_temperature": target_temp,
             "delta": delta,
             "occupied": occupied,
             "vent_positions": vent_positions,
+            "efficiency": efficiency,
         })
-        
         rooms.append(room_state)
-    
-    # Get main thermostat state
+
     main_thermostat = config_entry.data.get("main_thermostat")
     thermostat_state = None
     if main_thermostat:
@@ -147,48 +124,43 @@ async def async_get_config_entry_diagnostics(
                     "target_temp_high": get_safe_attribute(hass, main_thermostat, "target_temp_high"),
                 }
         else:
-            thermostat_state = {
-                "entity": main_thermostat,
-                "available": False,
-            }
-    
-    # Get rooms to condition
-    rooms_to_condition = None
-    rooms_to_condition_entity = hass.states.get("sensor.rooms_to_condition")
-    if rooms_to_condition_entity:
-        rooms_to_condition = rooms_to_condition_entity.state
-    
-    # Get automation status
+            thermostat_state = {"entity": main_thermostat, "available": False}
+
+    rooms_to_condition = coordinator.get_rooms_to_condition_value() if coordinator else None
+
     automation_status = {
         "auto_vent_control": config_entry.options.get("auto_vent_control", True),
         "auto_thermostat_control": config_entry.options.get("auto_thermostat_control", True),
         "require_occupancy": config_entry.options.get("require_occupancy", True),
         "debug_mode": config_entry.options.get("debug_mode", False),
+        "control_strategy": config_entry.options.get("control_strategy", "simple"),
     }
-    
-    # Get cycle protection status
+
     cycle_protection = {
         "enabled": (
-            config_entry.options.get("hvac_min_runtime_min", 10) > 0 or
-            config_entry.options.get("hvac_min_off_time_min", 5) > 0
+            config_entry.options.get("hvac_min_runtime_min", 10) > 0
+            or config_entry.options.get("hvac_min_off_time_min", 5) > 0
         ),
         "min_runtime_min": config_entry.options.get("hvac_min_runtime_min", 10),
         "min_off_time_min": config_entry.options.get("hvac_min_off_time_min", 5),
+        "cycle_start_ts": coordinator.store.cycle_start_ts if coordinator else 0,
+        "cycle_end_ts": coordinator.store.cycle_end_ts if coordinator else 0,
     }
-    
-    # Get manual override status
+
     manual_override = False
-    manual_override_entity = hass.states.get("binary_sensor.thermostat_manual_override_detected")
-    if manual_override_entity:
-        manual_override = manual_override_entity.state == "on"
-    
-    # Get statistics
-    stats_entity = hass.states.get("sensor.smart_vent_controller_stats")
-    statistics = None
-    if stats_entity:
-        statistics = stats_entity.attributes
-    
-    # Get device registry info
+    if coordinator:
+        main = config_entry.data.get("main_thermostat")
+        if main:
+            thermo = hass.states.get(main)
+            if thermo:
+                current = thermo.attributes.get("temperature")
+                last = coordinator.store.last_thermostat_setpoint
+                if current is not None and last > 0:
+                    try:
+                        manual_override = abs(float(current) - last) > 0.5
+                    except (ValueError, TypeError):
+                        pass
+
     device_registry = dr.async_get(hass)
     devices = []
     for room_config in config_entry.data.get("rooms", []):
@@ -203,9 +175,8 @@ async def async_get_config_entry_diagnostics(
                 "manufacturer": device.manufacturer,
                 "model": device.model,
             })
-    
-    # Compile diagnostics
-    diagnostics = {
+
+    return {
         "config": config,
         "main_thermostat": thermostat_state,
         "rooms": rooms,
@@ -213,10 +184,7 @@ async def async_get_config_entry_diagnostics(
         "automation_status": automation_status,
         "cycle_protection": cycle_protection,
         "manual_override": manual_override,
-        "statistics": statistics,
         "devices": devices,
+        "efficiency_data": coordinator.store.export_efficiency() if coordinator else {},
         "timestamp": datetime.now().isoformat(),
     }
-    
-    return diagnostics
-

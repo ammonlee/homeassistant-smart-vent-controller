@@ -18,10 +18,10 @@ smart_vent_controller:
             min: 0
             max: 10
             step: 1
-  
+
   override_room:
     name: Override Room
-    description: Temporarily override room control
+    description: Temporarily override room control (exclude from conditioning)
     fields:
       room:
         name: Room
@@ -35,8 +35,45 @@ smart_vent_controller:
         required: true
         selector:
           boolean:
-  
+      duration_min:
+        name: Duration (minutes)
+        description: How long the override lasts (default 60)
+        required: false
+        default: 60
+        selector:
+          number:
+            min: 1
+            max: 1440
+            step: 1
+
   reset_to_defaults:
     name: Reset to Defaults
     description: Reset all settings to default values
 
+  export_efficiency:
+    name: Export Efficiency Data
+    description: Export learned per-room efficiency rates to JSON
+    fields:
+      path:
+        name: File Path
+        description: Relative path under config dir (leave blank for log output)
+        required: false
+        selector:
+          text:
+
+  import_efficiency:
+    name: Import Efficiency Data
+    description: Import per-room efficiency rates from JSON
+    fields:
+      path:
+        name: File Path
+        description: Relative path under config dir
+        required: false
+        selector:
+          text:
+      payload:
+        name: JSON Payload
+        description: Inline JSON data (alternative to file path)
+        required: false
+        selector:
+          object:
