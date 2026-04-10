@@ -231,10 +231,6 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         if user_input is not None:
-            if "heat_boost_f" in user_input:
-                user_input["heat_boost_f"] = float(user_input["heat_boost_f"])
-            if "room_hysteresis_f" in user_input:
-                user_input["room_hysteresis_f"] = float(user_input["room_hysteresis_f"])
             options = dict(user_input)
             self.data.update(user_input)
             return self.async_create_entry(
@@ -263,19 +259,9 @@ class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         if user_input is not None:
-            if "heat_boost_f" in user_input:
-                user_input["heat_boost_f"] = float(user_input["heat_boost_f"])
-            if "room_hysteresis_f" in user_input:
-                user_input["room_hysteresis_f"] = float(user_input["room_hysteresis_f"])
-            if "temp_error_override_f" in user_input:
-                user_input["temp_error_override_f"] = float(user_input["temp_error_override_f"])
             return self.async_create_entry(title="", data=user_input)
 
-        current = self.config_entry.options or {}
-        if "heat_boost_f" in current and isinstance(current["heat_boost_f"], int):
-            current["heat_boost_f"] = float(current["heat_boost_f"])
-        if "room_hysteresis_f" in current and isinstance(current["room_hysteresis_f"], int):
-            current["room_hysteresis_f"] = float(current["room_hysteresis_f"])
+        current = dict(self.config_entry.options or {})
 
         return self.async_show_form(
             step_id="init",
@@ -283,74 +269,100 @@ class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
 
+def _num(
+    min_val: float,
+    max_val: float,
+    step: float = 1,
+    mode: str = "box",
+    unit: str | None = None,
+) -> selector.NumberSelector:
+    """Build a NumberSelector with common defaults."""
+    cfg = selector.NumberSelectorConfig(
+        min=min_val,
+        max=max_val,
+        step=step,
+        mode=selector.NumberSelectorMode(mode),
+        **({"unit_of_measurement": unit} if unit else {}),
+    )
+    return selector.NumberSelector(cfg)
+
+
 def _settings_schema(defaults: dict | None = None) -> vol.Schema:
     """Build settings schema used by both initial config and options flow."""
     d = defaults or {}
     return vol.Schema({
-        vol.Optional("min_other_room_open_pct",
-                     default=d.get("min_other_room_open_pct", DEFAULT_MIN_OTHER_ROOM_OPEN_PCT)):
-            vol.All(int, vol.Range(min=0, max=100)),
-        vol.Optional("closed_threshold_pct",
-                     default=d.get("closed_threshold_pct", DEFAULT_CLOSED_THRESHOLD_PCT)):
-            vol.All(int, vol.Range(min=0, max=100)),
-        vol.Optional("relief_open_pct",
-                     default=d.get("relief_open_pct", DEFAULT_RELIEF_OPEN_PCT)):
-            vol.All(int, vol.Range(min=0, max=100)),
-        vol.Optional("max_relief_rooms",
-                     default=d.get("max_relief_rooms", DEFAULT_MAX_RELIEF_ROOMS)):
-            vol.All(int, vol.Range(min=1, max=10)),
-        vol.Optional("room_hysteresis_f",
-                     default=d.get("room_hysteresis_f", DEFAULT_ROOM_HYSTERESIS_F)):
-            vol.All(float, vol.Range(min=0, max=5)),
-        vol.Optional("hvac_min_runtime_min",
-                     default=d.get("hvac_min_runtime_min", DEFAULT_HVAC_MIN_RUNTIME_MIN)):
-            vol.All(int, vol.Range(min=0, max=30)),
-        vol.Optional("hvac_min_off_time_min",
-                     default=d.get("hvac_min_off_time_min", DEFAULT_HVAC_MIN_OFF_TIME_MIN)):
-            vol.All(int, vol.Range(min=0, max=30)),
-        vol.Optional("occupancy_linger_min",
-                     default=d.get("occupancy_linger_min", DEFAULT_OCCUPANCY_LINGER_MIN)):
-            vol.All(int, vol.Range(min=0, max=300)),
-        vol.Optional("occupancy_linger_night_min",
-                     default=d.get("occupancy_linger_night_min", DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN)):
-            vol.All(int, vol.Range(min=0, max=300)),
-        vol.Optional("heat_boost_f",
-                     default=d.get("heat_boost_f", DEFAULT_HEAT_BOOST_F)):
-            vol.All(float, vol.Range(min=0, max=3)),
-        vol.Optional("default_thermostat_temp",
-                     default=d.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP)):
-            vol.All(int, vol.Range(min=65, max=80)),
-        vol.Optional("automation_cooldown_sec",
-                     default=d.get("automation_cooldown_sec", 30)):
-            vol.All(int, vol.Range(min=0, max=300)),
-        vol.Optional("require_occupancy", default=d.get("require_occupancy", True)): bool,
-        vol.Optional("heat_boost_enabled", default=d.get("heat_boost_enabled", True)): bool,
-        vol.Optional("auto_thermostat_control", default=d.get("auto_thermostat_control", True)): bool,
-        vol.Optional("auto_vent_control", default=d.get("auto_vent_control", True)): bool,
-        vol.Optional("debug_mode", default=d.get("debug_mode", False)): bool,
-        # --- new algorithm options ---
         vol.Optional("control_strategy",
                      default=d.get("control_strategy", DEFAULT_CONTROL_STRATEGY)):
-            vol.In(CONTROL_STRATEGIES),
+            selector.SelectSelector(selector.SelectSelectorConfig(
+                options=CONTROL_STRATEGIES,
+                mode=selector.SelectSelectorMode.DROPDOWN,
+                translation_key="control_strategy",
+            )),
         vol.Optional("vent_granularity",
                      default=d.get("vent_granularity", DEFAULT_VENT_GRANULARITY)):
-            vol.All(int, vol.Range(min=1, max=50)),
+            _num(1, 50, step=1, unit="%"),
+        vol.Optional("min_other_room_open_pct",
+                     default=d.get("min_other_room_open_pct", DEFAULT_MIN_OTHER_ROOM_OPEN_PCT)):
+            _num(0, 100, step=5, unit="%"),
+        vol.Optional("closed_threshold_pct",
+                     default=d.get("closed_threshold_pct", DEFAULT_CLOSED_THRESHOLD_PCT)):
+            _num(0, 100, step=5, unit="%"),
+        vol.Optional("relief_open_pct",
+                     default=d.get("relief_open_pct", DEFAULT_RELIEF_OPEN_PCT)):
+            _num(0, 100, step=5, unit="%"),
+        vol.Optional("max_relief_rooms",
+                     default=d.get("max_relief_rooms", DEFAULT_MAX_RELIEF_ROOMS)):
+            _num(1, 10, step=1),
+        vol.Optional("room_hysteresis_f",
+                     default=d.get("room_hysteresis_f", DEFAULT_ROOM_HYSTERESIS_F)):
+            _num(0, 5, step=0.5, unit="°F"),
+        vol.Optional("heat_boost_f",
+                     default=d.get("heat_boost_f", DEFAULT_HEAT_BOOST_F)):
+            _num(0, 5, step=0.5, unit="°F"),
+        vol.Optional("default_thermostat_temp",
+                     default=d.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP)):
+            _num(50, 90, step=1, unit="°F"),
         vol.Optional("min_adjustment_pct",
                      default=d.get("min_adjustment_pct", DEFAULT_MIN_ADJUSTMENT_PCT)):
-            vol.All(int, vol.Range(min=0, max=50)),
+            _num(0, 50, step=5, unit="%"),
         vol.Optional("min_adjustment_interval_min",
                      default=d.get("min_adjustment_interval_min", DEFAULT_MIN_ADJUSTMENT_INTERVAL_MIN)):
-            vol.All(int, vol.Range(min=0, max=120)),
+            _num(0, 120, step=1, unit="min"),
         vol.Optional("temp_error_override_f",
                      default=d.get("temp_error_override_f", DEFAULT_TEMP_ERROR_OVERRIDE_F)):
-            vol.All(float, vol.Range(min=0, max=10)),
+            _num(0, 10, step=0.5, unit="°F"),
         vol.Optional("conventional_vent_count",
                      default=d.get("conventional_vent_count", DEFAULT_CONVENTIONAL_VENT_COUNT)):
-            vol.All(int, vol.Range(min=0, max=30)),
+            _num(0, 30, step=1),
+        vol.Optional("hvac_min_runtime_min",
+                     default=d.get("hvac_min_runtime_min", DEFAULT_HVAC_MIN_RUNTIME_MIN)):
+            _num(0, 30, step=1, unit="min"),
+        vol.Optional("hvac_min_off_time_min",
+                     default=d.get("hvac_min_off_time_min", DEFAULT_HVAC_MIN_OFF_TIME_MIN)):
+            _num(0, 30, step=1, unit="min"),
+        vol.Optional("occupancy_linger_min",
+                     default=d.get("occupancy_linger_min", DEFAULT_OCCUPANCY_LINGER_MIN)):
+            _num(0, 300, step=5, unit="min"),
+        vol.Optional("occupancy_linger_night_min",
+                     default=d.get("occupancy_linger_night_min", DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN)):
+            _num(0, 300, step=5, unit="min"),
+        vol.Optional("automation_cooldown_sec",
+                     default=d.get("automation_cooldown_sec", 30)):
+            _num(0, 300, step=5, unit="sec"),
         vol.Optional("poll_interval_active_sec",
                      default=d.get("poll_interval_active_sec", DEFAULT_POLL_INTERVAL_ACTIVE_SEC)):
-            vol.All(int, vol.Range(min=10, max=300)),
+            _num(10, 300, step=5, unit="sec"),
         vol.Optional("poll_interval_idle_sec",
                      default=d.get("poll_interval_idle_sec", DEFAULT_POLL_INTERVAL_IDLE_SEC)):
-            vol.All(int, vol.Range(min=30, max=600)),
+            _num(30, 600, step=10, unit="sec"),
+        vol.Optional("require_occupancy", default=d.get("require_occupancy", True)):
+            selector.BooleanSelector(),
+        vol.Optional("heat_boost_enabled", default=d.get("heat_boost_enabled", True)):
+            selector.BooleanSelector(),
+        vol.Optional("auto_thermostat_control", default=d.get("auto_thermostat_control", True)):
+            selector.BooleanSelector(),
+        vol.Optional("auto_vent_control", default=d.get("auto_vent_control", True)):
+            selector.BooleanSelector(),
+        vol.Optional("debug_mode", default=d.get("debug_mode", False)):
+            selector.BooleanSelector(),
     })
