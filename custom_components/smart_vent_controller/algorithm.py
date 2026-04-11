@@ -283,7 +283,7 @@ def compute_simple_targets(
     hvac_action: str,
     min_open_pct: int,
 ) -> dict[str, float]:
-    """Original simple targeting: selected rooms get 100%, others get min or 0.
+    """Original simple targeting: selected rooms get 100%, others get min_open_pct.
 
     Preserved as the ``simple`` strategy fallback when no learned rates exist.
     """
@@ -293,11 +293,56 @@ def compute_simple_targets(
         if key in selected_keys:
             targets[key] = 100.0
         else:
-            delta = room.get("delta", 0)
-            should_close = False
-            if hvac_mode in ("heat",) or hvac_action == "heating":
-                should_close = delta < 0
-            elif hvac_mode in ("cool",) or hvac_action == "cooling":
-                should_close = delta > 0
-            targets[key] = float(min_open_pct) if should_close else float(min_open_pct)
+            targets[key] = float(min_open_pct)
     return targets
+
+
+def select_relief_rooms(
+    rooms_data: list[dict],
+    selected_keys: list[str],
+    hvac_mode: str,
+    hvac_action: str,
+    max_relief: int = 3,
+) -> list[dict]:
+    """Score and rank non-selected rooms as relief vent candidates.
+
+    Relief rooms absorb back-pressure when too many vents are restricted.
+    Candidates are rooms not currently selected for conditioning whose
+    temperature delta indicates they don't need conditioning in the current
+    direction.
+
+    Scoring (higher = better relief candidate):
+      - Occupied rooms preferred (they benefit from airflow): +10000
+      - Higher priority rooms preferred: +priority*100
+      - Rooms closest to satisfied (smallest |delta|) preferred
+
+    Returns up to *max_relief* room dicts sorted by descending score.
+    """
+    active_mode = hvac_action if hvac_action in ("heating", "cooling") else hvac_mode
+    candidates: list[dict] = []
+    for room in rooms_data:
+        key = room.get("key", "")
+        if key in selected_keys:
+            continue
+        delta = room.get("delta", 0)
+        # Only consider rooms that don't need conditioning in the current direction
+        if active_mode in ("heat", "heating") and delta > 0:
+            # Room is below target in heating — still needs heat, skip
+            continue
+        if active_mode in ("cool", "cooling") and delta < 0:
+            # Room is above target in cooling — still needs cooling, skip
+            continue
+        candidates.append(room)
+
+    scored: list[tuple[float, dict]] = []
+    for room in candidates:
+        occ_rank = 10000.0 if room.get("occupied", False) else 0.0
+        priority_rank = room.get("priority", 5) * 100.0
+        # Rooms with smallest absolute delta are best relief candidates
+        # (they're closest to satisfied, so opening vents costs least energy)
+        temp_rank = -abs(room.get("delta", 0))
+        score = occ_rank + priority_rank + temp_rank
+        scored.append((score, room))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [room for _, room in scored[:max_relief]]

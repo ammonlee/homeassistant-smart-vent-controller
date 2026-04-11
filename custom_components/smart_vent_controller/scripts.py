@@ -43,6 +43,7 @@ from .algorithm import (
     calculate_longest_time_to_target,
     adjust_for_minimum_airflow,
     compute_simple_targets,
+    select_relief_rooms,
     should_pre_adjust,
 )
 
@@ -127,6 +128,15 @@ class VentControlScript:
             min_open = safe_int(
                 self.entry.options.get("min_other_room_open_pct", 20), 20, 0, 100
             )
+            closed_thr = safe_int(
+                self.entry.options.get("closed_threshold_pct", 10), 10, 0, 100
+            )
+            relief_pct = safe_int(
+                self.entry.options.get("relief_open_pct", 60), 60, 0, 100
+            )
+            max_relief = safe_int(
+                self.entry.options.get("max_relief_rooms", 3), 3, 1, 10
+            )
             initial_eff = safe_float(
                 self.entry.options.get("initial_efficiency", DEFAULT_INITIAL_EFFICIENCY),
                 DEFAULT_INITIAL_EFFICIENCY, 1, 100,
@@ -193,6 +203,24 @@ class VentControlScript:
             targets = adjust_for_minimum_airflow(
                 targets, algo_rooms, hvac_mode, conv_vents
             )
+
+            # Relief vents: open non-selected rooms to relieve back-pressure
+            # when too many vents are at or below the closed threshold.
+            closed_count = sum(
+                1 for pct in targets.values() if pct <= closed_thr
+            )
+            if closed_count > 0:
+                relief_rooms = select_relief_rooms(
+                    algo_rooms, selected_list, mode, action, max_relief
+                )
+                for rr in relief_rooms:
+                    rr_key = rr["key"]
+                    if targets.get(rr_key, 0) < relief_pct:
+                        targets[rr_key] = float(relief_pct)
+                        if debug:
+                            _LOGGER.info(
+                                "Relief vent: opening %s to %d%%", rr_key, relief_pct,
+                            )
 
             # Round to granularity
             final_targets: dict[str, int] = {}
