@@ -5,159 +5,298 @@
         "title": "Smart Vent Controller Setup",
         "description": "Select the HVAC thermostat for this zone. You can configure multiple thermostats by adding this integration multiple times.{migration_note}",
         "data": {
-          "main_thermostat": "Thermostat for this zone",
-          "migrate_from_yaml": "Migrate from YAML configuration"
+          "main_thermostat": "Thermostat for This Zone",
+          "migrate_from_yaml": "Migrate from YAML Configuration"
         }
       },
       "migrate": {
         "title": "Migrate from YAML",
         "description": "Found YAML configuration with {rooms_count} rooms and thermostat {main_thermostat}.\n\nWarnings:\n{warnings}\n\nDo you want to import this configuration?",
         "data": {
-          "confirm_migration": "Import YAML configuration"
+          "confirm_migration": "Import YAML Configuration"
         }
       },
       "rooms": {
         "title": "Configure Rooms",
         "description": "Add rooms to control. You can add multiple rooms.",
         "data": {
-          "room_name": "Room name",
-          "climate_entity": "Climate entity",
-          "temp_sensor": "Temperature sensor",
-          "occupancy_sensor": "Occupancy sensor",
-          "vent_entities": "Vent entities",
+          "name": "Room Name",
+          "climate_entity": "Climate Entity",
+          "temp_sensor": "Temperature Sensor",
+          "occupancy_sensor": "Occupancy Sensor",
+          "vent_entities": "Vent Entities",
           "priority": "Priority",
-          "add_another": "Add another room"
+          "add_another": "Add Another Room"
         },
         "data_description": {
-          "room_name": "A friendly name for this room (e.g. \"Master Bedroom\")",
+          "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
           "climate_entity": "The climate entity that controls this room's setpoint",
           "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
           "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
           "vent_entities": "One or more smart vent cover entities in this room",
-          "priority": "Higher priority rooms are conditioned first and relieved last (0–10)"
+          "priority": "Higher priority rooms are conditioned first and relieved last (0\u201310)"
         }
       },
-      "settings": {
+      "settings_intro": {
         "title": "Settings",
-        "description": "Configure algorithm, vent control, and HVAC protection settings.",
+        "description": "You can customize algorithm, temperature, HVAC, and automation settings, or use the recommended defaults. You can always adjust settings later from the integration options.",
         "data": {
-          "control_strategy": "Control strategy",
-          "vent_granularity": "Vent granularity",
-          "min_other_room_open_pct": "Minimum other-room open",
-          "closed_threshold_pct": "Closed threshold",
-          "relief_open_pct": "Relief vent opening",
-          "max_relief_rooms": "Max relief rooms",
-          "room_hysteresis_f": "Room hysteresis",
-          "heat_boost_f": "Heat boost",
-          "default_thermostat_temp": "Default thermostat temperature",
-          "min_adjustment_pct": "Minimum adjustment",
-          "min_adjustment_interval_min": "Minimum adjustment interval",
-          "temp_error_override_f": "Temperature error override",
-          "conventional_vent_count": "Conventional (non-smart) vents",
-          "hvac_min_runtime_min": "HVAC minimum runtime",
-          "hvac_min_off_time_min": "HVAC minimum off time",
-          "occupancy_linger_min": "Occupancy linger (day)",
-          "occupancy_linger_night_min": "Occupancy linger (night)",
-          "automation_cooldown_sec": "Automation cooldown",
-          "poll_interval_active_sec": "Active polling interval",
-          "poll_interval_idle_sec": "Idle polling interval",
-          "require_occupancy": "Require occupancy",
-          "heat_boost_enabled": "Heat boost enabled",
-          "auto_thermostat_control": "Automatic thermostat control",
-          "auto_vent_control": "Automatic vent control",
-          "debug_mode": "Debug mode"
+          "use_defaults": "Use Recommended Defaults"
+        },
+        "data_description": {
+          "use_defaults": "Enable to skip detailed configuration and use sensible defaults. You can adjust settings later from the integration options."
+        }
+      },
+      "settings_algorithm": {
+        "title": "Algorithm & Vent Positioning (1/4)",
+        "description": "Configure how vent positions are calculated and balanced across rooms.",
+        "data": {
+          "control_strategy": "Control Strategy",
+          "vent_granularity": "Vent Granularity",
+          "min_other_room_open_pct": "Minimum Other-Room Open %",
+          "closed_threshold_pct": "Closed Threshold %",
+          "relief_open_pct": "Relief Vent Opening %",
+          "max_relief_rooms": "Maximum Relief Rooms",
+          "conventional_vent_count": "Conventional (Non-Smart) Vents"
         },
         "data_description": {
           "control_strategy": "Simple uses fixed positions, Learned adapts from past cycles, Hybrid blends both",
-          "vent_granularity": "Round vent positions to the nearest increment (e.g. 5 rounds to 0/5/10/…/100)",
+          "vent_granularity": "Round vent positions to the nearest increment (e.g. 5 rounds to 0/5/10/\u2026/100)",
           "min_other_room_open_pct": "Minimum open percentage for vents in non-target rooms to maintain airflow",
           "closed_threshold_pct": "Vents at or below this percentage are treated as fully closed",
           "relief_open_pct": "How far to open relief vents to maintain system back-pressure",
           "max_relief_rooms": "Maximum number of rooms that can act as relief vents at once",
+          "conventional_vent_count": "Number of non-smart (always-open) vents in the system for airflow math"
+        }
+      },
+      "settings_temperature": {
+        "title": "Temperature & Setpoint Control (2/4)",
+        "description": "Adjust temperature thresholds, hysteresis, and heat boost behavior.",
+        "data": {
+          "room_hysteresis_f": "Room Hysteresis (Dead Band)",
+          "heat_boost_f": "Heat Boost",
+          "default_thermostat_temp": "Default Thermostat Temperature",
+          "temp_error_override_f": "Temperature Error Override"
+        },
+        "data_description": {
           "room_hysteresis_f": "Dead band around the setpoint before a room is considered satisfied",
           "heat_boost_f": "Extra degrees added to the thermostat setpoint during heating cycles",
           "default_thermostat_temp": "Fallback thermostat setpoint when no room needs conditioning",
+          "temp_error_override_f": "Override the throttle interval when temperature error exceeds this"
+        }
+      },
+      "settings_hvac": {
+        "title": "HVAC Protection & Timing (3/4)",
+        "description": "Set polling intervals, adjustment throttles, and short-cycle protection.",
+        "data": {
+          "min_adjustment_pct": "Minimum Adjustment %",
+          "min_adjustment_interval_min": "Minimum Adjustment Interval",
+          "hvac_min_runtime_min": "HVAC Minimum Runtime",
+          "hvac_min_off_time_min": "HVAC Minimum Off Time",
+          "poll_interval_active_sec": "Active Polling Interval",
+          "poll_interval_idle_sec": "Idle Polling Interval",
+          "automation_cooldown_sec": "Automation Cooldown"
+        },
+        "data_description": {
           "min_adjustment_pct": "Ignore vent changes smaller than this to reduce motor wear",
           "min_adjustment_interval_min": "Minimum time between vent position changes for a room",
-          "temp_error_override_f": "Override the throttle interval when temperature error exceeds this",
-          "conventional_vent_count": "Number of non-smart (always-open) vents in the system for airflow math",
           "hvac_min_runtime_min": "Minimum HVAC run time before allowing a shutdown (short-cycle protection)",
           "hvac_min_off_time_min": "Minimum HVAC off time before allowing a restart (short-cycle protection)",
-          "occupancy_linger_min": "Keep conditioning a room for this long after occupancy clears (daytime)",
-          "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
-          "automation_cooldown_sec": "Minimum time between automation triggers to prevent rapid toggling",
           "poll_interval_active_sec": "How often to poll sensors while the HVAC is actively running",
           "poll_interval_idle_sec": "How often to poll sensors while the HVAC is idle",
+          "automation_cooldown_sec": "Minimum time between automation triggers to prevent rapid toggling"
+        }
+      },
+      "settings_behavior": {
+        "title": "Occupancy & Automation (4/4)",
+        "description": "Control occupancy behavior, feature toggles, and debug logging.",
+        "data": {
+          "occupancy_linger_min": "Occupancy Linger (Daytime)",
+          "occupancy_linger_night_min": "Occupancy Linger (Nighttime)",
+          "require_occupancy": "Require Occupancy",
+          "heat_boost_enabled": "Heat Boost Enabled",
+          "auto_thermostat_control": "Automatic Thermostat Control",
+          "auto_vent_control": "Automatic Vent Control",
+          "debug_mode": "Debug Mode"
+        },
+        "data_description": {
+          "occupancy_linger_min": "Keep conditioning a room for this long after occupancy clears (daytime)",
+          "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
           "require_occupancy": "Only condition rooms that currently show occupancy",
           "heat_boost_enabled": "Add extra degrees to the setpoint during heating for faster warm-up",
           "auto_thermostat_control": "Let the integration adjust the thermostat setpoint automatically",
           "auto_vent_control": "Let the integration open and close vents automatically",
           "debug_mode": "Enable verbose logging for troubleshooting"
         }
+      },
+      "reconfigure": {
+        "title": "Manage Rooms",
+        "description": "You have {room_count} room(s) configured: {room_names}.\n\nChoose an action below.",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "select_room": {
+        "title": "Select Room",
+        "description": "Choose a room to edit.",
+        "data": {
+          "room_index": "Room"
+        }
+      },
+      "edit_room": {
+        "title": "Edit Room: {room_name}",
+        "description": "Update this room's configuration.",
+        "data": {
+          "name": "Room Name",
+          "climate_entity": "Climate Entity",
+          "temp_sensor": "Temperature Sensor",
+          "occupancy_sensor": "Occupancy Sensor",
+          "vent_entities": "Vent Entities",
+          "priority": "Priority"
+        },
+        "data_description": {
+          "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
+          "climate_entity": "The climate entity that controls this room's setpoint",
+          "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
+          "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
+          "vent_entities": "One or more smart vent cover entities in this room",
+          "priority": "Higher priority rooms are conditioned first and relieved last (0\u201310)"
+        }
+      },
+      "add_room": {
+        "title": "Add Room",
+        "description": "Configure a new room.",
+        "data": {
+          "name": "Room Name",
+          "climate_entity": "Climate Entity",
+          "temp_sensor": "Temperature Sensor",
+          "occupancy_sensor": "Occupancy Sensor",
+          "vent_entities": "Vent Entities",
+          "priority": "Priority"
+        },
+        "data_description": {
+          "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
+          "climate_entity": "The climate entity that controls this room's setpoint",
+          "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
+          "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
+          "vent_entities": "One or more smart vent cover entities in this room",
+          "priority": "Higher priority rooms are conditioned first and relieved last (0\u201310)"
+        }
+      },
+      "remove_room": {
+        "title": "Remove Room",
+        "description": "Select a room to remove.",
+        "data": {
+          "room_index": "Room"
+        }
+      },
+      "confirm_remove": {
+        "title": "Confirm Removal",
+        "description": "Are you sure you want to remove **{room_name}**? This will delete all associated sensors and devices.",
+        "data": {
+          "confirm": "Yes, Remove This Room"
+        }
       }
     },
     "error": {
       "invalid_thermostat": "Selected thermostat is not valid",
       "no_climate_entities": "No climate entities found. Please add a climate entity first.",
-      "no_rooms": "At least one room must be configured"
+      "no_rooms": "At least one room must be configured",
+      "name_and_climate_required": "Room name and climate entity are required",
+      "duplicate_room_name": "A room with this name already exists"
     },
     "abort": {
-      "already_configured": "This thermostat is already configured."
+      "already_configured": "This thermostat is already configured.",
+      "reconfigure_successful": "Room configuration updated successfully."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Smart Vent Controller Options",
-        "description": "Adjust settings. Changes take effect immediately.",
+        "description": "Select a category to configure. Changes take effect immediately.",
+        "menu_options": {
+          "settings_algorithm": "Algorithm & Vent Positioning",
+          "settings_temperature": "Temperature & Setpoint Control",
+          "settings_hvac": "HVAC Protection & Timing",
+          "settings_behavior": "Occupancy & Automation"
+        }
+      },
+      "settings_algorithm": {
+        "title": "Algorithm & Vent Positioning",
+        "description": "Configure how vent positions are calculated and balanced across rooms.",
         "data": {
-          "control_strategy": "Control strategy",
-          "vent_granularity": "Vent granularity",
-          "min_other_room_open_pct": "Minimum other-room open",
-          "closed_threshold_pct": "Closed threshold",
-          "relief_open_pct": "Relief vent opening",
-          "max_relief_rooms": "Max relief rooms",
-          "room_hysteresis_f": "Room hysteresis",
-          "heat_boost_f": "Heat boost",
-          "default_thermostat_temp": "Default thermostat temperature",
-          "min_adjustment_pct": "Minimum adjustment",
-          "min_adjustment_interval_min": "Minimum adjustment interval",
-          "temp_error_override_f": "Temperature error override",
-          "conventional_vent_count": "Conventional (non-smart) vents",
-          "hvac_min_runtime_min": "HVAC minimum runtime",
-          "hvac_min_off_time_min": "HVAC minimum off time",
-          "occupancy_linger_min": "Occupancy linger (day)",
-          "occupancy_linger_night_min": "Occupancy linger (night)",
-          "automation_cooldown_sec": "Automation cooldown",
-          "poll_interval_active_sec": "Active polling interval",
-          "poll_interval_idle_sec": "Idle polling interval",
-          "require_occupancy": "Require occupancy",
-          "heat_boost_enabled": "Heat boost enabled",
-          "auto_thermostat_control": "Automatic thermostat control",
-          "auto_vent_control": "Automatic vent control",
-          "debug_mode": "Debug mode"
+          "control_strategy": "Control Strategy",
+          "vent_granularity": "Vent Granularity",
+          "min_other_room_open_pct": "Minimum Other-Room Open %",
+          "closed_threshold_pct": "Closed Threshold %",
+          "relief_open_pct": "Relief Vent Opening %",
+          "max_relief_rooms": "Maximum Relief Rooms",
+          "conventional_vent_count": "Conventional (Non-Smart) Vents"
         },
         "data_description": {
           "control_strategy": "Simple uses fixed positions, Learned adapts from past cycles, Hybrid blends both",
-          "vent_granularity": "Round vent positions to the nearest increment (e.g. 5 rounds to 0/5/10/…/100)",
+          "vent_granularity": "Round vent positions to the nearest increment (e.g. 5 rounds to 0/5/10/\u2026/100)",
           "min_other_room_open_pct": "Minimum open percentage for vents in non-target rooms to maintain airflow",
           "closed_threshold_pct": "Vents at or below this percentage are treated as fully closed",
           "relief_open_pct": "How far to open relief vents to maintain system back-pressure",
           "max_relief_rooms": "Maximum number of rooms that can act as relief vents at once",
+          "conventional_vent_count": "Number of non-smart (always-open) vents in the system for airflow math"
+        }
+      },
+      "settings_temperature": {
+        "title": "Temperature & Setpoint Control",
+        "description": "Adjust temperature thresholds, hysteresis, and heat boost behavior.",
+        "data": {
+          "room_hysteresis_f": "Room Hysteresis (Dead Band)",
+          "heat_boost_f": "Heat Boost",
+          "default_thermostat_temp": "Default Thermostat Temperature",
+          "temp_error_override_f": "Temperature Error Override"
+        },
+        "data_description": {
           "room_hysteresis_f": "Dead band around the setpoint before a room is considered satisfied",
           "heat_boost_f": "Extra degrees added to the thermostat setpoint during heating cycles",
           "default_thermostat_temp": "Fallback thermostat setpoint when no room needs conditioning",
+          "temp_error_override_f": "Override the throttle interval when temperature error exceeds this"
+        }
+      },
+      "settings_hvac": {
+        "title": "HVAC Protection & Timing",
+        "description": "Set polling intervals, adjustment throttles, and short-cycle protection.",
+        "data": {
+          "min_adjustment_pct": "Minimum Adjustment %",
+          "min_adjustment_interval_min": "Minimum Adjustment Interval",
+          "hvac_min_runtime_min": "HVAC Minimum Runtime",
+          "hvac_min_off_time_min": "HVAC Minimum Off Time",
+          "poll_interval_active_sec": "Active Polling Interval",
+          "poll_interval_idle_sec": "Idle Polling Interval",
+          "automation_cooldown_sec": "Automation Cooldown"
+        },
+        "data_description": {
           "min_adjustment_pct": "Ignore vent changes smaller than this to reduce motor wear",
           "min_adjustment_interval_min": "Minimum time between vent position changes for a room",
-          "temp_error_override_f": "Override the throttle interval when temperature error exceeds this",
-          "conventional_vent_count": "Number of non-smart (always-open) vents in the system for airflow math",
           "hvac_min_runtime_min": "Minimum HVAC run time before allowing a shutdown (short-cycle protection)",
           "hvac_min_off_time_min": "Minimum HVAC off time before allowing a restart (short-cycle protection)",
-          "occupancy_linger_min": "Keep conditioning a room for this long after occupancy clears (daytime)",
-          "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
-          "automation_cooldown_sec": "Minimum time between automation triggers to prevent rapid toggling",
           "poll_interval_active_sec": "How often to poll sensors while the HVAC is actively running",
           "poll_interval_idle_sec": "How often to poll sensors while the HVAC is idle",
+          "automation_cooldown_sec": "Minimum time between automation triggers to prevent rapid toggling"
+        }
+      },
+      "settings_behavior": {
+        "title": "Occupancy & Automation",
+        "description": "Control occupancy behavior, feature toggles, and debug logging.",
+        "data": {
+          "occupancy_linger_min": "Occupancy Linger (Daytime)",
+          "occupancy_linger_night_min": "Occupancy Linger (Nighttime)",
+          "require_occupancy": "Require Occupancy",
+          "heat_boost_enabled": "Heat Boost Enabled",
+          "auto_thermostat_control": "Automatic Thermostat Control",
+          "auto_vent_control": "Automatic Vent Control",
+          "debug_mode": "Debug Mode"
+        },
+        "data_description": {
+          "occupancy_linger_min": "Keep conditioning a room for this long after occupancy clears (daytime)",
+          "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
           "require_occupancy": "Only condition rooms that currently show occupancy",
           "heat_boost_enabled": "Add extra degrees to the setpoint during heating for faster warm-up",
           "auto_thermostat_control": "Let the integration adjust the thermostat setpoint automatically",

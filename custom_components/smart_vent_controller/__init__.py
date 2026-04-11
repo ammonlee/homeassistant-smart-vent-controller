@@ -103,55 +103,8 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
         )
 
     async def reset_to_defaults(call):
-        from .const import (
-            DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
-            DEFAULT_CLOSED_THRESHOLD_PCT,
-            DEFAULT_RELIEF_OPEN_PCT,
-            DEFAULT_MAX_RELIEF_ROOMS,
-            DEFAULT_ROOM_HYSTERESIS_F,
-            DEFAULT_OCCUPANCY_LINGER_MIN,
-            DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN,
-            DEFAULT_HEAT_BOOST_F,
-            DEFAULT_HVAC_MIN_RUNTIME_MIN,
-            DEFAULT_HVAC_MIN_OFF_TIME_MIN,
-            DEFAULT_DEFAULT_THERMOSTAT_TEMP,
-            DEFAULT_VENT_GRANULARITY,
-            DEFAULT_MIN_ADJUSTMENT_PCT,
-            DEFAULT_MIN_ADJUSTMENT_INTERVAL_MIN,
-            DEFAULT_TEMP_ERROR_OVERRIDE_F,
-            DEFAULT_CONVENTIONAL_VENT_COUNT,
-            DEFAULT_CONTROL_STRATEGY,
-            DEFAULT_POLL_INTERVAL_ACTIVE_SEC,
-            DEFAULT_POLL_INTERVAL_IDLE_SEC,
-        )
-        options = {
-            "min_other_room_open_pct": DEFAULT_MIN_OTHER_ROOM_OPEN_PCT,
-            "closed_threshold_pct": DEFAULT_CLOSED_THRESHOLD_PCT,
-            "relief_open_pct": DEFAULT_RELIEF_OPEN_PCT,
-            "max_relief_rooms": DEFAULT_MAX_RELIEF_ROOMS,
-            "room_hysteresis_f": DEFAULT_ROOM_HYSTERESIS_F,
-            "occupancy_linger_min": DEFAULT_OCCUPANCY_LINGER_MIN,
-            "occupancy_linger_night_min": DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN,
-            "heat_boost_f": DEFAULT_HEAT_BOOST_F,
-            "hvac_min_runtime_min": DEFAULT_HVAC_MIN_RUNTIME_MIN,
-            "hvac_min_off_time_min": DEFAULT_HVAC_MIN_OFF_TIME_MIN,
-            "default_thermostat_temp": DEFAULT_DEFAULT_THERMOSTAT_TEMP,
-            "automation_cooldown_sec": 30,
-            "require_occupancy": True,
-            "heat_boost_enabled": True,
-            "auto_thermostat_control": True,
-            "auto_vent_control": True,
-            "debug_mode": False,
-            "vent_granularity": DEFAULT_VENT_GRANULARITY,
-            "min_adjustment_pct": DEFAULT_MIN_ADJUSTMENT_PCT,
-            "min_adjustment_interval_min": DEFAULT_MIN_ADJUSTMENT_INTERVAL_MIN,
-            "temp_error_override_f": DEFAULT_TEMP_ERROR_OVERRIDE_F,
-            "conventional_vent_count": DEFAULT_CONVENTIONAL_VENT_COUNT,
-            "control_strategy": DEFAULT_CONTROL_STRATEGY,
-            "poll_interval_active_sec": DEFAULT_POLL_INTERVAL_ACTIVE_SEC,
-            "poll_interval_idle_sec": DEFAULT_POLL_INTERVAL_IDLE_SEC,
-        }
-        hass.config_entries.async_update_entry(entry, options=options)
+        from .config_flow import _all_settings_defaults
+        hass.config_entries.async_update_entry(entry, options=_all_settings_defaults())
         _LOGGER.info("Smart Vent Controller options reset to defaults")
 
     async def export_efficiency(call):
