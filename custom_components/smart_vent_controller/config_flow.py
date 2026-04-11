@@ -788,7 +788,6 @@ class SmartVentControllerOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Smart Vent Controller."""
 
     def __init__(self, config_entry):
-        self.config_entry = config_entry
         self._options: dict[str, Any] = {}
 
     async def async_step_init(
