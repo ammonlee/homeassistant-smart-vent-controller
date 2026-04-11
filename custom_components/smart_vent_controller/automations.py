@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant, callback
@@ -61,7 +61,7 @@ class SmartVentConditionerAutomation:
 
         self._unsubscribers.append(
             async_track_time_interval(
-                self.hass, self._handle_periodic, seconds=300
+                self.hass, self._handle_periodic, timedelta(seconds=300)
             )
         )
         _LOGGER.info("Smart Vent Controller automation set up and running")

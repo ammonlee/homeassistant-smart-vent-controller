@@ -1,6 +1,6 @@
 """Binary sensor platform for Smart Vent Controller."""
 
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -69,8 +69,9 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
         if not occ_state or occ_state.state != "on":
             return False
 
-        now = datetime.now().time()
-        is_night = time(22, 0) <= now or now <= time(6, 0)
+        now_utc = datetime.now(tz=timezone.utc)
+        now_local = now_utc.time()
+        is_night = time(22, 0) <= now_local or now_local <= time(6, 0)
         linger_min = self._entry.options.get(
             "occupancy_linger_night_min" if is_night else "occupancy_linger_min",
             60 if is_night else 30,
@@ -78,7 +79,7 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
 
         last_changed = occ_state.last_changed
         if last_changed:
-            elapsed = (datetime.now() - last_changed).total_seconds() / 60
+            elapsed = (now_utc - last_changed).total_seconds() / 60
             return elapsed <= linger_min
         return False
 
