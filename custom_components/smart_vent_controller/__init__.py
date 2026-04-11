@@ -22,6 +22,7 @@ async def async_get_config_entry_diagnostics(
     return await get_diagnostics(hass, config_entry)
 
 PLATFORMS = [
+    Platform.CLIMATE,
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.NUMBER,

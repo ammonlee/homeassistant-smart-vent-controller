@@ -343,11 +343,11 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vents = user_input.get("vent_entities") or user_input.get(CONF_ROOM_VENTS) or []
             priority = user_input.get("priority") or user_input.get(CONF_ROOM_PRIORITY) or DEFAULT_ROOM_PRIORITY
 
-            if not room_name or not climate_entity:
+            if not room_name:
                 return self.async_show_form(
                     step_id="rooms",
                     data_schema=self._rooms_schema(),
-                    errors={"base": "name_and_climate_required"},
+                    errors={"base": "name_required"},
                 )
 
             room_data = {
@@ -580,11 +580,11 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             room_name = user_input.get(CONF_ROOM_NAME)
             climate_entity = user_input.get(CONF_ROOM_CLIMATE)
 
-            if not room_name or not climate_entity:
+            if not room_name:
                 return self.async_show_form(
                     step_id="edit_room",
                     data_schema=self._room_edit_schema(room),
-                    errors={"base": "name_and_climate_required"},
+                    errors={"base": "name_required"},
                     description_placeholders={"room_name": room.get("name", "")},
                 )
 
@@ -616,11 +616,11 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             room_name = user_input.get(CONF_ROOM_NAME)
             climate_entity = user_input.get(CONF_ROOM_CLIMATE)
 
-            if not room_name or not climate_entity:
+            if not room_name:
                 return self.async_show_form(
                     step_id="add_room",
                     data_schema=self._room_edit_schema({}),
-                    errors={"base": "name_and_climate_required"},
+                    errors={"base": "name_required"},
                 )
 
             existing_keys = [
@@ -715,7 +715,7 @@ class SmartVentControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Build a room edit schema pre-filled with existing data."""
         return vol.Schema({
             vol.Required(CONF_ROOM_NAME, default=room.get("name", "")): str,
-            vol.Required(CONF_ROOM_CLIMATE, default=room.get("climate_entity", "")):
+            vol.Optional(CONF_ROOM_CLIMATE, default=room.get("climate_entity", "")):
                 selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="climate")
                 ),

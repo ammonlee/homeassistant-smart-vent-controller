@@ -310,8 +310,13 @@ class VentControlScript:
                 if t is not None:
                     current = safe_float(t, min_val=40.0, max_val=100.0) or None
 
+            # Target setpoint: prefer integration store, then external climate
             target = None
-            if climate and validate_entity_state(self.hass, climate, "climate"):
+            if coordinator:
+                stored = coordinator.store.get_room_setpoint(key)
+                if stored is not None:
+                    target = safe_float(stored, min_val=40.0, max_val=100.0) or None
+            if target is None and climate and validate_entity_state(self.hass, climate, "climate"):
                 t = get_safe_attribute(self.hass, climate, "temperature")
                 if t is not None:
                     target = safe_float(t, min_val=40.0, max_val=100.0) or None
@@ -559,11 +564,21 @@ class ThermostatControlScript:
         return False
 
     def _gather_room_targets(self, selected_keys: list[str]) -> list[float]:
+        coordinator = self.hass.data.get(DOMAIN, {}).get(self.entry.entry_id)
         targets: list[float] = []
         for rc in self.entry.data.get("rooms", []):
             key = rc.get("name", "").lower().replace(" ", "_")
             if key not in selected_keys:
                 continue
+            # Prefer integration-managed setpoint from store
+            if coordinator:
+                stored = coordinator.store.get_room_setpoint(key)
+                if stored is not None:
+                    v = safe_float(stored, min_val=40.0, max_val=100.0)
+                    if v:
+                        targets.append(v)
+                        continue
+            # Fall back to external climate entity
             climate = rc.get("climate_entity")
             if not climate or not validate_entity_state(self.hass, climate, "climate"):
                 continue

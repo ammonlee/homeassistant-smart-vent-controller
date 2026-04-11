@@ -30,7 +30,7 @@
         },
         "data_description": {
           "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
-          "climate_entity": "The climate entity that controls this room's setpoint",
+          "climate_entity": "Optional external climate entity for this room's setpoint. If omitted, the integration manages the setpoint.",
           "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
           "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
           "vent_entities": "One or more smart vent cover entities in this room",
@@ -156,7 +156,7 @@
         },
         "data_description": {
           "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
-          "climate_entity": "The climate entity that controls this room's setpoint",
+          "climate_entity": "Optional external climate entity for this room's setpoint. If omitted, the integration manages the setpoint.",
           "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
           "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
           "vent_entities": "One or more smart vent cover entities in this room",
@@ -176,7 +176,7 @@
         },
         "data_description": {
           "name": "A friendly name for this room (e.g. \"Master Bedroom\")",
-          "climate_entity": "The climate entity that controls this room's setpoint",
+          "climate_entity": "Optional external climate entity for this room's setpoint. If omitted, the integration manages the setpoint.",
           "temp_sensor": "Optional dedicated temperature sensor for more accurate readings",
           "occupancy_sensor": "Optional binary sensor that indicates room occupancy",
           "vent_entities": "One or more smart vent cover entities in this room",
@@ -202,7 +202,7 @@
       "invalid_thermostat": "Selected thermostat is not valid",
       "no_climate_entities": "No climate entities found. Please add a climate entity first.",
       "no_rooms": "At least one room must be configured",
-      "name_and_climate_required": "Room name and climate entity are required",
+      "name_required": "Room name is required",
       "duplicate_room_name": "A room with this name already exists"
     },
     "abort": {

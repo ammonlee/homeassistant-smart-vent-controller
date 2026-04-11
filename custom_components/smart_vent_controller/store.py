@@ -136,6 +136,15 @@ class SmartVentStore:
     def max_running_minutes(self, value: float) -> None:
         self._data["max_running_minutes"] = value
 
+    # -- per-room target setpoints ------------------------------------------
+
+    def get_room_setpoint(self, room_key: str) -> float | None:
+        val = self._data.get("room_setpoints", {}).get(room_key)
+        return float(val) if val is not None else None
+
+    def set_room_setpoint(self, room_key: str, temp: float) -> None:
+        self._data.setdefault("room_setpoints", {})[room_key] = temp
+
     # -- efficiency export / import -----------------------------------------
 
     def export_efficiency(self) -> dict[str, Any]:

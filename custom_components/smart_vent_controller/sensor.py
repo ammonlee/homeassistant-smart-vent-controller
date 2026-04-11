@@ -132,6 +132,10 @@ class RoomTargetSensor(SensorEntity):
 
     @property
     def native_value(self):
+        # Prefer integration-managed setpoint from store
+        stored = self.coordinator.store.get_room_setpoint(self._room_key)
+        if stored is not None:
+            return float(stored)
         if self._climate_entity:
             climate = self.coordinator.hass.states.get(self._climate_entity)
             if climate:
@@ -174,8 +178,12 @@ class RoomDeltaSensor(SensorEntity):
 
     @property
     def native_value(self):
+        # Prefer integration-managed setpoint from store
         target = None
-        if self._climate_entity:
+        stored = self.coordinator.store.get_room_setpoint(self._room_key)
+        if stored is not None:
+            target = float(stored)
+        elif self._climate_entity:
             climate = self.coordinator.hass.states.get(self._climate_entity)
             if climate:
                 temp = climate.attributes.get("temperature")
