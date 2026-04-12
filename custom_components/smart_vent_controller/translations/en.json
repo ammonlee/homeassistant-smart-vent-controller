@@ -75,12 +75,14 @@
         "data": {
           "room_hysteresis_f": "Room Hysteresis (Dead Band)",
           "heat_boost_f": "Heat Boost",
+          "cool_boost_f": "Cool Boost",
           "default_thermostat_temp": "Default Thermostat Temperature",
           "temp_error_override_f": "Temperature Error Override"
         },
         "data_description": {
           "room_hysteresis_f": "Dead band around the setpoint before a room is considered satisfied",
           "heat_boost_f": "Extra degrees added to the thermostat setpoint during heating cycles",
+          "cool_boost_f": "Extra degrees subtracted from the thermostat setpoint during cooling cycles",
           "default_thermostat_temp": "Fallback thermostat setpoint when no room needs conditioning",
           "temp_error_override_f": "Override the throttle interval when temperature error exceeds this"
         }
@@ -115,6 +117,7 @@
           "occupancy_linger_night_min": "Occupancy Linger (Nighttime)",
           "require_occupancy": "Require Occupancy",
           "heat_boost_enabled": "Heat Boost Enabled",
+          "cool_boost_enabled": "Cool Boost Enabled",
           "auto_thermostat_control": "Automatic Thermostat Control",
           "auto_vent_control": "Automatic Vent Control",
           "debug_mode": "Debug Mode"
@@ -124,6 +127,7 @@
           "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
           "require_occupancy": "Only condition rooms that currently show occupancy",
           "heat_boost_enabled": "Add extra degrees to the setpoint during heating for faster warm-up",
+          "cool_boost_enabled": "Subtract extra degrees from the setpoint during cooling for faster cool-down",
           "auto_thermostat_control": "Let the integration adjust the thermostat setpoint automatically",
           "auto_vent_control": "Let the integration open and close vents automatically",
           "debug_mode": "Enable verbose logging for troubleshooting"
@@ -250,12 +254,14 @@
         "data": {
           "room_hysteresis_f": "Room Hysteresis (Dead Band)",
           "heat_boost_f": "Heat Boost",
+          "cool_boost_f": "Cool Boost",
           "default_thermostat_temp": "Default Thermostat Temperature",
           "temp_error_override_f": "Temperature Error Override"
         },
         "data_description": {
           "room_hysteresis_f": "Dead band around the setpoint before a room is considered satisfied",
           "heat_boost_f": "Extra degrees added to the thermostat setpoint during heating cycles",
+          "cool_boost_f": "Extra degrees subtracted from the thermostat setpoint during cooling cycles",
           "default_thermostat_temp": "Fallback thermostat setpoint when no room needs conditioning",
           "temp_error_override_f": "Override the throttle interval when temperature error exceeds this"
         }
@@ -290,6 +296,7 @@
           "occupancy_linger_night_min": "Occupancy Linger (Nighttime)",
           "require_occupancy": "Require Occupancy",
           "heat_boost_enabled": "Heat Boost Enabled",
+          "cool_boost_enabled": "Cool Boost Enabled",
           "auto_thermostat_control": "Automatic Thermostat Control",
           "auto_vent_control": "Automatic Vent Control",
           "debug_mode": "Debug Mode"
@@ -299,6 +306,7 @@
           "occupancy_linger_night_min": "Keep conditioning a room for this long after occupancy clears (nighttime)",
           "require_occupancy": "Only condition rooms that currently show occupancy",
           "heat_boost_enabled": "Add extra degrees to the setpoint during heating for faster warm-up",
+          "cool_boost_enabled": "Subtract extra degrees from the setpoint during cooling for faster cool-down",
           "auto_thermostat_control": "Let the integration adjust the thermostat setpoint automatically",
           "auto_vent_control": "Let the integration open and close vents automatically",
           "debug_mode": "Enable verbose logging for troubleshooting"

@@ -471,7 +471,13 @@ class ThermostatControlScript:
                     max_retries=2,
                 )
             elif mode == "cool" or action == "cooling":
-                new_setpoint = safe_float(min(room_targets), min_val=40.0, max_val=100.0)
+                cool_target = min(room_targets)
+                cool_boost_on = self.entry.options.get("cool_boost_enabled", True)
+                cool_boost = (
+                    safe_float(self.entry.options.get("cool_boost_f", 0.0), 0.0, 0.0, 3.0)
+                    if cool_boost_on else 0.0
+                )
+                new_setpoint = safe_float(cool_target - cool_boost, min_val=40.0, max_val=100.0)
                 ok = await safe_service_call(
                     self.hass, "climate", "set_temperature",
                     {"entity_id": main_thermostat, "temperature": new_setpoint},
@@ -485,8 +491,13 @@ class ThermostatControlScript:
                     safe_float(self.entry.options.get("heat_boost_f", 0.0), 0.0, 0.0, 3.0)
                     if boost_on else 0.0
                 )
+                cool_boost_on = self.entry.options.get("cool_boost_enabled", True)
+                cool_boost = (
+                    safe_float(self.entry.options.get("cool_boost_f", 0.0), 0.0, 0.0, 3.0)
+                    if cool_boost_on else 0.0
+                )
                 lo = safe_float(heat_target + boost, min_val=40.0, max_val=100.0)
-                hi = safe_float(cool_target, min_val=40.0, max_val=100.0)
+                hi = safe_float(cool_target - cool_boost, min_val=40.0, max_val=100.0)
                 new_setpoint = (lo + hi) / 2.0
                 ok = await safe_service_call(
                     self.hass, "climate", "set_temperature",

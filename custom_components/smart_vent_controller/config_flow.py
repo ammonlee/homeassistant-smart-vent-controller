@@ -47,6 +47,7 @@ from .const import (
     DEFAULT_POLL_INTERVAL_ACTIVE_SEC,
     DEFAULT_POLL_INTERVAL_IDLE_SEC,
     DEFAULT_AUTOMATION_COOLDOWN_SEC,
+    DEFAULT_COOL_BOOST_F,
     CONTROL_STRATEGIES,
 )
 
@@ -85,6 +86,7 @@ def _all_settings_defaults() -> dict[str, Any]:
         "conventional_vent_count": DEFAULT_CONVENTIONAL_VENT_COUNT,
         "room_hysteresis_f": DEFAULT_ROOM_HYSTERESIS_F,
         "heat_boost_f": DEFAULT_HEAT_BOOST_F,
+        "cool_boost_f": DEFAULT_COOL_BOOST_F,
         "default_thermostat_temp": DEFAULT_DEFAULT_THERMOSTAT_TEMP,
         "temp_error_override_f": DEFAULT_TEMP_ERROR_OVERRIDE_F,
         "min_adjustment_pct": DEFAULT_MIN_ADJUSTMENT_PCT,
@@ -98,6 +100,7 @@ def _all_settings_defaults() -> dict[str, Any]:
         "occupancy_linger_night_min": DEFAULT_OCCUPANCY_LINGER_NIGHT_MIN,
         "require_occupancy": True,
         "heat_boost_enabled": True,
+        "cool_boost_enabled": True,
         "auto_thermostat_control": True,
         "auto_vent_control": True,
         "debug_mode": False,
@@ -148,6 +151,9 @@ def _settings_temperature_schema(defaults: dict | None = None) -> vol.Schema:
         vol.Optional("heat_boost_f",
                      default=d.get("heat_boost_f", DEFAULT_HEAT_BOOST_F)):
             _num(0, 5, step=0.5, unit="°F"),
+        vol.Optional("cool_boost_f",
+                     default=d.get("cool_boost_f", DEFAULT_COOL_BOOST_F)):
+            _num(0, 5, step=0.5, unit="°F"),
         vol.Optional("default_thermostat_temp",
                      default=d.get("default_thermostat_temp", DEFAULT_DEFAULT_THERMOSTAT_TEMP)):
             _num(50, 90, step=1, unit="°F"),
@@ -196,6 +202,8 @@ def _settings_behavior_schema(defaults: dict | None = None) -> vol.Schema:
         vol.Optional("require_occupancy", default=d.get("require_occupancy", True)):
             selector.BooleanSelector(),
         vol.Optional("heat_boost_enabled", default=d.get("heat_boost_enabled", True)):
+            selector.BooleanSelector(),
+        vol.Optional("cool_boost_enabled", default=d.get("cool_boost_enabled", True)):
             selector.BooleanSelector(),
         vol.Optional("auto_thermostat_control", default=d.get("auto_thermostat_control", True)):
             selector.BooleanSelector(),

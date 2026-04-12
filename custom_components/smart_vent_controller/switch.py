@@ -37,6 +37,14 @@ async def async_setup_entry(
         ConfigSwitch(
             coordinator,
             entry,
+            "cool_boost_enabled",
+            "Cool Boost Enabled",
+            "mdi:snowflake",
+            True
+        ),
+        ConfigSwitch(
+            coordinator,
+            entry,
             "auto_thermostat_control",
             "Auto Thermostat Control",
             "mdi:thermostat-auto",
