@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 
 from homeassistant.components.cover import (
-    CoverDeviceClass,
     CoverEntity,
     CoverEntityFeature,
 )
@@ -50,7 +49,6 @@ async def async_setup_entry(
 class RoomVentCover(CoverEntity):
     """Proxy cover entity that mirrors and controls an underlying vent."""
 
-    _attr_device_class = CoverDeviceClass.DAMPER
     _attr_supported_features = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
