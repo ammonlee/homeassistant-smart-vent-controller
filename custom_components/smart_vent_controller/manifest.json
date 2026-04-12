@@ -1,7 +1,7 @@
 {
   "domain": "smart_vent_controller",
   "name": "Smart Vent Controller",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "documentation": "https://github.com/ammonlee/homeassistant-smart-vent-controller",
   "issue_tracker": "https://github.com/ammonlee/homeassistant-smart-vent-controller/issues",
   "codeowners": ["@ammonlee"],

@@ -203,11 +203,11 @@
       }
     },
     "error": {
-      "invalid_thermostat": "Selected thermostat is not valid",
-      "no_climate_entities": "No climate entities found. Please add a climate entity first.",
-      "no_rooms": "At least one room must be configured",
-      "name_required": "Room name is required",
-      "duplicate_room_name": "A room with this name already exists"
+      "invalid_thermostat": "The selected thermostat entity was not found. Make sure a climate integration (Ecobee, Nest, Z-Wave, etc.) is set up first.",
+      "no_climate_entities": "No climate entities found. Set up a climate integration (Ecobee, Nest, Z-Wave thermostat, etc.) in Home Assistant first, then return here.",
+      "no_rooms": "At least one room must be configured. Go back and add a room with a name and at least one vent.",
+      "name_required": "A room name is required. Enter a friendly name like 'Master Bedroom'.",
+      "duplicate_room_name": "A room with this name already exists. Choose a different name or edit the existing room via Reconfigure."
     },
     "abort": {
       "already_configured": "This thermostat is already configured.",

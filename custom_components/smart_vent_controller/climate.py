@@ -102,7 +102,7 @@ class RoomClimateEntity(ClimateEntity):
         self._default_temp = default_temp
 
         self._attr_unique_id = f"{entry.entry_id}_{room_key}_climate"
-        self._attr_name = f"{room_name}"
+        self._attr_name = f"{room_name} Zone"
 
     @property
     def device_info(self) -> DeviceInfo:

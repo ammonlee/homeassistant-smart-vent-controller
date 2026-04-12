@@ -34,6 +34,12 @@ async def async_setup_entry(
                     coordinator, entry, room_key, room_name, occ_sensor
                 )
             )
+        entities.append(
+            RoomConditioningActiveSensor(coordinator, entry, room_key, room_name)
+        )
+        entities.append(
+            RoomOverrideActiveSensor(coordinator, entry, room_key, room_name)
+        )
 
     entities.append(ThermostatManualOverrideSensor(coordinator, entry))
 
@@ -82,6 +88,73 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
             elapsed = (now_utc - last_changed).total_seconds() / 60
             return elapsed <= linger_min
         return False
+
+
+class RoomConditioningActiveSensor(BinarySensorEntity):
+    """Whether a room is currently being conditioned."""
+
+    _attr_icon = "mdi:hvac"
+
+    def __init__(self, coordinator, entry, room_key, room_name):
+        self.coordinator = coordinator
+        self._entry = entry
+        self._room_key = room_key
+        self._room_name = room_name
+        self._attr_unique_id = f"{entry.entry_id}_{room_key}_conditioning_active"
+        self._attr_name = f"{room_name} Conditioning Active"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={get_room_device_id(self._entry, self._room_key)},
+            name=f"{self._room_name} Zone",
+            manufacturer="Smart Vent Controller",
+            model="Room Controller",
+        )
+
+    @property
+    def is_on(self):
+        csv = self.coordinator.get_rooms_to_condition_value()
+        if csv in ("none", ""):
+            return False
+        return self._room_key in csv.split(",")
+
+
+class RoomOverrideActiveSensor(BinarySensorEntity):
+    """Whether a room is currently in manual override (excluded from conditioning)."""
+
+    _attr_icon = "mdi:hand-back-left"
+
+    def __init__(self, coordinator, entry, room_key, room_name):
+        self.coordinator = coordinator
+        self._entry = entry
+        self._room_key = room_key
+        self._room_name = room_name
+        self._attr_unique_id = f"{entry.entry_id}_{room_key}_override_active"
+        self._attr_name = f"{room_name} Override Active"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={get_room_device_id(self._entry, self._room_key)},
+            name=f"{self._room_name} Zone",
+            manufacturer="Smart Vent Controller",
+            model="Room Controller",
+        )
+
+    @property
+    def is_on(self):
+        return self.coordinator.is_room_overridden(self._room_key)
+
+    @property
+    def extra_state_attributes(self):
+        overrides = self.coordinator.store._data.get("room_overrides", {})
+        info = overrides.get(self._room_key)
+        if info:
+            until_ts = info.get("until", 0)
+            remaining = max(0, (until_ts - datetime.now(tz=timezone.utc).timestamp()) / 60)
+            return {"remaining_minutes": round(remaining, 1)}
+        return {}
 
 
 class ThermostatManualOverrideSensor(BinarySensorEntity):

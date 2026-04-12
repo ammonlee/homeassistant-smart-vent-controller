@@ -102,6 +102,7 @@ class ConfigNumber(NumberEntity, RestoreEntity):
     """User-facing configuration number backed by config entry options."""
 
     _attr_mode = NumberMode.BOX
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry, key, name, icon,
                  min_val, max_val, step, default, unit):

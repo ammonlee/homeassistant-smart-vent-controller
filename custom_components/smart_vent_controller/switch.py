@@ -79,7 +79,7 @@ class ConfigSwitch(SwitchEntity):
         self.coordinator = coordinator
         self._entry = entry
         self._key = key
-        self._attr_unique_id = key
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_name = name
         self._attr_icon = icon
         self._default = default

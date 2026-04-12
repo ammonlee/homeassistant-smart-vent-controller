@@ -51,6 +51,7 @@ async def async_setup_entry(
     entities.append(HVACCycleStartTimeSensor(coordinator, entry))
     entities.append(HVACCycleEndTimeSensor(coordinator, entry))
     entities.append(SmartVentControllerStatsSensor(coordinator, entry))
+    entities.append(SystemHealthSensor(coordinator, entry))
 
     async_add_entities(entities)
 
@@ -155,6 +156,7 @@ class RoomDeltaSensor(SensorEntity):
     _attr_device_class = "temperature"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTemperature.FAHRENHEIT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry, room_key, room_name, climate_entity, temp_sensor):
         self.coordinator = coordinator
@@ -217,6 +219,8 @@ class RoomDeltaSensor(SensorEntity):
 
 class RoomEfficiencySensor(SensorEntity):
     """Learned heating/cooling efficiency rate for a room."""
+
+    _attr_entity_registry_enabled_default = False
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:chart-timeline-variant"
@@ -321,6 +325,7 @@ class HVACCycleStartTimeSensor(SensorEntity):
     """Timestamp of last HVAC cycle start."""
 
     _attr_icon = "mdi:clock-start"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry):
         self.coordinator = coordinator
@@ -337,6 +342,7 @@ class HVACCycleEndTimeSensor(SensorEntity):
     """Timestamp of last HVAC cycle end."""
 
     _attr_icon = "mdi:clock-end"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry):
         self.coordinator = coordinator
@@ -380,3 +386,59 @@ class SmartVentControllerStatsSensor(SensorEntity):
             ),
             "control_strategy": self._entry.options.get("control_strategy", "simple"),
         }
+
+
+class SystemHealthSensor(SensorEntity):
+    """Integration health status with error details."""
+
+    _attr_icon = "mdi:heart-pulse"
+
+    def __init__(self, coordinator, entry):
+        self.coordinator = coordinator
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_system_health"
+        self._attr_name = "Smart Vent Controller Health"
+
+    @property
+    def native_value(self):
+        main = self._entry.data.get("main_thermostat")
+        if not main:
+            return "error"
+        thermo = self.coordinator.hass.states.get(main)
+        if not thermo or thermo.state == "unavailable":
+            return "error"
+
+        # Check for unavailable vents
+        rooms = self._entry.data.get("rooms", [])
+        unavailable_vents = []
+        for room in rooms:
+            for vent in room.get("vent_entities", []):
+                state = self.coordinator.hass.states.get(vent)
+                if state is None or state.state == "unavailable":
+                    unavailable_vents.append(vent)
+
+        if unavailable_vents:
+            return "degraded"
+        return "healthy"
+
+    @property
+    def extra_state_attributes(self):
+        attrs = {}
+        main = self._entry.data.get("main_thermostat")
+        thermo = self.coordinator.hass.states.get(main) if main else None
+        attrs["thermostat_available"] = thermo is not None and thermo.state != "unavailable"
+
+        rooms = self._entry.data.get("rooms", [])
+        unavailable = []
+        total_vents = 0
+        for room in rooms:
+            for vent in room.get("vent_entities", []):
+                total_vents += 1
+                state = self.coordinator.hass.states.get(vent)
+                if state is None or state.state == "unavailable":
+                    unavailable.append(vent)
+
+        attrs["total_vents"] = total_vents
+        attrs["unavailable_vents"] = unavailable
+        attrs["unavailable_vent_count"] = len(unavailable)
+        return attrs
