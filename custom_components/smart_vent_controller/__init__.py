@@ -23,6 +23,7 @@ async def async_get_config_entry_diagnostics(
 
 PLATFORMS = [
     Platform.CLIMATE,
+    Platform.COVER,
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.NUMBER,
