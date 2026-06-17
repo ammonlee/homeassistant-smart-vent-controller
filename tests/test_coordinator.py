@@ -132,3 +132,33 @@ async def test_cold_room_below_old_band_is_conditioned(hass):
     )
 
     assert "garage" in coordinator.get_rooms_to_condition_value().split(",")
+
+
+async def test_efficiency_export_import_roundtrip_via_services(hass, tmp_path):
+    from custom_components.smart_vent_controller import _async_register_services
+
+    entry = _make_entry([])
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+
+    # Isolate file I/O to a per-test temp dir so we don't pollute the shared
+    # test config directory.
+    hass.config.config_dir = str(tmp_path)
+
+    await _async_register_services(hass, entry)
+
+    coordinator.store.set_heating_rate("office", 0.0123)
+
+    await hass.services.async_call(
+        DOMAIN, "export_efficiency", {"path": "sv_eff_test.json"}, blocking=True
+    )
+
+    # Corrupt the in-memory value; importing from disk must restore it.
+    coordinator.store.set_heating_rate("office", 0.0)
+    await hass.services.async_call(
+        DOMAIN, "import_efficiency", {"path": "sv_eff_test.json"}, blocking=True
+    )
+
+    assert coordinator.store.get_heating_rate("office") == pytest.approx(0.0123)
