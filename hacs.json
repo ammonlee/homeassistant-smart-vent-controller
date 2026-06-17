@@ -1,6 +1,5 @@
 {
   "name": "Smart Vent Controller",
   "render_readme": true,
-  "homeassistant": "2024.1.0",
-  "domains": ["smart_vent_controller"]
+  "homeassistant": "2024.1.0"
 }
