@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from datetime import time as dt_time
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,18 @@ def round_to_granularity(value: float, granularity: int) -> int:
         return max(0, min(100, int(round(value))))
     rounded = int(round(value / granularity) * granularity)
     return max(0, min(100, rounded))
+
+
+def is_night_time(
+    now: dt_time,
+    night_start: dt_time = dt_time(22, 0),
+    night_end: dt_time = dt_time(6, 0),
+) -> bool:
+    """Return True if a local time-of-day falls in the overnight window.
+
+    The window wraps midnight: night is ``>= night_start`` OR ``<= night_end``.
+    """
+    return now >= night_start or now <= night_end
 
 
 def has_reached_setpoint(hvac_mode: str, setpoint: float, current_temp: float) -> bool:

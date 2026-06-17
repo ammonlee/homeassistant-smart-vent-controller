@@ -13,6 +13,7 @@ from custom_components.smart_vent_controller.algorithm import (
     calculate_all_vent_targets,
     adjust_for_minimum_airflow,
     compute_simple_targets,
+    is_night_time,
 )
 
 
@@ -251,3 +252,24 @@ class TestSimpleTargets:
         ]
         targets = compute_simple_targets(rooms, ["a"], "heat", "heating", 20)
         assert targets["b"] == 20.0
+
+
+from datetime import time
+
+
+class TestIsNightTime:
+    def test_late_evening_is_night(self):
+        assert is_night_time(time(23, 0)) is True
+
+    def test_early_morning_is_night(self):
+        assert is_night_time(time(5, 0)) is True
+
+    def test_boundaries_inclusive(self):
+        assert is_night_time(time(22, 0)) is True
+        assert is_night_time(time(6, 0)) is True
+
+    def test_midday_is_day(self):
+        assert is_night_time(time(12, 0)) is False
+
+    def test_custom_window(self):
+        assert is_night_time(time(20, 30), night_start=time(20, 0), night_end=time(7, 0)) is True

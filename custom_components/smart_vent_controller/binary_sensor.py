@@ -1,12 +1,13 @@
 """Binary sensor platform for Smart Vent Controller."""
 
-from datetime import datetime, time, timezone
+from homeassistant.util import dt as dt_util
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 
+from .algorithm import is_night_time
 from .const import DOMAIN
 from .coordinator import SmartVentControllerCoordinator
 from .device import get_room_device_id
@@ -75,9 +76,7 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
         if not occ_state or occ_state.state != "on":
             return False
 
-        now_utc = datetime.now(tz=timezone.utc)
-        now_local = now_utc.time()
-        is_night = time(22, 0) <= now_local or now_local <= time(6, 0)
+        is_night = is_night_time(dt_util.now().time())
         linger_min = self._entry.options.get(
             "occupancy_linger_night_min" if is_night else "occupancy_linger_min",
             60 if is_night else 30,
@@ -85,7 +84,7 @@ class RoomOccupiedRecentSensor(BinarySensorEntity):
 
         last_changed = occ_state.last_changed
         if last_changed:
-            elapsed = (now_utc - last_changed).total_seconds() / 60
+            elapsed = (dt_util.utcnow() - last_changed).total_seconds() / 60
             return elapsed <= linger_min
         return False
 
@@ -152,7 +151,7 @@ class RoomOverrideActiveSensor(BinarySensorEntity):
         info = overrides.get(self._room_key)
         if info:
             until_ts = info.get("until", 0)
-            remaining = max(0, (until_ts - datetime.now(tz=timezone.utc).timestamp()) / 60)
+            remaining = max(0, (until_ts - dt_util.utcnow().timestamp()) / 60)
             return {"remaining_minutes": round(remaining, 1)}
         return {}
 
