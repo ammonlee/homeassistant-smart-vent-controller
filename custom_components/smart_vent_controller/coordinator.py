@@ -367,20 +367,17 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         self, room_key: str, enabled: bool, duration_min: int = 60
     ) -> None:
         """Override (or clear) a room's conditioning for *duration_min* minutes."""
-        overrides: dict = self.store._data.setdefault("room_overrides", {})
         if enabled:
-            overrides[room_key] = {
-                "until": datetime.now().timestamp() + duration_min * 60,
-            }
+            until = dt_util.utcnow().timestamp() + duration_min * 60
+            self.store.set_room_override(room_key, until)
         else:
-            overrides.pop(room_key, None)
+            self.store.clear_room_override(room_key)
 
     def is_room_overridden(self, room_key: str) -> bool:
-        overrides: dict = self.store._data.get("room_overrides", {})
-        info = overrides.get(room_key)
-        if not info:
+        until = self.store.get_room_override_until(room_key)
+        if until is None:
             return False
-        if datetime.now().timestamp() > info.get("until", 0):
-            overrides.pop(room_key, None)
+        if dt_util.utcnow().timestamp() > until:
+            self.store.clear_room_override(room_key)
             return False
         return True

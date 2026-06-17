@@ -74,6 +74,24 @@ class TestVentLastAdjusted:
         assert store.get_vent_last_adjusted("cover.vent_1") == 12345.0
 
 
+class TestRoomOverrides:
+    def test_no_override_by_default(self, store):
+        assert store.get_room_override_until("bedroom") is None
+
+    def test_set_and_get_override(self, store):
+        store.set_room_override("bedroom", 5000.0)
+        assert store.get_room_override_until("bedroom") == 5000.0
+
+    def test_clear_override(self, store):
+        store.set_room_override("bedroom", 5000.0)
+        store.clear_room_override("bedroom")
+        assert store.get_room_override_until("bedroom") is None
+
+    def test_clear_missing_override_is_noop(self, store):
+        store.clear_room_override("nope")  # must not raise
+        assert store.get_room_override_until("nope") is None
+
+
 class TestExportImport:
     def test_export_empty(self, store):
         data = store.export_efficiency()

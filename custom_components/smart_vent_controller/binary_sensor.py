@@ -147,10 +147,8 @@ class RoomOverrideActiveSensor(BinarySensorEntity):
 
     @property
     def extra_state_attributes(self):
-        overrides = self.coordinator.store._data.get("room_overrides", {})
-        info = overrides.get(self._room_key)
-        if info:
-            until_ts = info.get("until", 0)
+        until_ts = self.coordinator.store.get_room_override_until(self._room_key)
+        if until_ts is not None:
             remaining = max(0, (until_ts - dt_util.utcnow().timestamp()) / 60)
             return {"remaining_minutes": round(remaining, 1)}
         return {}
