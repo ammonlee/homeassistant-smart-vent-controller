@@ -81,3 +81,33 @@ async def test_override_expires_after_duration(hass):
 
         frozen.tick(timedelta(minutes=61))
         assert coordinator.is_room_overridden("guest_room") is False
+
+
+async def test_overridden_room_excluded_from_conditioning(hass):
+    rooms = [
+        {"name": "Cold Room", "temp_sensor": "sensor.cold",
+         "climate_entity": "climate.cold", "vent_entities": []},
+    ]
+    entry = _make_entry(rooms)
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+
+    hass.states.async_set("climate.main", "heat")
+    hass.states.async_set("sensor.cold", "66.0")
+    hass.states.async_set("climate.cold", "heat", {"temperature": 72.0})
+
+    hass.config_entries.async_update_entry(
+        entry, options={"require_occupancy": False, "room_hysteresis_f": 1.0}
+    )
+
+    # Baseline: the cold room is selected for conditioning.
+    assert "cold_room" in coordinator.get_rooms_to_condition_value().split(",")
+
+    # Override excludes it.
+    coordinator.set_room_override("cold_room", enabled=True, duration_min=60)
+    assert "cold_room" not in coordinator.get_rooms_to_condition_value().split(",")
+
+    # Clearing the override restores it.
+    coordinator.set_room_override("cold_room", enabled=False)
+    assert "cold_room" in coordinator.get_rooms_to_condition_value().split(",")

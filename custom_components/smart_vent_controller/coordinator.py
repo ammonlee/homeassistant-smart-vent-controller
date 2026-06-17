@@ -315,6 +315,8 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
 
         for room in rooms:
             room_key = room.get("name", "").lower().replace(" ", "_")
+            if self.is_room_overridden(room_key):
+                continue
             current_temp = self._get_room_temp(room)
             if current_temp is None or current_temp < 40 or current_temp > 100:
                 continue
