@@ -61,12 +61,22 @@ These are the concrete issues this effort addresses.
    but it is the same fragility class as the already-fixed bug in commit
    `5eae6af`, and it blocks clean time-freezing in tests. HA convention is
    `homeassistant.util.dt`.
+
+   Related active bug found while planning: `binary_sensor.py:78-80` derives
+   `now_local = now_utc.time()` from a UTC datetime and checks the 22:00-06:00
+   night window against it, so the day/night occupancy-linger window is
+   evaluated in UTC rather than the user's local timezone (off by hours for most
+   users). The datetime task fixes this with `dt_util.now()` (local) for the
+   time-of-day check while keeping `dt_util.utcnow()` for elapsed-vs-`last_changed`.
 3. **Coarse coordinator error handling.** `_async_update_data` wraps the entire
    room loop in a single `try/except Exception` → `UpdateFailed`, so one
    unexpected error blanks every room's data for that cycle.
 4. **Leaky abstraction.** `coordinator.set_room_override` / `is_room_overridden`
    reach into the store's private `_data` dict (`store._data.setdefault(...)`,
-   lines 360, 369) to manage `room_overrides`.
+   lines 360, 369) to manage `room_overrides`. `binary_sensor.py:151`
+   (`RoomOverrideActiveSensor.extra_state_attributes`) does the same
+   (`coordinator.store._data.get("room_overrides", {})`); both must move to a
+   public store API.
 5. **Git hygiene.** No `.gitignore`; `.DS_Store` and the binary
    `keypad_esp32.zip` are tracked (zip is also in history). `keypad_esp32.zip`
    is already staged for deletion at baseline.
