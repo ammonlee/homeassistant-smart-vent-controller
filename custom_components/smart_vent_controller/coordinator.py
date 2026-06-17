@@ -59,6 +59,7 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         self.automations: list[Any] = []
 
         self._is_hvac_active = False
+        self._unavailable_since: dict[str, float] = {}
 
     async def async_initialize(self) -> None:
         """Load persisted state from disk. Call once during entry setup."""
@@ -106,6 +107,11 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                         room.get("name", "?"),
                         room_err,
                     )
+
+            try:
+                self._evaluate_health()
+            except Exception as health_err:  # noqa: BLE001 - never fail the cycle
+                _LOGGER.debug("Health evaluation skipped: %s", health_err)
 
             return data
 
@@ -268,6 +274,16 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
             )
 
     # -- helpers ------------------------------------------------------------
+
+    def _evaluate_health(self) -> None:
+        """Raise/clear Repairs issues for unavailable entities (best-effort)."""
+        from .health import evaluate_health_issues
+        evaluate_health_issues(
+            self.hass,
+            self.config_entry,
+            self._unavailable_since,
+            dt_util.utcnow().timestamp(),
+        )
 
     def _get_room_temp(self, room_config: dict) -> float | None:
         temp_sensor = room_config.get("temp_sensor")

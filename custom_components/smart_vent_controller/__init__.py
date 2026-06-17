@@ -55,6 +55,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Smart Vent Controller entry."""
+    from homeassistant.helpers import issue_registry as ir
+    ir.async_delete_issue(hass, DOMAIN, f"thermostat_unavailable_{entry.entry_id}")
+    ir.async_delete_issue(hass, DOMAIN, f"vents_unavailable_{entry.entry_id}")
     try:
         await async_remove_room_devices(hass, entry)
     except Exception as exc:
