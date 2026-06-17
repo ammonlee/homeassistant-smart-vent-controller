@@ -111,3 +111,24 @@ async def test_overridden_room_excluded_from_conditioning(hass):
     # Clearing the override restores it.
     coordinator.set_room_override("cold_room", enabled=False)
     assert "cold_room" in coordinator.get_rooms_to_condition_value().split(",")
+
+
+async def test_cold_room_below_old_band_is_conditioned(hass):
+    rooms = [
+        {"name": "Garage", "temp_sensor": "sensor.garage",
+         "climate_entity": "climate.garage", "vent_entities": []},
+    ]
+    entry = _make_entry(rooms)
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+
+    hass.states.async_set("climate.main", "heat")
+    hass.states.async_set("sensor.garage", "38.0")  # below the old 40 °F floor
+    hass.states.async_set("climate.garage", "heat", {"temperature": 60.0})
+
+    hass.config_entries.async_update_entry(
+        entry, options={"require_occupancy": False, "room_hysteresis_f": 1.0}
+    )
+
+    assert "garage" in coordinator.get_rooms_to_condition_value().split(",")

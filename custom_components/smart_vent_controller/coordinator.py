@@ -318,7 +318,9 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
             if self.is_room_overridden(room_key):
                 continue
             current_temp = self._get_room_temp(room)
-            if current_temp is None or current_temp < 40 or current_temp > 100:
+            # Plausibility band: intentionally wider than the 40-100 setpoint
+            # clamps so extreme but real readings (e.g. a 38F garage) stay eligible.
+            if current_temp is None or current_temp < 32 or current_temp > 110:
                 continue
 
             target_temp = self._get_room_target(room)
