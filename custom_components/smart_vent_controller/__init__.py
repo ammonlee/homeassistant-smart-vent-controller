@@ -115,10 +115,13 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
         data = coordinator.store.export_efficiency()
         path = call.data.get("path", "")
         if path:
-            config_dir = hass.config.path()
-            full = f"{config_dir}/{path}"
-            with open(full, "w") as f:
-                json.dump(data, f, indent=2)
+            full = hass.config.path(path)
+
+            def _write():
+                with open(full, "w") as f:
+                    json.dump(data, f, indent=2)
+
+            await hass.async_add_executor_job(_write)
             _LOGGER.info("Efficiency data exported to %s", full)
         else:
             _LOGGER.info("Efficiency data: %s", json.dumps(data))
@@ -130,10 +133,13 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
         payload = call.data.get("payload")
         path = call.data.get("path", "")
         if path:
-            config_dir = hass.config.path()
-            full = f"{config_dir}/{path}"
-            with open(full) as f:
-                payload = json.load(f)
+            full = hass.config.path(path)
+
+            def _read():
+                with open(full) as f:
+                    return json.load(f)
+
+            payload = await hass.async_add_executor_job(_read)
         if payload:
             coordinator.store.import_efficiency(payload)
             await coordinator.store.async_save()

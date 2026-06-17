@@ -304,11 +304,11 @@ class VentControlScript:
             if temp_sensor and validate_entity_state(self.hass, temp_sensor, "sensor"):
                 v = get_safe_state(self.hass, temp_sensor)
                 if v:
-                    current = safe_float(v, min_val=40.0, max_val=100.0) or None
+                    current = safe_float(v, min_val=32.0, max_val=110.0) or None
             if current is None and climate and validate_entity_state(self.hass, climate, "climate"):
                 t = get_safe_attribute(self.hass, climate, "current_temperature")
                 if t is not None:
-                    current = safe_float(t, min_val=40.0, max_val=100.0) or None
+                    current = safe_float(t, min_val=32.0, max_val=110.0) or None
 
             # Target setpoint: prefer integration store, then external climate
             target = None
