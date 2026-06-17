@@ -365,6 +365,23 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                 pass
         return None
 
+    def get_room_comfort(self, room_config: dict) -> bool | None:
+        """Return True if the room is within its comfort band, None if unknown.
+
+        Comfortable means abs(target - current) <= room_hysteresis_f, independent
+        of HVAC mode. Target resolves store setpoint first, then the room's climate
+        entity (same precedence as the Target sensor).
+        """
+        current = self._get_room_temp(room_config)
+        room_key = room_config.get("name", "").lower().replace(" ", "_")
+        target = self.store.get_room_setpoint(room_key)
+        if target is None:
+            target = self._get_room_target(room_config)
+        if current is None or target is None:
+            return None
+        hysteresis = self.config_entry.options.get("room_hysteresis_f", 1.0)
+        return abs(float(target) - float(current)) <= hysteresis
+
     # -- override room support ----------------------------------------------
 
     def set_room_override(

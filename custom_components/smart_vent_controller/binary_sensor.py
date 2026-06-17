@@ -39,6 +39,9 @@ async def async_setup_entry(
             RoomConditioningActiveSensor(coordinator, entry, room_key, room_name)
         )
         entities.append(
+            RoomComfortableSensor(coordinator, entry, room_key, room_name, room)
+        )
+        entities.append(
             RoomOverrideActiveSensor(coordinator, entry, room_key, room_name)
         )
 
@@ -117,6 +120,34 @@ class RoomConditioningActiveSensor(BinarySensorEntity):
         if csv in ("none", ""):
             return False
         return self._room_key in csv.split(",")
+
+
+class RoomComfortableSensor(BinarySensorEntity):
+    """Whether a room is currently within its comfort band."""
+
+    _attr_icon = "mdi:thermometer-check"
+
+    def __init__(self, coordinator, entry, room_key, room_name, room_config):
+        self.coordinator = coordinator
+        self._entry = entry
+        self._room_key = room_key
+        self._room_name = room_name
+        self._room_config = room_config
+        self._attr_unique_id = f"{entry.entry_id}_{room_key}_comfortable"
+        self._attr_name = f"{room_name} Comfortable"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={get_room_device_id(self._entry, self._room_key)},
+            name=f"{self._room_name} Zone",
+            manufacturer="Smart Vent Controller",
+            model="Room Controller",
+        )
+
+    @property
+    def is_on(self):
+        return self.coordinator.get_room_comfort(self._room_config)
 
 
 class RoomOverrideActiveSensor(BinarySensorEntity):

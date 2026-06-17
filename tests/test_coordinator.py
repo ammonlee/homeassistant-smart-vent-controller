@@ -162,3 +162,27 @@ async def test_efficiency_export_import_roundtrip_via_services(hass, tmp_path):
     )
 
     assert coordinator.store.get_heating_rate("office") == pytest.approx(0.0123)
+
+
+async def test_get_room_comfort(hass):
+    rooms = [{"name": "Den", "temp_sensor": "sensor.den",
+              "climate_entity": "climate.den", "vent_entities": []}]
+    entry = _make_entry(rooms)
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    hass.config_entries.async_update_entry(entry, options={"room_hysteresis_f": 1.0})
+
+    hass.states.async_set("climate.den", "heat", {"temperature": 70.0})
+
+    # Within band: |70 - 70.5| = 0.5 <= 1.0
+    hass.states.async_set("sensor.den", "70.5")
+    assert coordinator.get_room_comfort(rooms[0]) is True
+
+    # Outside band: |70 - 66| = 4 > 1.0
+    hass.states.async_set("sensor.den", "66.0")
+    assert coordinator.get_room_comfort(rooms[0]) is False
+
+    # Missing current temp -> None
+    hass.states.async_set("sensor.den", "unavailable")
+    assert coordinator.get_room_comfort(rooms[0]) is None
