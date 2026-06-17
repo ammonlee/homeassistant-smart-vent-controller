@@ -98,6 +98,8 @@ class TestExportImport:
         assert data == {
             "heating_rates": {},
             "cooling_rates": {},
+            "heating_samples": {},
+            "cooling_samples": {},
             "max_running_minutes": 60.0,
         }
 
@@ -114,3 +116,43 @@ class TestExportImport:
         assert store2.get_heating_rate("a") == 0.1
         assert store2.get_cooling_rate("b") == 0.2
         assert store2.max_running_minutes == 45.0
+
+
+class TestEfficiencySamples:
+    def test_default_zero(self, store):
+        assert store.get_heating_samples("den") == 0
+        assert store.get_cooling_samples("den") == 0
+
+    def test_increment(self, store):
+        store.increment_heating_samples("den")
+        store.increment_heating_samples("den")
+        store.increment_cooling_samples("den")
+        assert store.get_heating_samples("den") == 2
+        assert store.get_cooling_samples("den") == 1
+
+    def test_samples_roundtrip(self, store, hass):
+        store.increment_heating_samples("a")
+        exported = store.export_efficiency()
+        store2 = SmartVentStore(hass, "other")
+        store2.import_efficiency(exported)
+        assert store2.get_heating_samples("a") == 1
+
+
+class TestResetEfficiency:
+    def test_reset_one_room(self, store):
+        store.set_heating_rate("a", 0.1)
+        store.increment_heating_samples("a")
+        store.set_heating_rate("b", 0.2)
+        store.reset_efficiency("a")
+        assert store.get_heating_rate("a") == 0
+        assert store.get_heating_samples("a") == 0
+        assert store.get_heating_rate("b") == 0.2
+
+    def test_reset_all(self, store):
+        store.set_heating_rate("a", 0.1)
+        store.set_cooling_rate("b", 0.2)
+        store.increment_cooling_samples("b")
+        store.reset_efficiency()
+        assert store.get_heating_rate("a") == 0
+        assert store.get_cooling_rate("b") == 0
+        assert store.get_cooling_samples("b") == 0

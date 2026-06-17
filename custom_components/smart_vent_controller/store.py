@@ -92,6 +92,32 @@ class SmartVentStore:
             return self.get_cooling_rate(room_key)
         return self.get_heating_rate(room_key)
 
+    # -- per-room learning sample counts ------------------------------------
+
+    def get_heating_samples(self, room_key: str) -> int:
+        return int(self._data.get("heating_samples", {}).get(room_key, 0))
+
+    def increment_heating_samples(self, room_key: str) -> None:
+        d = self._data.setdefault("heating_samples", {})
+        d[room_key] = int(d.get(room_key, 0)) + 1
+
+    def get_cooling_samples(self, room_key: str) -> int:
+        return int(self._data.get("cooling_samples", {}).get(room_key, 0))
+
+    def increment_cooling_samples(self, room_key: str) -> None:
+        d = self._data.setdefault("cooling_samples", {})
+        d[room_key] = int(d.get(room_key, 0)) + 1
+
+    def reset_efficiency(self, room_key: str | None = None) -> None:
+        """Clear learned rates and sample counts for one room, or all rooms."""
+        keys = ("heating_rates", "cooling_rates", "heating_samples", "cooling_samples")
+        if room_key is None:
+            for k in keys:
+                self._data[k] = {}
+        else:
+            for k in keys:
+                self._data.get(k, {}).pop(room_key, None)
+
     # -- per-room cycle start temperatures ----------------------------------
 
     def get_cycle_start_temp(self, room_key: str) -> float | None:
@@ -166,6 +192,8 @@ class SmartVentStore:
         return {
             "heating_rates": dict(self._data.get("heating_rates", {})),
             "cooling_rates": dict(self._data.get("cooling_rates", {})),
+            "heating_samples": dict(self._data.get("heating_samples", {})),
+            "cooling_samples": dict(self._data.get("cooling_samples", {})),
             "max_running_minutes": self.max_running_minutes,
         }
 
@@ -174,5 +202,9 @@ class SmartVentStore:
             self._data["heating_rates"] = dict(payload["heating_rates"])
         if "cooling_rates" in payload:
             self._data["cooling_rates"] = dict(payload["cooling_rates"])
+        if "heating_samples" in payload:
+            self._data["heating_samples"] = dict(payload["heating_samples"])
+        if "cooling_samples" in payload:
+            self._data["cooling_samples"] = dict(payload["cooling_samples"])
         if "max_running_minutes" in payload:
             self._data["max_running_minutes"] = float(payload["max_running_minutes"])
