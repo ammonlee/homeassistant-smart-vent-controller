@@ -98,52 +98,13 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                 await self._handle_cycle_end()
 
             for room in self.rooms:
-                room_name = room.get("name", "").lower().replace(" ", "_")
-                temp_sensor = room.get("temp_sensor")
-                climate_entity = room.get("climate_entity")
-
-                current_temp = None
-                if temp_sensor:
-                    state = self.hass.states.get(temp_sensor)
-                    if state and state.state not in (
-                        "unknown", "unavailable", "None", "none"
-                    ):
-                        try:
-                            current_temp = float(state.state)
-                        except (ValueError, TypeError):
-                            pass
-
-                if current_temp is None and climate_entity:
-                    climate = self.hass.states.get(climate_entity)
-                    if climate:
-                        temp = climate.attributes.get("current_temperature")
-                        if temp is not None:
-                            try:
-                                current_temp = float(temp)
-                            except (ValueError, TypeError):
-                                pass
-
-                data[f"{room_name}_temp"] = current_temp
-
-                vent_entities = room.get("vent_entities", [])
-                positions = []
-                for vent in vent_entities:
-                    vent_state = self.hass.states.get(vent)
-                    if vent_state:
-                        pos = vent_state.attributes.get("current_position", 0)
-                        try:
-                            positions.append(float(pos))
-                        except (ValueError, TypeError):
-                            pass
-                data[f"{room_name}_vent_avg"] = (
-                    sum(positions) / len(positions) if positions else 0
-                )
-
-                occ_sensor = room.get("occupancy_sensor")
-                if occ_sensor:
-                    occ_state = self.hass.states.get(occ_sensor)
-                    data[f"{room_name}_occupied"] = (
-                        occ_state.state == "on" if occ_state else False
+                try:
+                    self._read_room_into(room, data)
+                except Exception as room_err:  # noqa: BLE001 - isolate one room
+                    _LOGGER.warning(
+                        "Skipping room %s this cycle: %s",
+                        room.get("name", "?"),
+                        room_err,
                     )
 
             return data
@@ -152,6 +113,54 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(
                 f"Error updating Smart Vent Controller: {err}"
             ) from err
+
+    def _read_room_into(self, room: dict, data: dict[str, Any]) -> None:
+        """Read one room's temp/vent/occupancy into *data*. Raises on bad input."""
+        room_name = room.get("name", "").lower().replace(" ", "_")
+        temp_sensor = room.get("temp_sensor")
+        climate_entity = room.get("climate_entity")
+
+        current_temp = None
+        if temp_sensor:
+            state = self.hass.states.get(temp_sensor)
+            if state and state.state not in ("unknown", "unavailable", "None", "none"):
+                try:
+                    current_temp = float(state.state)
+                except (ValueError, TypeError):
+                    pass
+
+        if current_temp is None and climate_entity:
+            climate = self.hass.states.get(climate_entity)
+            if climate:
+                temp = climate.attributes.get("current_temperature")
+                if temp is not None:
+                    try:
+                        current_temp = float(temp)
+                    except (ValueError, TypeError):
+                        pass
+
+        data[f"{room_name}_temp"] = current_temp
+
+        vent_entities = room.get("vent_entities", [])
+        positions = []
+        for vent in vent_entities:
+            vent_state = self.hass.states.get(vent)
+            if vent_state:
+                pos = vent_state.attributes.get("current_position", 0)
+                try:
+                    positions.append(float(pos))
+                except (ValueError, TypeError):
+                    pass
+        data[f"{room_name}_vent_avg"] = (
+            sum(positions) / len(positions) if positions else 0
+        )
+
+        occ_sensor = room.get("occupancy_sensor")
+        if occ_sensor:
+            occ_state = self.hass.states.get(occ_sensor)
+            data[f"{room_name}_occupied"] = (
+                occ_state.state == "on" if occ_state else False
+            )
 
     # -- HVAC cycle tracking ------------------------------------------------
 
