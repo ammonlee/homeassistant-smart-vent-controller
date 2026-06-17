@@ -7,7 +7,6 @@ Thermostat control reads/writes cycle state via the coordinator's store.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING
 from homeassistant.util import dt as dt_util
 

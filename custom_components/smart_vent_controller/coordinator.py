@@ -7,7 +7,7 @@ now lives here and is persisted via SmartVentStore.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant

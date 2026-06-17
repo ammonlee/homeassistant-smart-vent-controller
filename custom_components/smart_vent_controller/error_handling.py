@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Callable, TypeVar, Optional
 from functools import wraps
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util

@@ -1,7 +1,6 @@
 """Diagnostics support for Smart Vent Controller."""
 
 from typing import Any
-from datetime import datetime
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.util import dt as dt_util
