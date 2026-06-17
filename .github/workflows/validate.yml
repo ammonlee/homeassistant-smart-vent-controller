@@ -24,3 +24,7 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
+          # 'brands' is a HACS default-list requirement (icon in home-assistant/brands).
+          # This repo is a HACS custom repository and does not pursue default-list
+          # inclusion, so the brands check is intentionally skipped.
+          ignore: brands
