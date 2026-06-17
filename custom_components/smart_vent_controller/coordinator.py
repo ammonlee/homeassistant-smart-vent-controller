@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -155,7 +156,7 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
     # -- HVAC cycle tracking ------------------------------------------------
 
     async def _handle_cycle_start(self, action: str) -> None:
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
         self.store.cycle_start_ts = now
         self.store.hvac_last_action = action
 
@@ -188,7 +189,7 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("HVAC cycle started: %s at %.0f", action, now)
 
     async def _handle_cycle_end(self) -> None:
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
         self.store.cycle_end_ts = now
 
         start_ts = self.store.cycle_start_ts

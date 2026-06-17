@@ -306,9 +306,9 @@ class HVACCycleProtectionSensor(SensorEntity):
         action = thermo.attributes.get("hvac_action", "idle")
         min_runtime = self._entry.options.get("hvac_min_runtime_min", 10) * 60
         min_off = self._entry.options.get("hvac_min_off_time_min", 5) * 60
-        from datetime import datetime
+        from homeassistant.util import dt as dt_util
 
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
 
         if action in ("heating", "cooling"):
             start = self.coordinator.store.cycle_start_ts

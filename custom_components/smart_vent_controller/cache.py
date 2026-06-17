@@ -3,6 +3,7 @@
 from typing import Any, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
+from homeassistant.util import dt as dt_util
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class TimedCache:
         
         value, timestamp = self._cache[key]
         
-        if datetime.now() - timestamp > self._ttl:
+        if dt_util.utcnow() - timestamp > self._ttl:
             del self._cache[key]
             return None
         
@@ -47,7 +48,7 @@ class TimedCache:
             key: Cache key
             value: Value to cache
         """
-        self._cache[key] = (value, datetime.now())
+        self._cache[key] = (value, dt_util.utcnow())
     
     def clear(self) -> None:
         """Clear all cached values."""

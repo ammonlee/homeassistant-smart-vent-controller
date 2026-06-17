@@ -6,6 +6,7 @@ from functools import wraps
 from datetime import datetime, timedelta
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from homeassistant.exceptions import HomeAssistantError
 
 _LOGGER = logging.getLogger(__name__)
@@ -294,7 +295,7 @@ class ErrorRecovery:
             component: Component name (e.g., 'vent_control', 'thermostat_control')
             error: Exception that occurred
         """
-        now = datetime.now()
+        now = dt_util.utcnow()
         
         # Initialize if needed
         if component not in self._error_counts:
