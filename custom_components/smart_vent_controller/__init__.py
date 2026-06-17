@@ -148,8 +148,19 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
             await coordinator.store.async_save()
             _LOGGER.info("Efficiency data imported")
 
+    async def reset_efficiency(call):
+        coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if coordinator is None:
+            return
+        room = call.data.get("room", "")
+        room_key = room.lower().replace(" ", "_") if room else None
+        coordinator.store.reset_efficiency(room_key)
+        await coordinator.store.async_save()
+        _LOGGER.info("Efficiency data reset for %s", room_key or "all rooms")
+
     hass.services.async_register(DOMAIN, "set_room_priority", set_room_priority)
     hass.services.async_register(DOMAIN, "override_room", override_room)
     hass.services.async_register(DOMAIN, "reset_to_defaults", reset_to_defaults)
     hass.services.async_register(DOMAIN, "export_efficiency", export_efficiency)
     hass.services.async_register(DOMAIN, "import_efficiency", import_efficiency)
+    hass.services.async_register(DOMAIN, "reset_efficiency", reset_efficiency)

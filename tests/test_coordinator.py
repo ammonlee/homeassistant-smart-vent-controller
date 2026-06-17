@@ -203,3 +203,24 @@ async def test_learn_efficiency_increments_samples(hass):
 
     assert coordinator.store.get_heating_samples("den") == 1
     assert coordinator.store.get_heating_rate("den") > 0
+
+
+async def test_reset_efficiency_service(hass):
+    from custom_components.smart_vent_controller import _async_register_services
+
+    entry = _make_entry([])
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    await _async_register_services(hass, entry)
+
+    coordinator.store.set_heating_rate("den", 0.3)
+    coordinator.store.increment_heating_samples("den")
+
+    await hass.services.async_call(
+        DOMAIN, "reset_efficiency", {"room": "Den"}, blocking=True
+    )
+
+    assert coordinator.store.get_heating_rate("den") == 0
+    assert coordinator.store.get_heating_samples("den") == 0

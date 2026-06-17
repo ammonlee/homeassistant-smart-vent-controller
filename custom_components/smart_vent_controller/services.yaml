@@ -76,3 +76,14 @@ import_efficiency:
       required: false
       selector:
         object:
+
+reset_efficiency:
+  name: Reset Efficiency Data
+  description: Clear learned efficiency rates and sample counts for one room or all rooms
+  fields:
+    room:
+      name: Room
+      description: Room name or key (leave blank to reset all rooms)
+      required: false
+      selector:
+        text:
