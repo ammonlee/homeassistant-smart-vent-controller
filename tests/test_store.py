@@ -1,20 +1,12 @@
 """Tests for the SmartVentStore persistence layer."""
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from custom_components.smart_vent_controller.store import SmartVentStore
 
 
 @pytest.fixture
-def mock_hass():
-    hass = MagicMock()
-    hass.config.path.return_value = "/tmp/ha_test"
-    return hass
-
-
-@pytest.fixture
-def store(mock_hass):
-    return SmartVentStore(mock_hass, "test_entry_123")
+def store(hass):
+    return SmartVentStore(hass, "test_entry_123")
 
 
 class TestStoreProperties:
@@ -91,14 +83,14 @@ class TestExportImport:
             "max_running_minutes": 60.0,
         }
 
-    def test_roundtrip(self, store):
+    def test_roundtrip(self, store, hass):
         store.set_heating_rate("a", 0.1)
         store.set_cooling_rate("b", 0.2)
         store.max_running_minutes = 45.0
 
         exported = store.export_efficiency()
 
-        store2 = SmartVentStore(MagicMock(), "other")
+        store2 = SmartVentStore(hass, "other")
         store2.import_efficiency(exported)
 
         assert store2.get_heating_rate("a") == 0.1
