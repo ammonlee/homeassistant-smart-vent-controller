@@ -10,6 +10,7 @@ from homeassistant.const import UnitOfTemperature
 from .const import DOMAIN
 from .coordinator import SmartVentControllerCoordinator
 from .device import get_room_device_id
+from .algorithm import efficiency_confidence
 
 
 async def async_setup_entry(
@@ -250,13 +251,17 @@ class RoomEfficiencySensor(SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        heat = self.coordinator.store.get_heating_rate(self._room_key)
+        cool = self.coordinator.store.get_cooling_rate(self._room_key)
+        heat_n = self.coordinator.store.get_heating_samples(self._room_key)
+        cool_n = self.coordinator.store.get_cooling_samples(self._room_key)
+        dominant_samples = cool_n if cool > heat else heat_n
         return {
-            "heating_rate": round(
-                self.coordinator.store.get_heating_rate(self._room_key), 4
-            ),
-            "cooling_rate": round(
-                self.coordinator.store.get_cooling_rate(self._room_key), 4
-            ),
+            "heating_rate": round(heat, 4),
+            "cooling_rate": round(cool, 4),
+            "heating_samples": heat_n,
+            "cooling_samples": cool_n,
+            "confidence": efficiency_confidence(dominant_samples),
         }
 
 

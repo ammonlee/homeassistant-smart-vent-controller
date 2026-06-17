@@ -265,8 +265,10 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
 
             if hvac_mode in ("cool", "cooling"):
                 self.store.set_cooling_rate(room_key, blended)
+                self.store.increment_cooling_samples(room_key)
             else:
                 self.store.set_heating_rate(room_key, blended)
+                self.store.increment_heating_samples(room_key)
 
             _LOGGER.info(
                 "Learned %s rate for %s: %.4f (was %.4f)",

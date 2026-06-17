@@ -359,3 +359,19 @@ def select_relief_rooms(
 
     scored.sort(key=lambda x: x[0], reverse=True)
     return [room for _, room in scored[:max_relief]]
+
+
+EFFICIENCY_SAMPLES_LOW = 1
+EFFICIENCY_SAMPLES_MEDIUM = 3
+EFFICIENCY_SAMPLES_HIGH = 6
+
+
+def efficiency_confidence(samples: int) -> str:
+    """Map a learning sample count to a qualitative confidence level."""
+    if samples >= EFFICIENCY_SAMPLES_HIGH:
+        return "high"
+    if samples >= EFFICIENCY_SAMPLES_MEDIUM:
+        return "medium"
+    if samples >= EFFICIENCY_SAMPLES_LOW:
+        return "low"
+    return "none"

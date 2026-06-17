@@ -27,3 +27,29 @@ def test_delta_and_efficiency_enabled_by_default():
 def test_cycle_timestamp_sensors_disabled_by_default():
     assert HVACCycleStartTimeSensor.__dict__.get(_ENABLED_KEY) is False
     assert HVACCycleEndTimeSensor.__dict__.get(_ENABLED_KEY) is False
+
+
+async def test_efficiency_sensor_confidence_attributes(hass):
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+    from custom_components.smart_vent_controller.const import DOMAIN
+    from custom_components.smart_vent_controller.coordinator import (
+        SmartVentControllerCoordinator,
+    )
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={"main_thermostat": "climate.main", "rooms": []},
+        options={},
+    )
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    coordinator.store.set_heating_rate("den", 0.2)
+    for _ in range(3):
+        coordinator.store.increment_heating_samples("den")
+
+    sensor = RoomEfficiencySensor(coordinator, entry, "den", "Den")
+    attrs = sensor.extra_state_attributes
+    assert attrs["heating_samples"] == 3
+    assert attrs["cooling_samples"] == 0
+    assert attrs["confidence"] == "medium"
