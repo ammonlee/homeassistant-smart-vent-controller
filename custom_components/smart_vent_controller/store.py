@@ -145,6 +145,21 @@ class SmartVentStore:
     def set_room_setpoint(self, room_key: str, temp: float) -> None:
         self._data.setdefault("room_setpoints", {})[room_key] = temp
 
+    # -- per-room conditioning overrides ------------------------------------
+
+    def set_room_override(self, room_key: str, until_ts: float) -> None:
+        self._data.setdefault("room_overrides", {})[room_key] = {"until": until_ts}
+
+    def clear_room_override(self, room_key: str) -> None:
+        self._data.setdefault("room_overrides", {}).pop(room_key, None)
+
+    def get_room_override_until(self, room_key: str) -> float | None:
+        info = self._data.get("room_overrides", {}).get(room_key)
+        if not info:
+            return None
+        until = info.get("until")
+        return float(until) if until is not None else None
+
     # -- efficiency export / import -----------------------------------------
 
     def export_efficiency(self) -> dict[str, Any]:

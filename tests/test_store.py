@@ -1,20 +1,12 @@
 """Tests for the SmartVentStore persistence layer."""
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from custom_components.smart_vent_controller.store import SmartVentStore
 
 
 @pytest.fixture
-def mock_hass():
-    hass = MagicMock()
-    hass.config.path.return_value = "/tmp/ha_test"
-    return hass
-
-
-@pytest.fixture
-def store(mock_hass):
-    return SmartVentStore(mock_hass, "test_entry_123")
+def store(hass):
+    return SmartVentStore(hass, "test_entry_123")
 
 
 class TestStoreProperties:
@@ -82,6 +74,24 @@ class TestVentLastAdjusted:
         assert store.get_vent_last_adjusted("cover.vent_1") == 12345.0
 
 
+class TestRoomOverrides:
+    def test_no_override_by_default(self, store):
+        assert store.get_room_override_until("bedroom") is None
+
+    def test_set_and_get_override(self, store):
+        store.set_room_override("bedroom", 5000.0)
+        assert store.get_room_override_until("bedroom") == 5000.0
+
+    def test_clear_override(self, store):
+        store.set_room_override("bedroom", 5000.0)
+        store.clear_room_override("bedroom")
+        assert store.get_room_override_until("bedroom") is None
+
+    def test_clear_missing_override_is_noop(self, store):
+        store.clear_room_override("nope")  # must not raise
+        assert store.get_room_override_until("nope") is None
+
+
 class TestExportImport:
     def test_export_empty(self, store):
         data = store.export_efficiency()
@@ -91,14 +101,14 @@ class TestExportImport:
             "max_running_minutes": 60.0,
         }
 
-    def test_roundtrip(self, store):
+    def test_roundtrip(self, store, hass):
         store.set_heating_rate("a", 0.1)
         store.set_cooling_rate("b", 0.2)
         store.max_running_minutes = 45.0
 
         exported = store.export_efficiency()
 
-        store2 = SmartVentStore(MagicMock(), "other")
+        store2 = SmartVentStore(hass, "other")
         store2.import_efficiency(exported)
 
         assert store2.get_heating_rate("a") == 0.1

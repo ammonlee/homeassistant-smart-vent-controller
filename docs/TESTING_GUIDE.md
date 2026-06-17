@@ -548,3 +548,19 @@ Happy testing! 🎉
 
 Your multi-room vent controller should now provide intelligent, occupancy-aware zoning for your entire home!
 
+## Coverage status & gaps (2026-06-16)
+
+Covered by automated tests:
+- `algorithm.py` — pure vent-math functions, including `is_night_time`.
+- `store.py` — persistence properties, efficiency rates, room overrides.
+- `error_handling.py` — rolling error window.
+- `coordinator.py` — per-room failure isolation, rooms-to-condition selection,
+  room-override expiry.
+
+Known follow-on gaps (not yet covered, tracked for future work):
+- `config_flow.py` (~857 lines): the setup wizard, reconfigure, and options
+  menus have no automated tests.
+- `scripts.py` (~609 lines): the vent and thermostat control execution paths.
+
+These are the highest-value next targets for behavioral coverage.
+

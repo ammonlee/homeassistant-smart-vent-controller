@@ -7,10 +7,11 @@ now lives here and is persisted via SmartVentStore.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -97,52 +98,13 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                 await self._handle_cycle_end()
 
             for room in self.rooms:
-                room_name = room.get("name", "").lower().replace(" ", "_")
-                temp_sensor = room.get("temp_sensor")
-                climate_entity = room.get("climate_entity")
-
-                current_temp = None
-                if temp_sensor:
-                    state = self.hass.states.get(temp_sensor)
-                    if state and state.state not in (
-                        "unknown", "unavailable", "None", "none"
-                    ):
-                        try:
-                            current_temp = float(state.state)
-                        except (ValueError, TypeError):
-                            pass
-
-                if current_temp is None and climate_entity:
-                    climate = self.hass.states.get(climate_entity)
-                    if climate:
-                        temp = climate.attributes.get("current_temperature")
-                        if temp is not None:
-                            try:
-                                current_temp = float(temp)
-                            except (ValueError, TypeError):
-                                pass
-
-                data[f"{room_name}_temp"] = current_temp
-
-                vent_entities = room.get("vent_entities", [])
-                positions = []
-                for vent in vent_entities:
-                    vent_state = self.hass.states.get(vent)
-                    if vent_state:
-                        pos = vent_state.attributes.get("current_position", 0)
-                        try:
-                            positions.append(float(pos))
-                        except (ValueError, TypeError):
-                            pass
-                data[f"{room_name}_vent_avg"] = (
-                    sum(positions) / len(positions) if positions else 0
-                )
-
-                occ_sensor = room.get("occupancy_sensor")
-                if occ_sensor:
-                    occ_state = self.hass.states.get(occ_sensor)
-                    data[f"{room_name}_occupied"] = (
-                        occ_state.state == "on" if occ_state else False
+                try:
+                    self._read_room_into(room, data)
+                except Exception as room_err:  # noqa: BLE001 - isolate one room
+                    _LOGGER.warning(
+                        "Skipping room %s this cycle: %s",
+                        room.get("name", "?"),
+                        room_err,
                     )
 
             return data
@@ -152,10 +114,58 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                 f"Error updating Smart Vent Controller: {err}"
             ) from err
 
+    def _read_room_into(self, room: dict, data: dict[str, Any]) -> None:
+        """Read one room's temp/vent/occupancy into *data*. Raises on bad input."""
+        room_name = room.get("name", "").lower().replace(" ", "_")
+        temp_sensor = room.get("temp_sensor")
+        climate_entity = room.get("climate_entity")
+
+        current_temp = None
+        if temp_sensor:
+            state = self.hass.states.get(temp_sensor)
+            if state and state.state not in ("unknown", "unavailable", "None", "none"):
+                try:
+                    current_temp = float(state.state)
+                except (ValueError, TypeError):
+                    pass
+
+        if current_temp is None and climate_entity:
+            climate = self.hass.states.get(climate_entity)
+            if climate:
+                temp = climate.attributes.get("current_temperature")
+                if temp is not None:
+                    try:
+                        current_temp = float(temp)
+                    except (ValueError, TypeError):
+                        pass
+
+        data[f"{room_name}_temp"] = current_temp
+
+        vent_entities = room.get("vent_entities", [])
+        positions = []
+        for vent in vent_entities:
+            vent_state = self.hass.states.get(vent)
+            if vent_state:
+                pos = vent_state.attributes.get("current_position", 0)
+                try:
+                    positions.append(float(pos))
+                except (ValueError, TypeError):
+                    pass
+        data[f"{room_name}_vent_avg"] = (
+            sum(positions) / len(positions) if positions else 0
+        )
+
+        occ_sensor = room.get("occupancy_sensor")
+        if occ_sensor:
+            occ_state = self.hass.states.get(occ_sensor)
+            data[f"{room_name}_occupied"] = (
+                occ_state.state == "on" if occ_state else False
+            )
+
     # -- HVAC cycle tracking ------------------------------------------------
 
     async def _handle_cycle_start(self, action: str) -> None:
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
         self.store.cycle_start_ts = now
         self.store.hvac_last_action = action
 
@@ -188,7 +198,7 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("HVAC cycle started: %s at %.0f", action, now)
 
     async def _handle_cycle_end(self) -> None:
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
         self.store.cycle_end_ts = now
 
         start_ts = self.store.cycle_start_ts
@@ -357,20 +367,17 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         self, room_key: str, enabled: bool, duration_min: int = 60
     ) -> None:
         """Override (or clear) a room's conditioning for *duration_min* minutes."""
-        overrides: dict = self.store._data.setdefault("room_overrides", {})
         if enabled:
-            overrides[room_key] = {
-                "until": datetime.now().timestamp() + duration_min * 60,
-            }
+            until = dt_util.utcnow().timestamp() + duration_min * 60
+            self.store.set_room_override(room_key, until)
         else:
-            overrides.pop(room_key, None)
+            self.store.clear_room_override(room_key)
 
     def is_room_overridden(self, room_key: str) -> bool:
-        overrides: dict = self.store._data.get("room_overrides", {})
-        info = overrides.get(room_key)
-        if not info:
+        until = self.store.get_room_override_until(room_key)
+        if until is None:
             return False
-        if datetime.now().timestamp() > info.get("until", 0):
-            overrides.pop(room_key, None)
+        if dt_util.utcnow().timestamp() > until:
+            self.store.clear_room_override(room_key)
             return False
         return True

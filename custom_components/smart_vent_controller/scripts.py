@@ -7,8 +7,8 @@ Thermostat control reads/writes cycle state via the coordinator's store.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING
+from homeassistant.util import dt as dt_util
 
 from homeassistant.core import HomeAssistant
 
@@ -228,7 +228,7 @@ class VentControlScript:
                 final_targets[key] = round_to_granularity(pct, granularity)
 
             # Apply to vents with throttling
-            now_ts = datetime.now().timestamp()
+            now_ts = dt_util.utcnow().timestamp()
             async with ServiceCallBatcher(self.hass, batch_size=10) as batcher:
                 for rd in rooms_data:
                     key = rd["key"]
@@ -562,7 +562,7 @@ class ThermostatControlScript:
 
         if coordinator is None:
             return False
-        now = datetime.now().timestamp()
+        now = dt_util.utcnow().timestamp()
 
         if action in ("heating", "cooling"):
             start = coordinator.store.cycle_start_ts

@@ -1,9 +1,9 @@
 """Diagnostics support for Smart Vent Controller."""
 
 from typing import Any
-from datetime import datetime
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.util import dt as dt_util
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
@@ -186,5 +186,5 @@ async def async_get_config_entry_diagnostics(
         "manual_override": manual_override,
         "devices": devices,
         "efficiency_data": coordinator.store.export_efficiency() if coordinator else {},
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": dt_util.utcnow().isoformat(),
     }

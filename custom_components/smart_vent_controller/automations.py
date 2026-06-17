@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.util import dt as dt_util
 from homeassistant.helpers.event import (
     async_track_state_change,
     async_track_time_interval,
@@ -77,7 +78,7 @@ class SmartVentConditionerAutomation:
             return
         cooldown_sec = self.entry.options.get("automation_cooldown_sec", 30)
         if self._last_trigger_time:
-            elapsed = (datetime.now() - self._last_trigger_time).total_seconds()
+            elapsed = (dt_util.utcnow() - self._last_trigger_time).total_seconds()
             if elapsed < cooldown_sec:
                 return
         if self._pending_task:
@@ -95,7 +96,7 @@ class SmartVentConditionerAutomation:
         self.hass.async_create_task(self._run_automation())
 
     async def _run_automation(self):
-        self._last_trigger_time = datetime.now()
+        self._last_trigger_time = dt_util.utcnow()
 
         coordinator: SmartVentControllerCoordinator = self.hass.data.get(
             DOMAIN, {}

@@ -1,5 +1,8 @@
 # Smart Vent Controller
 
+[![Validate](https://github.com/ammonlee/homeassistant-smart-vent-controller/actions/workflows/validate.yml/badge.svg)](https://github.com/ammonlee/homeassistant-smart-vent-controller/actions/workflows/validate.yml)
+[![Tests](https://github.com/ammonlee/homeassistant-smart-vent-controller/actions/workflows/test.yml/badge.svg)](https://github.com/ammonlee/homeassistant-smart-vent-controller/actions/workflows/test.yml)
+
 A Home Assistant custom integration for intelligent multi-room HVAC zone control. Automatically positions smart vents based on per-room temperature targets, occupancy, and learned efficiency — with built-in HVAC cycle protection and airflow safety.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
