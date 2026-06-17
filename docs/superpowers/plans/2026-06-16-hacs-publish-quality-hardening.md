@@ -20,6 +20,11 @@
 - Commit messages end with the trailer:
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`
 - After Phase 2, `pytest` must stay green; run it before every commit in Phases 3-4.
+- **Test environment:** system `python3` is 3.9 and CANNOT run Home Assistant. A
+  Python 3.13 venv with the HA test harness is already provisioned at `.venv/`
+  (via `uv`). Wherever this plan shows `python3 -m pytest` or `python3 ...`, run
+  it through the venv instead: **`.venv/bin/python -m pytest`** /
+  `.venv/bin/python ...`. Never `git add` the `.venv/` directory.
 
 ---
 
@@ -291,25 +296,22 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Create: `requirements_test.txt`
 - Create: `pyproject.toml`
 
-- [ ] **Step 1: Install the harness and capture the exact version**
+- [ ] **Step 1: Confirm the harness is installed in the venv**
 
-Run (in a fresh venv if you have one):
+The `.venv/` (Python 3.13) was provisioned via `uv` with
+`pytest-homeassistant-custom-component` already installed. Confirm the pin:
 ```bash
-python3 -m pip install pytest-homeassistant-custom-component
-python3 -c "import importlib.metadata as m; print('pytest-homeassistant-custom-component==' + m.version('pytest-homeassistant-custom-component'))"
+.venv/bin/python -c "import importlib.metadata as m; print('pytest-homeassistant-custom-component==' + m.version('pytest-homeassistant-custom-component')); print('homeassistant==' + m.version('homeassistant'))"
 ```
-Expected: a printed pinned line such as `pytest-homeassistant-custom-component==0.13.x`. Copy that exact line into the next step.
+Expected: `pytest-homeassistant-custom-component==0.13.316` and `homeassistant==2026.2.3` (or whatever is installed — use the printed harness version verbatim in the next step).
 
 - [ ] **Step 2: Write `requirements_test.txt`**
 
-Create `requirements_test.txt` using the pinned line from Step 1:
+Create `requirements_test.txt` with the pinned harness (only this line — `pytest`, `freezegun`, and a matching `homeassistant` are pulled in transitively and pinned by it):
 
 ```text
-# Pin captured from `pip install` in Task 5, Step 1.
-pytest-homeassistant-custom-component==<PASTE_EXACT_VERSION_FROM_STEP_1>
+pytest-homeassistant-custom-component==0.13.316
 ```
-
-(`pytest`, `freezegun`, and a matching `homeassistant` come in transitively and pinned by this package — do not list them separately.)
 
 - [ ] **Step 3: Write `pyproject.toml` pytest config**
 
