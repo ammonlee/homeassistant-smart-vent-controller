@@ -156,7 +156,6 @@ class RoomDeltaSensor(SensorEntity):
     _attr_device_class = "temperature"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTemperature.FAHRENHEIT
-    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry, room_key, room_name, climate_entity, temp_sensor):
         self.coordinator = coordinator
@@ -219,8 +218,6 @@ class RoomDeltaSensor(SensorEntity):
 
 class RoomEfficiencySensor(SensorEntity):
     """Learned heating/cooling efficiency rate for a room."""
-
-    _attr_entity_registry_enabled_default = False
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:chart-timeline-variant"
