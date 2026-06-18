@@ -316,5 +316,15 @@
     "error": {
       "invalid_value": "Invalid value entered"
     }
+  },
+  "issues": {
+    "thermostat_unavailable": {
+      "title": "Smart Vent Controller: thermostat unavailable",
+      "description": "The main thermostat `{entity_id}` has been unavailable for several minutes. Smart Vent Controller cannot read the HVAC state or adjust the setpoint until it returns."
+    },
+    "vents_unavailable": {
+      "title": "Smart Vent Controller: vents unavailable",
+      "description": "{count} vent(s) have been unavailable for several minutes: {entities}. Their positions cannot be controlled until they return."
+    }
   }
 }

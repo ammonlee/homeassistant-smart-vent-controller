@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+- Per-room **Comfortable** binary sensor — on when the room is within its
+  hysteresis band (mode-independent), unknown when temperature/target is missing.
+- Learning **confidence** on the Efficiency sensor: `heating_samples` /
+  `cooling_samples` counts plus a `confidence` level (none / low / medium / high).
+- `reset_efficiency` service to clear learned rates and sample counts for one room
+  or all rooms.
+- Home Assistant **Repairs** issues when the main thermostat (error) or one or more
+  vents (warning) stay unavailable for 5+ minutes; they auto-clear on recovery and
+  are removed when the integration is unloaded.
+
 ### Fixed
 - **`override_room` now actually excludes a room from conditioning.** Previously
   the service stored the override and updated the `{Room} Override Active` sensor
@@ -18,3 +29,6 @@
 ### Changed
 - Efficiency `export_efficiency` / `import_efficiency` services now perform file
   I/O in an executor instead of on the event loop.
+- The Delta and Efficiency sensors are now enabled by default. (Home Assistant only
+  applies this at first registration, so it affects new installs and newly-added
+  rooms; existing entities keep their current enabled/disabled state.)

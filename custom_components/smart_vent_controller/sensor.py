@@ -10,6 +10,7 @@ from homeassistant.const import UnitOfTemperature
 from .const import DOMAIN
 from .coordinator import SmartVentControllerCoordinator
 from .device import get_room_device_id
+from .algorithm import efficiency_confidence
 
 
 async def async_setup_entry(
@@ -156,7 +157,6 @@ class RoomDeltaSensor(SensorEntity):
     _attr_device_class = "temperature"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTemperature.FAHRENHEIT
-    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, entry, room_key, room_name, climate_entity, temp_sensor):
         self.coordinator = coordinator
@@ -220,8 +220,6 @@ class RoomDeltaSensor(SensorEntity):
 class RoomEfficiencySensor(SensorEntity):
     """Learned heating/cooling efficiency rate for a room."""
 
-    _attr_entity_registry_enabled_default = False
-
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:chart-timeline-variant"
 
@@ -253,13 +251,17 @@ class RoomEfficiencySensor(SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        heat = self.coordinator.store.get_heating_rate(self._room_key)
+        cool = self.coordinator.store.get_cooling_rate(self._room_key)
+        heat_n = self.coordinator.store.get_heating_samples(self._room_key)
+        cool_n = self.coordinator.store.get_cooling_samples(self._room_key)
+        dominant_samples = cool_n if cool > heat else heat_n
         return {
-            "heating_rate": round(
-                self.coordinator.store.get_heating_rate(self._room_key), 4
-            ),
-            "cooling_rate": round(
-                self.coordinator.store.get_cooling_rate(self._room_key), 4
-            ),
+            "heating_rate": round(heat, 4),
+            "cooling_rate": round(cool, 4),
+            "heating_samples": heat_n,
+            "cooling_samples": cool_n,
+            "confidence": efficiency_confidence(dominant_samples),
         }
 
 

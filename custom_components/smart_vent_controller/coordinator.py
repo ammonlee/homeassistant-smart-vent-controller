@@ -59,6 +59,7 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
         self.automations: list[Any] = []
 
         self._is_hvac_active = False
+        self._unavailable_since: dict[str, float] = {}
 
     async def async_initialize(self) -> None:
         """Load persisted state from disk. Call once during entry setup."""
@@ -106,6 +107,11 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
                         room.get("name", "?"),
                         room_err,
                     )
+
+            try:
+                self._evaluate_health()
+            except Exception as health_err:  # noqa: BLE001 - never fail the cycle
+                _LOGGER.debug("Health evaluation skipped: %s", health_err)
 
             return data
 
@@ -259,8 +265,10 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
 
             if hvac_mode in ("cool", "cooling"):
                 self.store.set_cooling_rate(room_key, blended)
+                self.store.increment_cooling_samples(room_key)
             else:
                 self.store.set_heating_rate(room_key, blended)
+                self.store.increment_heating_samples(room_key)
 
             _LOGGER.info(
                 "Learned %s rate for %s: %.4f (was %.4f)",
@@ -268,6 +276,16 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
             )
 
     # -- helpers ------------------------------------------------------------
+
+    def _evaluate_health(self) -> None:
+        """Raise/clear Repairs issues for unavailable entities (best-effort)."""
+        from .health import evaluate_health_issues
+        evaluate_health_issues(
+            self.hass,
+            self.config_entry,
+            self._unavailable_since,
+            dt_util.utcnow().timestamp(),
+        )
 
     def _get_room_temp(self, room_config: dict) -> float | None:
         temp_sensor = room_config.get("temp_sensor")
@@ -364,6 +382,23 @@ class SmartVentControllerCoordinator(DataUpdateCoordinator):
             except (ValueError, TypeError):
                 pass
         return None
+
+    def get_room_comfort(self, room_config: dict) -> bool | None:
+        """Return True if the room is within its comfort band, None if unknown.
+
+        Comfortable means abs(target - current) <= room_hysteresis_f, independent
+        of HVAC mode. Target resolves store setpoint first, then the room's climate
+        entity (same precedence as the Target sensor).
+        """
+        current = self._get_room_temp(room_config)
+        room_key = room_config.get("name", "").lower().replace(" ", "_")
+        target = self.store.get_room_setpoint(room_key)
+        if target is None:
+            target = self._get_room_target(room_config)
+        if current is None or target is None:
+            return None
+        hysteresis = self.config_entry.options.get("room_hysteresis_f", 1.0)
+        return abs(float(target) - float(current)) <= hysteresis
 
     # -- override room support ----------------------------------------------
 

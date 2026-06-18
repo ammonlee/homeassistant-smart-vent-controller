@@ -162,3 +162,65 @@ async def test_efficiency_export_import_roundtrip_via_services(hass, tmp_path):
     )
 
     assert coordinator.store.get_heating_rate("office") == pytest.approx(0.0123)
+
+
+async def test_get_room_comfort(hass):
+    rooms = [{"name": "Den", "temp_sensor": "sensor.den",
+              "climate_entity": "climate.den", "vent_entities": []}]
+    entry = _make_entry(rooms)
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    hass.config_entries.async_update_entry(entry, options={"room_hysteresis_f": 1.0})
+
+    hass.states.async_set("climate.den", "heat", {"temperature": 70.0})
+
+    # Within band: |70 - 70.5| = 0.5 <= 1.0
+    hass.states.async_set("sensor.den", "70.5")
+    assert coordinator.get_room_comfort(rooms[0]) is True
+
+    # Outside band: |70 - 66| = 4 > 1.0
+    hass.states.async_set("sensor.den", "66.0")
+    assert coordinator.get_room_comfort(rooms[0]) is False
+
+    # Missing current temp -> None
+    hass.states.async_set("sensor.den", "unavailable")
+    assert coordinator.get_room_comfort(rooms[0]) is None
+
+
+async def test_learn_efficiency_increments_samples(hass):
+    rooms = [{"name": "Den", "temp_sensor": "sensor.den", "vent_entities": ["cover.den"]}]
+    entry = _make_entry(rooms)
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+
+    coordinator.store.set_cycle_start_temp("den", 60.0)
+    coordinator.store.set_cycle_avg_aperture("den", 100.0)
+    hass.states.async_set("sensor.den", "66.0")  # rose 6 F during a heating cycle
+
+    await coordinator._learn_efficiency(30.0, "heating")
+
+    assert coordinator.store.get_heating_samples("den") == 1
+    assert coordinator.store.get_heating_rate("den") > 0
+
+
+async def test_reset_efficiency_service(hass):
+    from custom_components.smart_vent_controller import _async_register_services
+
+    entry = _make_entry([])
+    entry.add_to_hass(hass)
+    coordinator = SmartVentControllerCoordinator(hass, entry)
+    await coordinator.async_initialize()
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    await _async_register_services(hass, entry)
+
+    coordinator.store.set_heating_rate("den", 0.3)
+    coordinator.store.increment_heating_samples("den")
+
+    await hass.services.async_call(
+        DOMAIN, "reset_efficiency", {"room": "Den"}, blocking=True
+    )
+
+    assert coordinator.store.get_heating_rate("den") == 0
+    assert coordinator.store.get_heating_samples("den") == 0

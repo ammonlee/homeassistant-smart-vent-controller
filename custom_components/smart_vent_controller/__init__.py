@@ -55,6 +55,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Smart Vent Controller entry."""
+    from homeassistant.helpers import issue_registry as ir
+    ir.async_delete_issue(hass, DOMAIN, f"thermostat_unavailable_{entry.entry_id}")
+    ir.async_delete_issue(hass, DOMAIN, f"vents_unavailable_{entry.entry_id}")
     try:
         await async_remove_room_devices(hass, entry)
     except Exception as exc:
@@ -145,8 +148,19 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry):
             await coordinator.store.async_save()
             _LOGGER.info("Efficiency data imported")
 
+    async def reset_efficiency(call):
+        coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        if coordinator is None:
+            return
+        room = call.data.get("room", "")
+        room_key = room.lower().replace(" ", "_") if room else None
+        coordinator.store.reset_efficiency(room_key)
+        await coordinator.store.async_save()
+        _LOGGER.info("Efficiency data reset for %s", room_key or "all rooms")
+
     hass.services.async_register(DOMAIN, "set_room_priority", set_room_priority)
     hass.services.async_register(DOMAIN, "override_room", override_room)
     hass.services.async_register(DOMAIN, "reset_to_defaults", reset_to_defaults)
     hass.services.async_register(DOMAIN, "export_efficiency", export_efficiency)
     hass.services.async_register(DOMAIN, "import_efficiency", import_efficiency)
+    hass.services.async_register(DOMAIN, "reset_efficiency", reset_efficiency)

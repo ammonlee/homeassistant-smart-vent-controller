@@ -15,6 +15,7 @@ from custom_components.smart_vent_controller.algorithm import (
     compute_simple_targets,
     is_night_time,
 )
+from custom_components.smart_vent_controller.algorithm import efficiency_confidence
 
 
 # ---------------------------------------------------------------------------
@@ -273,3 +274,13 @@ class TestIsNightTime:
 
     def test_custom_window(self):
         assert is_night_time(time(20, 30), night_start=time(20, 0), night_end=time(7, 0)) is True
+
+
+def test_efficiency_confidence_levels():
+    assert efficiency_confidence(0) == "none"
+    assert efficiency_confidence(1) == "low"
+    assert efficiency_confidence(2) == "low"
+    assert efficiency_confidence(3) == "medium"
+    assert efficiency_confidence(5) == "medium"
+    assert efficiency_confidence(6) == "high"
+    assert efficiency_confidence(99) == "high"
